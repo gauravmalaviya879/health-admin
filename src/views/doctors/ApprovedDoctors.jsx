@@ -1,15 +1,17 @@
-import React from 'react';
+import React from 'react'
 import { Card, CardContent, Typography } from '@mui/material';
 
-const DoctorList = () => {
+const ApprovedDoctors = () => {
   return (
-    <Card>
+    <div>
+      <Card>
       <CardContent>
-        <Typography variant="h5">Doctor List</Typography>
+        <Typography variant="h5">Approved Doctors</Typography>
         <Typography>Coming soon or doctor details go here.</Typography>
       </CardContent>
     </Card>
-  );
-};
+    </div>
+  )
+}
 
-export default DoctorList;
+export default ApprovedDoctors
