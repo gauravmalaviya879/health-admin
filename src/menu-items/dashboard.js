@@ -7,10 +7,10 @@ const icons = { IconDashboard };
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
 const doctorList = {
-  id: 'doctor-list',
-  title: 'Doctor List',
+  id: 'DoctorSpecialties',
+  title: 'Doctor Specialties',
   type: 'item',
-  url: '/doctor-list',
+  url: '/doctor-specialties',
   icon: IconUser,
   breadcrumbs: false
 };
@@ -18,7 +18,7 @@ const doctorList = {
 
 const dashboard = {
   id: 'dashboard',
-  title: 'Dashboard',
+  title: '',
   type: 'group',
   children: [
     {
