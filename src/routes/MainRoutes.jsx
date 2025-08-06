@@ -10,13 +10,7 @@ import ApprovedDoctors from '../views/doctors/ApprovedDoctors';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
-// utilities routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
-
-// sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+// Note: Utility and sample page components removed as they don't exist in this project
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -56,18 +50,7 @@ const MainRoutes = {
       ]
     },
 
-    {
-      path: 'color',
-      element: <UtilsColor />
-    },
-    {
-      path: 'shadow',
-      element: <UtilsShadow />
-    },
-    {
-      path: '/sample-page',
-      element: <SamplePage />
-    }
+
   ]
 };
 
