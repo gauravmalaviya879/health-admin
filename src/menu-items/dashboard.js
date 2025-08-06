@@ -1,10 +1,20 @@
 // assets
 import { IconDashboard } from '@tabler/icons-react';
-
+import { IconUser } from '@tabler/icons-react';
 // constant
 const icons = { IconDashboard };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
+
+const doctorList = {
+  id: 'doctor-list',
+  title: 'Doctor List',
+  type: 'item',
+  url: '/doctor-list',
+  icon: IconUser,
+  breadcrumbs: false
+};
+
 
 const dashboard = {
   id: 'dashboard',
@@ -18,7 +28,8 @@ const dashboard = {
       url: '/dashboard/default',
       icon: icons.IconDashboard,
       breadcrumbs: false
-    }
+    },
+    doctorList  
   ]
 };
 

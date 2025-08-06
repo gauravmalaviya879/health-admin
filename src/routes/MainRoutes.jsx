@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
+import DoctorList from '../views/doctor/DoctorList';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -33,6 +34,10 @@ const MainRoutes = {
           element: <DashboardDefault />
         }
       ]
+    },
+    {
+      path: 'doctor-list',
+      element: <DoctorList />
     },
     {
       path: 'typography',
