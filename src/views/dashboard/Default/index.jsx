@@ -28,7 +28,7 @@ export default function Dashboard() {
   return (
     <Grid container spacing={gridSpacing}>
       <Grid size={12}>
-        {/* <Grid container spacing={gridSpacing}>
+        <Grid container spacing={gridSpacing}>
           <Grid size={{ lg: 4, md: 6, sm: 6, xs: 12 }}>
             <EarningCard isLoading={isLoading} />
           </Grid>
@@ -52,7 +52,7 @@ export default function Dashboard() {
               </Grid>
             </Grid>
           </Grid>
-        </Grid> */}
+        </Grid>
       </Grid>
       <Grid size={12}>
         {/* <Grid container spacing={gridSpacing}>

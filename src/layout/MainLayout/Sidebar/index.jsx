@@ -40,14 +40,7 @@ function Sidebar() {
   );
 
   const drawer = useMemo(() => {
-    const drawerContent = (
-      <>
-        <MenuCard />
-        <Stack direction="row" sx={{ justifyContent: 'center', mb: 2 }}>
-          <Chip label={import.meta.env.VITE_APP_VERSION} size="small" color="default" />
-        </Stack>
-      </>
-    );
+  
 
     let drawerSX = { paddingLeft: '0px', paddingRight: '0px', marginTop: '20px' };
     if (drawerOpen) drawerSX = { paddingLeft: '16px', paddingRight: '16px', marginTop: '0px' };
@@ -57,12 +50,12 @@ function Sidebar() {
         {downMD ? (
           <Box sx={drawerSX}>
             <MenuList />
-            {drawerOpen && drawerContent}
+            {drawerOpen }
           </Box>
         ) : (
           <PerfectScrollbar style={{ height: 'calc(100vh - 88px)', ...drawerSX }}>
             <MenuList />
-            {drawerOpen && drawerContent}
+            {drawerOpen }
           </PerfectScrollbar>
         )}
       </>

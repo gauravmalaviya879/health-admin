@@ -3,6 +3,9 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
+import DoctorSpecialties from '../views/DoctorSpecialties';
+import NewDoctors from '../views/doctors/NewDoctors';
+import ApprovedDoctors from '../views/doctors/ApprovedDoctors';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -35,9 +38,24 @@ const MainRoutes = {
       ]
     },
     {
-      path: 'typography',
-      element: <UtilsTypography />
+      path: 'doctor-specialties',
+      element: <DoctorSpecialties />
     },
+
+    {
+      path: 'doctors',
+      children: [
+        {
+          path: 'new',
+          element: <NewDoctors />
+        },
+        {
+          path: 'approved',
+          element: <ApprovedDoctors />
+        }
+      ]
+    },
+
     {
       path: 'color',
       element: <UtilsColor />
