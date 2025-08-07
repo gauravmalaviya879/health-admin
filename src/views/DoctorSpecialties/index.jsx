@@ -55,7 +55,7 @@ const index = () => {
   
   // Pagination state
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // Handle edit specialty
   const handleEdit = (specialty) => {
