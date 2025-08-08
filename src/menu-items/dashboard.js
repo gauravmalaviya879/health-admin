@@ -8,9 +8,9 @@ const icons = { IconDashboard };
 
 const doctorList = {
   id: 'DoctorSpecialties',
-  title: 'Doctor Specialties',
+  title: 'Categories',
   type: 'item',
-  url: '/doctor-specialties',
+  url: '/categories',
   icon: IconUser,
   breadcrumbs: false
 };
