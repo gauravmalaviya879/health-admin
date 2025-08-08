@@ -128,11 +128,7 @@ export default function AuthLogin() {
             label="Keep me logged in"
           />
         </Grid>
-        <Grid>
-          <Typography variant="subtitle1" component={Link} to="/forgot-password" color="secondary" sx={{ textDecoration: 'none' }}>
-            Forgot Password?
-          </Typography>
-        </Grid>
+       
       </Grid>
       <Box sx={{ mt: 2 }}>
         <AnimateButton>
