@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import useMediaQuery from '@mui/material/useMediaQuery';
-import Divider from '@mui/material/Divider';
+
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -49,16 +49,16 @@ export default function Login() {
                   <Grid size={12}>
                     <AuthLogin />
                   </Grid>
-                  <Grid size={12}>
+                  {/* <Grid size={12}>
                     <Divider />
-                  </Grid>
-                  <Grid size={12}>
+                  </Grid> */}
+                  {/* <Grid size={12}>
                     <Grid container direction="column" sx={{ alignItems: 'center' }} size={12}>
                       <Typography component={Link} to="/register" variant="subtitle1" sx={{ textDecoration: 'none' }}>
                         Don&apos;t have an account?
                       </Typography>
                     </Grid>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </AuthCardWrapper>
             </Grid>

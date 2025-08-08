@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -26,10 +27,18 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function AuthLogin() {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [checked, setChecked] = useState(true);
-
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -38,11 +47,52 @@ export default function AuthLogin() {
     event.preventDefault();
   };
 
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (error) setError('');
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const result = await login(formData.email, formData.password);
+    
+    if (result.success) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    } else {
+      setError(result.error);
+    }
+    
+    setLoading(false);
+  };
+
   return (
-    <>
+    <form onSubmit={handleSubmit}>
+      {error && (
+        <Box sx={{ mb: 2 }}>
+          <Typography color="error" variant="body2">
+            {error}
+          </Typography>
+        </Box>
+      )}
+      
       <FormControl fullWidth sx={{ ...theme.typography.customInput }}>
-        <InputLabel htmlFor="outlined-adornment-email-login">Email Address / Username</InputLabel>
-        <OutlinedInput id="outlined-adornment-email-login" type="email" value="info@codedthemes.com" name="email" />
+        <InputLabel htmlFor="outlined-adornment-email-login">Email Address</InputLabel>
+        <OutlinedInput 
+          id="outlined-adornment-email-login" 
+          type="email" 
+          value={formData.email}
+          name="email"
+          onChange={handleInputChange}
+          required
+        />
       </FormControl>
 
       <FormControl fullWidth sx={{ ...theme.typography.customInput }}>
@@ -50,8 +100,10 @@ export default function AuthLogin() {
         <OutlinedInput
           id="outlined-adornment-password-login"
           type={showPassword ? 'text' : 'password'}
-          value="123456"
+          value={formData.password}
           name="password"
+          onChange={handleInputChange}
+          required
           endAdornment={
             <InputAdornment position="end">
               <IconButton
@@ -84,11 +136,19 @@ export default function AuthLogin() {
       </Grid>
       <Box sx={{ mt: 2 }}>
         <AnimateButton>
-          <Button color="secondary" fullWidth size="large" type="submit" variant="contained">
-            Sign In
+          <Button 
+            color="secondary" 
+            fullWidth 
+            size="large" 
+            type="submit" 
+            variant="contained"
+            disabled={loading}
+           
+          >
+            {loading ? 'Signing In...' : 'Sign In'}
           </Button>
         </AnimateButton>
       </Box>
-    </>
+    </form>
   );
 }

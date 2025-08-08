@@ -9,6 +9,7 @@ import LogoSection from '../LogoSection';
 import SearchSection from './SearchSection';
 import ProfileSection from './ProfileSection';
 import NotificationSection from './NotificationSection';
+import LogoutSection from './LogoutSection';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 
@@ -59,6 +60,9 @@ export default function Header() {
 
       {/* notification */}
       <NotificationSection />
+
+      {/* logout */}
+      <LogoutSection />
 
       {/* profile */}
       <ProfileSection />
