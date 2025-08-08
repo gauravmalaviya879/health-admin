@@ -1,8 +1,10 @@
 // assets
 import { IconDashboard } from '@tabler/icons-react';
 import { IconUser } from '@tabler/icons-react';
+import { IconClipboardHeart } from '@tabler/icons-react';
 // constant
 const icons = { IconDashboard };
+
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
@@ -14,6 +16,16 @@ const doctorList = {
   icon: IconUser,
   breadcrumbs: false
 };
+
+const specialties = {
+  id: 'specialties',
+  title: 'Specialties',
+  type: 'item',
+  url: '/specialties',
+  icon: IconClipboardHeart,
+  breadcrumbs: false
+};
+
 
 
 const dashboard = {
@@ -29,7 +41,9 @@ const dashboard = {
       icon: icons.IconDashboard,
       breadcrumbs: false
     },
-    doctorList  
+    specialties,
+    doctorList
+   
   ]
 };
 

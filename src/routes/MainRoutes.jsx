@@ -6,7 +6,7 @@ import Loadable from 'ui-component/Loadable';
 import Categories from '../views/Categories';
 import NewDoctors from '../views/doctors/NewDoctors';
 import ApprovedDoctors from '../views/doctors/ApprovedDoctors';
-
+import Specialties from '../views/Specialties';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
@@ -31,6 +31,11 @@ const MainRoutes = {
         }
       ]
     },
+    {
+      path: 'specialties',
+      element: <Specialties />
+    }
+    ,
     {
       path: 'categories',
       element: <Categories />
