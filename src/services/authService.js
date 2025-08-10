@@ -15,7 +15,8 @@ class AuthService {
       });
 
       const data = await response.json();
-
+      this.setToken(data.token);
+     
       if (response.ok) {
         // Successful login
         return {
@@ -58,7 +59,7 @@ class AuthService {
       console.error('Logout error:', error);
     } finally {
       // Always clear local storage
-      this.clearToken();
+    
     }
   }
 
