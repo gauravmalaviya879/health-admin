@@ -3,15 +3,13 @@ import axios from 'axios';
 
 const API_BASE_URL = 'https://healtheasy-o25g.onrender.com';
 const token = authService.getToken();
-class SpecialtiesService {
-  // Get all specialties
-  async getAllSpecialties() {
+class CategoriesService {
+  // Get all categories
+  async getAllCategories() {
     try {
-  
-      
       const response = await axios({
         method: 'post',
-        url: `${API_BASE_URL}/admin/surgerytypes/list`,
+        url: `${API_BASE_URL}/admin/doctorcategories/list`,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -25,7 +23,7 @@ class SpecialtiesService {
         data: response.data.Data || []
       };
     } catch (error) {
-      console.error('Get specialties error:', error);
+      console.error('Get categories error:', error);
       
       if (error.response && error.response.data && error.response.data.Message) {
         return {
@@ -41,28 +39,28 @@ class SpecialtiesService {
     }
   }
 
-  // Add new specialty
-  async addSpecialty(specialtyName) {
+  // Add new category
+  async addCategory(categoryName, surgerytypeid) {
     try {
-      
       const response = await axios({
         method: 'post',
-        url: `${API_BASE_URL}/admin/surgerytypes/save`,
+        url: `${API_BASE_URL}/admin/doctorcategories/save`,
         headers: {
           Authorization: `Bearer ${token}`,
         },
         data: {
-          surgerytypename: specialtyName,
+          surgerytypeid: surgerytypeid,
+          categoryname: categoryName,
         }
       });
 
       return {
         success: true,
         data: response.data,
-        message: 'Specialty added successfully',
+        message: 'Category added successfully',
       };
     } catch (error) {
-      console.error('Add specialty error:', error);
+      console.error('Add category error:', error);
       
       if (error.response && error.response.data && error.response.data.Message) {
         return {
@@ -78,29 +76,29 @@ class SpecialtiesService {
     }
   }
 
-  // Update existing specialty
-  async updateSpecialty(id, specialtyName) {
+  // Update existing category
+  async updateCategory(id, categoryName, surgerytypeid) {
     try {
-
       const response = await axios({
         method: 'post',
-        url: `${API_BASE_URL}/admin/surgerytypes/save`,
+        url: `${API_BASE_URL}/admin/doctorcategories/save`,
         headers: {
-          Authorization:  `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         data: {
-          surgerytypeid: id,
-          surgerytypename: specialtyName
+          categoryid: id,
+          categoryname: categoryName,
+          surgerytypeid: surgerytypeid
         }
       });
 
       return {
         success: true,
         data: response.data,
-        message: 'Specialty updated successfully',
+        message: 'Category updated successfully',
       };
     } catch (error) {
-      console.error('Update specialty error:', error);
+      console.error('Update category error:', error);
       
       if (error.response && error.response.data && error.response.data.Message) {
         return {
@@ -116,29 +114,27 @@ class SpecialtiesService {
     }
   }
 
-  // Delete specialty
-  async deleteSpecialty(id) {
+  // Delete category
+  async deleteCategory(id) {
     try {
-      
-      
       const response = await axios({
         method: 'POST',
-        url: `${API_BASE_URL}/admin/surgerytypes/remove`,
+        url: `${API_BASE_URL}/admin/doctorcategories/remove`,
         headers: {
           Authorization: `Bearer ${token}`,
         },
         data: {
-          surgerytypeid: id,
+            categoryid: id,
         }
       });
 
       return {
         success: true,
         data: response.data,
-        message: 'Specialty deleted successfully',
+        message: 'Category deleted successfully',
       };
     } catch (error) {
-      console.error('Delete specialty error:', error);
+      console.error('Delete category error:', error);
       
       if (error.response && error.response.data && error.response.data.Message) {
         return {
@@ -155,4 +151,4 @@ class SpecialtiesService {
   }
 }
 
-export default new SpecialtiesService();
+export default new CategoriesService();

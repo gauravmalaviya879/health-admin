@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -23,100 +23,197 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon
 } from '@mui/icons-material';
+import categoriesService from '../../services/categoriesService';
+import specialtiesService from '../../services/specialtiesService';
 
 const index = () => {
-  // Sample data for doctor specialties
-  const [specialties, setSpecialties] = useState([
-    { id: 1, no: 1, specialtiesname: 'Cardiology' },
-    { id: 2, no: 2, specialtiesname: 'Dermatology' },
-    { id: 3, no: 3, specialtiesname: 'Neurology' },
-    { id: 4, no: 4, specialtiesname: 'Orthopedics' },
-    { id: 5, no: 5, specialtiesname: 'Pediatrics' },
-    { id: 6, no: 6, specialtiesname: 'Psychiatry' },
-    { id: 7, no: 7, specialtiesname: 'Radiology' },
-    { id: 8, no: 8, specialtiesname: 'Surgery' },
-    { id: 9, no: 6, specialtiesname: 'Psychiatry' },
-    { id: 10, no: 7, specialtiesname: 'Radiology' },
-    { id: 11, no: 8, specialtiesname: 'Surgery' }
-  ]);
+  // Categories data state
+  const [categories, setCategories] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogLoading, setDialogLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
-  const [editingSpecialty, setEditingSpecialty] = useState(null);
-  const [specialtyName, setSpecialtyName] = useState('');
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryName, setCategoryName] = useState('');
+  const [selectedSpecialtyId, setSelectedSpecialtyId] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [specialtyToDelete, setSpecialtyToDelete] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
   
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Handle edit specialty
-  const handleEdit = (specialty) => {
-    setEditingSpecialty(specialty);
-    setSpecialtyName(specialty.specialtiesname);
-    setOpenDialog(true);
-  };
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
-  // Handle add new specialty
-  const handleAdd = () => {
-    setEditingSpecialty(null);
-    setSpecialtyName('');
-    setOpenDialog(true);
-  };
-
-  // Handle save specialty
-  const handleSave = () => {
-    if (specialtyName.trim()) {
-      if (editingSpecialty) {
-        // Update existing specialty
-        setSpecialties(prev => prev.map(spec => 
-          spec.id === editingSpecialty.id 
-            ? { ...spec, specialtiesname: specialtyName.trim() }
-            : spec
-        ));
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const result = await categoriesService.getAllCategories();
+      if (result.success) {
+        setCategories(result.data);
       } else {
-        // Add new specialty
-        const newId = Math.max(...specialties.map(s => s.id)) + 1;
-        const newNo = Math.max(...specialties.map(s => s.no)) + 1;
-        setSpecialties(prev => [...prev, {
-          id: newId,
-          no: newNo,
-          specialtiesname: specialtyName.trim()
-        }]);
+        showSnackbar(result.error, 'error');
       }
-      setOpenDialog(false);
-      setSpecialtyName('');
-      setEditingSpecialty(null);
+    } catch (error) {
+      showSnackbar('Failed to load categories', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch specialties from API
+  const fetchSpecialties = async () => {
+    try {
+      const result = await specialtiesService.getAllSpecialties();
+      if (result.success) {
+        console.log(result.data , "result.data-SPECIALTY")
+        setSpecialties(result.data);
+      } else {
+        showSnackbar('Failed to load specialties', 'error');
+      }
+    } catch (error) {
+      showSnackbar('Failed to load specialties', 'error');
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSpecialties();
+  }, []);
+
+  // Snackbar helper
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  // Handle edit category
+  const handleEdit = (category) => {
+    setEditingCategory(category);
+    setCategoryName(category.categoryname || '');
+    // Set the current specialty as selected
+    setSelectedSpecialtyId(category.surgerytypeid?._id || category.surgerytypeid || '');
+    console.log(category, "category data for edit");
+    setOpenDialog(true);
+  };
+
+  // Handle add new category
+  const handleAdd = () => {
+    setEditingCategory(null);
+    setCategoryName('');
+    setSelectedSpecialtyId('');
+    setOpenDialog(true);
+  };
+
+  // Handle save category
+  const handleSave = async () => {
+    if (!categoryName.trim()) {
+      showSnackbar('Please enter a category name', 'error');
+      return;
+    }
+
+    if (!editingCategory && !selectedSpecialtyId) {
+      showSnackbar('Please select a specialty', 'error');
+      return;
+    }
+
+    setDialogLoading(true);
+    try {
+      let result;
+      if (editingCategory) {
+        // Update existing category
+        result = await categoriesService.updateCategory(
+          editingCategory._id || editingCategory.categoryid,
+          categoryName.trim(),
+          selectedSpecialtyId
+        );
+      } else {
+        // Add new category
+        result = await categoriesService.addCategory(
+          categoryName.trim(),
+          selectedSpecialtyId
+        );
+      }
+
+      if (result.success) {
+        showSnackbar(result.message, 'success');
+        setOpenDialog(false);
+        setCategoryName('');
+        setSelectedSpecialtyId('');
+        setEditingCategory(null);
+        fetchCategories(); // Refresh the list
+      } else {
+        showSnackbar(result.error, 'error');
+      }
+    } catch (error) {
+      showSnackbar('Operation failed. Please try again.', 'error');
+    } finally {
+      setDialogLoading(false);
     }
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (specialty) => {
-    setSpecialtyToDelete(specialty);
+  const handleDeleteClick = (category) => {
+    setCategoryToDelete(category);
     setDeleteConfirmOpen(true);
   };
 
-  // Handle delete specialty
-  const handleDelete = () => {
-    if (specialtyToDelete) {
-      setSpecialties(prev => prev.filter(spec => spec.id !== specialtyToDelete.id));
-      setDeleteConfirmOpen(false);
-      setSpecialtyToDelete(null);
+  // Handle delete category
+  const handleDelete = async () => {
+    if (!categoryToDelete) return;
+
+    setDialogLoading(true);
+    try {
+      const result = await categoriesService.deleteCategory(
+        categoryToDelete._id
+      );
+
+      if (result.success) {
+        showSnackbar(result.message, 'success');
+        setDeleteConfirmOpen(false);
+        setCategoryToDelete(null);
+        fetchCategories(); // Refresh the list
+      } else {
+        showSnackbar(result.error, 'error');
+      }
+    } catch (error) {
+      showSnackbar('Delete failed. Please try again.', 'error');
+    } finally {
+      setDialogLoading(false);
     }
   };
 
   // Handle dialog close
   const handleDialogClose = () => {
     setOpenDialog(false);
-    setSpecialtyName('');
-    setEditingSpecialty(null);
+    setCategoryName('');
+    setSelectedSpecialtyId('');
+    setEditingCategory(null);
+  };
+
+  // Close snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   // Handle pagination
@@ -130,7 +227,7 @@ const index = () => {
   };
 
   // Calculate pagination
-  const paginatedSpecialties = specialties.slice(
+  const paginatedCategories = categories.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
@@ -140,7 +237,7 @@ const index = () => {
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography variant="h5" component="h2">
-            Doctor Specialties
+            Doctor Categories
           </Typography>
           <Button
             variant="contained"
@@ -148,7 +245,7 @@ const index = () => {
             onClick={handleAdd}
             sx={{ bgcolor: 'primary.main' }}
           >
-            Add Specialty
+            Add Category
           </Button>
         </Box>
 
@@ -156,59 +253,69 @@ const index = () => {
           <Table sx={{ minWidth: 650 }} aria-label="doctor specialties table">
             <TableHead>
               <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>No</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>Specialties Name</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>ID</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Category Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }} align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedSpecialties.map((specialty) => (
-                <TableRow
-                  key={specialty.id}
-                  sx={{ 
-                    '&:last-child td, &:last-child th': { border: 0 },
-                    '&:hover': { bgcolor: '#f9f9f9' }
-                  }}
-                >
-                  <TableCell component="th" scope="row">
-                    <Chip 
-                      label={specialty.no} 
-                      size="small" 
-                      variant="outlined"
-                      sx={{ minWidth: '40px' }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.9rem' }}>
-                    {specialty.specialtiesname}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box display="flex" justifyContent="center" gap={1}>
-                      <IconButton
-                        onClick={() => handleEdit(specialty)}
-                        color="primary"
-                        size="small"
-                        sx={{ 
-                          '&:hover': { bgcolor: 'primary.light', color: 'white' },
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDeleteClick(specialty)}
-                        color="error"
-                        size="small"
-                        sx={{ 
-                          '&:hover': { bgcolor: 'error.light', color: 'white' },
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <CircularProgress />
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : paginatedCategories.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      No categories found. Click "Add Category" to create one.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedCategories.map((category, index) => (
+                  <TableRow key={index} hover>
+                    <TableCell>
+                      <Chip 
+                        label={ `${page * rowsPerPage + index + 1}`}
+                        size="small" 
+                        color="primary" 
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {category.categoryname || 'N/A'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box display="flex" gap={1} justifyContent="center">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(category)}
+                          sx={{ 
+                            color: 'primary.main',
+                            '&:hover': { backgroundColor: 'primary.light', color: 'white' }
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteClick(category)}
+                          sx={{ 
+                            color: 'error.main',
+                            '&:hover': { backgroundColor: 'error.light', color: 'white' }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -245,9 +352,9 @@ const index = () => {
           
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="body2" color="text.secondary">
-              {specialties.length === 0 
+              {categories.length === 0 
                 ? '0 of 0'
-                : `${page * rowsPerPage + 1}-${Math.min((page + 1) * rowsPerPage, specialties.length)} of ${specialties.length}`
+                : `${page * rowsPerPage + 1}-${Math.min((page + 1) * rowsPerPage, categories.length)} of ${categories.length}`
               }
             </Typography>
             <Button
@@ -261,7 +368,7 @@ const index = () => {
             </Button>
             <Button
               onClick={() => handleChangePage(null, page + 1)}
-              disabled={page >= Math.ceil(specialties.length / rowsPerPage) - 1}
+              disabled={page >= Math.ceil(categories.length / rowsPerPage) - 1}
               size="small"
               variant="outlined"
               sx={{ minWidth: 'auto', px: 1 }}
@@ -274,30 +381,94 @@ const index = () => {
         {/* Add/Edit Dialog */}
         <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
           <DialogTitle>
-            {editingSpecialty ? 'Edit Specialty' : 'Add New Specialty'}
+            {editingCategory ? 'Edit Category' : 'Add New Category'}
           </DialogTitle>
           <DialogContent>
+            {!editingCategory && (
+              <FormControl fullWidth margin="dense" sx={{ mt: 2 }}>
+                <InputLabel>Select Specialty</InputLabel>
+                <Select
+                  value={selectedSpecialtyId}
+                  onChange={(e) =>{
+                    setSelectedSpecialtyId(e.target.value)
+                  }}
+                  label="Select Specialty"
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 48 * 6 + 8, 
+                        width: 250,
+                      },
+                    },
+                  }}
+                >
+                 
+                  {specialties.map((specialty) => (
+                    <MenuItem 
+                      key={specialty._id } 
+                      value={specialty._id}
+                      label={specialty.surgerytypename}
+                    >
+                      {specialty.surgerytypename }
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            {editingCategory && (
+              <FormControl fullWidth margin="dense" sx={{ mt: 2 }}>
+                <InputLabel>Select Specialty</InputLabel>
+                <Select
+                  value={selectedSpecialtyId}
+                  onChange={(e) =>{
+                    setSelectedSpecialtyId(e.target.value)
+                  }}
+                  label="Select Specialty"
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 48 * 6 + 8, 
+                        width: 250,
+                      },
+                    },
+                  }}
+                >
+                 
+                  {specialties.map((specialty) => (
+                    <MenuItem 
+                      key={specialty._id } 
+                      value={specialty._id}
+                      label={specialty.surgerytypename}
+                      selected={specialty._id === editingCategory.surgerytypeid._id}
+                    >
+                      {specialty.surgerytypename }
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
             <TextField
-              autoFocus
+              autoFocus={editingCategory ? true : false}
               margin="dense"
-              label="Specialty Name"
+              label="Category Name"
               fullWidth
               variant="outlined"
-              value={specialtyName}
-              onChange={(e) => setSpecialtyName(e.target.value)}
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
               sx={{ mt: 2 }}
             />
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
-            <Button onClick={handleDialogClose} color="inherit">
+            <Button onClick={handleDialogClose} color="inherit" disabled={dialogLoading}>
               Cancel
             </Button>
             <Button 
               onClick={handleSave} 
               variant="contained"
-              disabled={!specialtyName.trim()}
+              disabled={!categoryName.trim() || (!editingCategory && !selectedSpecialtyId) || dialogLoading}
+              startIcon={dialogLoading ? <CircularProgress size={16} /> : null}
             >
-              {editingSpecialty ? 'Update' : 'Add'}
+              {editingCategory ? 'Update' : 'Add'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -307,18 +478,41 @@ const index = () => {
           <DialogTitle>Confirm Delete</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete the specialty "{specialtyToDelete?.specialtiesname}"?
+              Are you sure you want to delete the category "{categoryToDelete?.categoryname }"?
+
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setDeleteConfirmOpen(false)} color="inherit">
+            <Button onClick={() => setDeleteConfirmOpen(false)} color="inherit" disabled={dialogLoading}>
               Cancel
             </Button>
-            <Button onClick={handleDelete} color="error" variant="contained">
+            <Button 
+              onClick={handleDelete} 
+              color="error" 
+              variant="contained"
+              disabled={dialogLoading}
+              startIcon={dialogLoading ? <CircularProgress size={16} /> : null}
+            >
               Delete
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </CardContent>
     </Card>
   );
