@@ -15,15 +15,16 @@ class AuthService {
       });
 
       const data = await response.json();
-      this.setToken(data.token);
+     
+      this.setToken(data.Data.accessToken);
      
       if (response.ok) {
         // Successful login
         return {
           success: true,
-          data: data,
-          token: data.token || data.accessToken || data.access_token,
-          user: data.user || data.admin || { email, name: data.name || 'Admin' }
+          data: data.Data,
+          token: data.Data.accessToken,
+          user: { email :email , password: password }
         };
       } else {
         // Failed login
