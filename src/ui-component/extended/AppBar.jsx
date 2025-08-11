@@ -71,10 +71,10 @@ export default function AppBar({ ...others }) {
               <Button color="inherit" component={RouterLink} to="/login" target="_blank">
                 Dashboard
               </Button>
-              <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
+              <Button color="inherit" component={Link} href="" target="_blank">
                 Documentation
               </Button>
-              <Button component={Link} href="https://links.codedthemes.com/hsqll" disableElevation variant="contained" color="secondary">
+              <Button component={Link} href="" disableElevation variant="contained" color="secondary">
                 Purchase Now
               </Button>
             </Stack>
@@ -102,7 +102,7 @@ export default function AppBar({ ...others }) {
                           <ListItemText primary="Dashboard" />
                         </ListItemButton>
                       </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="https://codedthemes.gitbook.io/berry" target="_blank">
+                      <Link sx={{ textDecoration: 'none' }} href="" target="_blank">
                         <ListItemButton component="a">
                           <ListItemIcon>
                             <IconBook />
@@ -110,7 +110,7 @@ export default function AppBar({ ...others }) {
                           <ListItemText primary="Documentation" />
                         </ListItemButton>
                       </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="https://links.codedthemes.com/hsqll" target="_blank">
+                      <Link sx={{ textDecoration: 'none' }} href="" target="_blank">
                         <ListItemButton component="a">
                           <ListItemIcon>
                             <IconCreditCard />
