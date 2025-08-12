@@ -28,10 +28,15 @@ const NewDoctors = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, action: '', doctorId: null, doctorName: '' });
   const [actionLoading, setActionLoading] = useState(null);
+
+  // Filter doctors to show only pending ones
+  const pendingDoctors = doctors.filter(doctor => 
+    doctor.approval_status?.toLowerCase() === 'pending'
+  );
 
   useEffect(() => {
     fetchDoctors();
@@ -172,19 +177,26 @@ const NewDoctors = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {doctors.length === 0 ? (
+              {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    <Typography variant="body2" color="text.secondary">
-                      No doctors found
+                  <TableCell colSpan={6} align="center">
+                    <CircularProgress />
+                  </TableCell>
+                </TableRow>
+              ) : pendingDoctors.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography variant="body1" color="textSecondary">
+                      No pending doctors found
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                doctors
+                pendingDoctors
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((doctor, index) => {
                     const isActionLoading = actionLoading === doctor.id;
+                  
                     return (
                       <TableRow key={doctor.id || index} hover>
                         <TableCell>
@@ -238,7 +250,7 @@ const NewDoctors = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
-          count={doctors.length}
+          count={pendingDoctors.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
