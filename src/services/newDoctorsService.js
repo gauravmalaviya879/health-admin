@@ -1,3 +1,4 @@
+import axios from 'axios';
 import authService from "./authService";
 
 const BASE_URL = 'https://healtheasy-o25g.onrender.com';
@@ -7,21 +8,14 @@ const newDoctorsService = {
   getDoctorsList: async () => {
     const token = authService.getToken();
     try {
-      const response = await fetch(`${BASE_URL}/admin/doctors/list`, {
-        method: 'POST',
+      const response = await axios.post(`${BASE_URL}/admin/doctors/list`, {}, {
         headers: {
           'Content-Type': 'application/json',
-          // Add authorization header if needed
           'Authorization': `Bearer ${token}`
-        },
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { data };
+      return { data: response.data };
     } catch (error) {
       console.error('Error fetching doctors list:', error);
       throw error;
@@ -32,21 +26,17 @@ const newDoctorsService = {
   approveDoctor: async (doctorId) => {
     const token = authService.getToken();
     try {
-      const response = await fetch(`${BASE_URL}/${doctorId}/approve`, {
-        method: 'POST',
+      const response = await axios.post(`${BASE_URL}/admin/doctors/approved`, {
+        doctorId: doctorId,
+        status: "Approved"
+      }, {
         headers: {
           'Content-Type': 'application/json',
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { status: response.status, data };
+      return { status: response.status, data: response.data };
     } catch (error) {
       console.error('Error approving doctor:', error);
       throw error;
@@ -57,21 +47,17 @@ const newDoctorsService = {
   rejectDoctor: async (doctorId) => {
     const token = authService.getToken();
     try {
-      const response = await fetch(`${BASE_URL}/${doctorId}/reject`, {
-        method: 'POST',
+      const response = await axios.post(`${BASE_URL}/admin/doctors/approved`, {
+        doctorId: doctorId,
+        status: "Rejected"
+      }, {
         headers: {
           'Content-Type': 'application/json',
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { status: response.status, data };
+      return { status: response.status, data: response.data };
     } catch (error) {
       console.error('Error rejecting doctor:', error);
       throw error;
