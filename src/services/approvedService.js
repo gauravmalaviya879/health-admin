@@ -3,8 +3,8 @@ import authService from "./authService";
 
 const BASE_URL = 'https://healtheasy-o25g.onrender.com';
 
-const newDoctorsService = {
-  // Get all doctors list
+const approvedService = {
+  // Get all doctors list (will filter for approved ones in component)
   getDoctorsList: async () => {
     const token = authService.getToken();
     try {
@@ -22,28 +22,7 @@ const newDoctorsService = {
     }
   },
 
-  // Approve a doctor
-  approveDoctor: async (doctorId) => {
-    const token = authService.getToken();
-    try {
-      const response = await axios.post(`${BASE_URL}/admin/doctors/approved`, {
-        doctorid: doctorId,
-        status: "Approved"
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      return { status: response.status, data: response.data };
-    } catch (error) {
-      console.error('Error approving doctor:', error);
-      throw error;
-    }
-  },
-
-  // Reject/Cancel a doctor
+  // Reject an approved doctor
   rejectDoctor: async (doctorId) => {
     const token = authService.getToken();
     try {
@@ -65,4 +44,4 @@ const newDoctorsService = {
   }
 };
 
-export default newDoctorsService;
+export default approvedService;
