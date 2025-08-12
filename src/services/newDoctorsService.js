@@ -1,10 +1,11 @@
 import authService from "./authService";
 
 const BASE_URL = 'https://healtheasy-o25g.onrender.com';
-const token = authService.getToken();
+
 const newDoctorsService = {
   // Get all doctors list
   getDoctorsList: async () => {
+    const token = authService.getToken();
     try {
       const response = await fetch(`${BASE_URL}/admin/doctors/list`, {
         method: 'POST',
@@ -29,6 +30,7 @@ const newDoctorsService = {
 
   // Approve a doctor
   approveDoctor: async (doctorId) => {
+    const token = authService.getToken();
     try {
       const response = await fetch(`${BASE_URL}/${doctorId}/approve`, {
         method: 'POST',
@@ -53,6 +55,7 @@ const newDoctorsService = {
 
   // Reject/Cancel a doctor
   rejectDoctor: async (doctorId) => {
+    const token = authService.getToken();
     try {
       const response = await fetch(`${BASE_URL}/${doctorId}/reject`, {
         method: 'POST',

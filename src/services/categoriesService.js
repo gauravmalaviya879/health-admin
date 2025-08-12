@@ -2,10 +2,11 @@ import authService from './authService';
 import axios from 'axios';
 
 const API_BASE_URL = 'https://healtheasy-o25g.onrender.com';
-const token = authService.getToken();
+
 class CategoriesService {
   // Get all categories
   async getAllCategories() {
+    const token = authService.getToken();
     try {
       const response = await axios({
         method: 'post',
@@ -41,6 +42,7 @@ class CategoriesService {
 
   // Add new category
   async addCategory(categoryName, surgerytypeid) {
+    const token = authService.getToken();
     try {
       const response = await axios({
         method: 'post',
@@ -78,6 +80,7 @@ class CategoriesService {
 
   // Update existing category
   async updateCategory(id, categoryName, surgerytypeid) {
+    const token = authService.getToken();
     try {
       const response = await axios({
         method: 'post',
@@ -116,6 +119,7 @@ class CategoriesService {
 
   // Delete category
   async deleteCategory(id) {
+    const token = authService.getToken();
     try {
       const response = await axios({
         method: 'POST',

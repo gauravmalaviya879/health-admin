@@ -49,10 +49,11 @@ export const AuthProvider = ({ children }) => {
         }
         
         // Set user data
-        const userData = user || {
-          id: data.id || 1,
-          email: email,
-          name: data.name || data.username || 'Admin User'
+        console.log(user)
+        const userData =  {
+         
+          email: user.email,
+        
         };
         
         setIsAuthenticated(true);

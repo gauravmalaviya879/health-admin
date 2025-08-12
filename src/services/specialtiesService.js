@@ -2,13 +2,12 @@ import authService from './authService';
 import axios from 'axios';
 
 const API_BASE_URL = 'https://healtheasy-o25g.onrender.com';
-const token = authService.getToken();
+
 class SpecialtiesService {
   // Get all specialties
   async getAllSpecialties() {
     try {
-  
-      
+      const token = authService.getToken();
       const response = await axios({
         method: 'post',
         url: `${API_BASE_URL}/admin/surgerytypes/list`,
@@ -43,6 +42,7 @@ class SpecialtiesService {
 
   // Add new specialty
   async addSpecialty(specialtyName) {
+    const token = authService.getToken();
     try {
       
       const response = await axios({
@@ -80,6 +80,7 @@ class SpecialtiesService {
 
   // Update existing specialty
   async updateSpecialty(id, specialtyName) {
+    const token = authService.getToken();
     try {
 
       const response = await axios({
@@ -118,6 +119,7 @@ class SpecialtiesService {
 
   // Delete specialty
   async deleteSpecialty(id) {
+    const token = authService.getToken();
     try {
       
       
