@@ -1,38 +1,38 @@
 // assets
-import { IconStethoscope } from '@tabler/icons-react';
+import { IconAmbulance } from '@tabler/icons-react';
 
 // constant
 const icons = {
-  IconStethoscope 
+  IconAmbulance 
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
 
-const doctors = {
-  id: 'doctors',
+const ambulance = {
+  id: 'ambulance',
   title: '',
   caption: '',
-  icon: icons.IconStethoscope,
+  icon: icons.IconAmbulance,
   type: 'group',
   children: [
     {
-      id: 'doctors',
-      title: 'Doctors',
+      id: 'ambulance',
+      title: 'Ambulance',
       type: 'collapse',
-      icon: icons.IconStethoscope,
+      icon: icons.IconAmbulance,
       children: [
         {
           id: 'new',
           title: 'New',
           type: 'item',
-          url: '/doctors/new',
+          url: '/ambulance/new',
           target: false
         },
         {
           id: 'approved',
           title: 'Approved',
           type: 'item',
-          url: '/doctors/approved',
+          url: '/ambulance/approved',
           target: false
         }
       ]
@@ -40,4 +40,4 @@ const doctors = {
   ]
 };
 
-export default doctors;
+export default ambulance;

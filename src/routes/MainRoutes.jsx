@@ -8,6 +8,8 @@ import Categories from '../views/Categories';
 import NewDoctors from '../views/doctors/NewDoctors';
 import ApprovedDoctors from '../views/doctors/ApprovedDoctors';
 import Specialties from '../views/Specialties';
+import ApprovedAmbu from '../views/ambulance/ApprovedAmbu';
+import NewAmbu from '../views/ambulance/newAmbu';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
@@ -26,8 +28,7 @@ const MainRoutes = {
     {
       path: '/',
       element: <DashboardDefault />
-    },
-    
+    }, 
     {
       path: 'specialties',
       element: <Specialties />
@@ -51,6 +52,19 @@ const MainRoutes = {
         }
       ]
     },
+    {
+      path: 'ambulance',
+      children: [
+        {
+          path: 'new',
+          element: <NewAmbu />
+        },
+        {
+          path: 'approved',
+          element: <ApprovedAmbu />
+        }
+      ]
+    }
 
 
   ]
