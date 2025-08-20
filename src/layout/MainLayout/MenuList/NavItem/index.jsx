@@ -31,7 +31,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
 
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
-  const isSelected = !!matchPath({ path: item?.link ? item.link : item.url, end: false }, pathname);
+  const isSelected = pathname === (item?.link || item?.url) || pathname.startsWith(`${item?.link || item?.url}/`);
 
   const [hoverStatus, setHover] = useState(false);
 
@@ -93,6 +93,9 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
                 '&:hover': {
                   color: iconSelectedColor,
                   bgcolor: 'secondary.light'
+                },
+                '& .MuiListItemIcon-root': {
+                  color: iconSelectedColor
                 }
               }
             }),

@@ -19,9 +19,10 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Avatar
 } from '@mui/material';
-import { IconX } from '@tabler/icons-react';
+import { IconX, IconEye } from '@tabler/icons-react';
 import approvedService from '../../services/approvedService';
 
 const ApprovedDoctors = () => {
@@ -32,6 +33,8 @@ const ApprovedDoctors = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, doctorId: null, doctorName: '' });
   const [actionLoading, setActionLoading] = useState(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   // Filter doctors to show only approved ones
   const approvedDoctors = doctors.filter((doctor) => doctor.approval_status?.toLowerCase() === 'approved');
@@ -125,6 +128,7 @@ const ApprovedDoctors = () => {
                 <TableCell>No</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Specialty</TableCell>
+                <TableCell>View</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -154,6 +158,22 @@ const ApprovedDoctors = () => {
                       </TableCell>
                       <TableCell>{doctor.name || 'N/A'}</TableCell>
                       <TableCell>{doctor.specialty || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outlined"
+                          color="info"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDoctor(doctor);
+                            setViewModalOpen(true);
+                          }}
+                          sx={{ minWidth: 'auto', p: 0.5 }}
+                          title="View Details"
+                        >
+                          <IconEye size={18} />
+                        </Button>
+                      </TableCell>
                       <TableCell>
                         <Button
                           variant="contained"
@@ -211,6 +231,80 @@ const ApprovedDoctors = () => {
           >
             {actionLoading ? <CircularProgress size={20} color="inherit" /> : 'Confirm'}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Doctor Details Modal */}
+      <Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Doctor Details</DialogTitle>
+        <DialogContent>
+          {selectedDoctor && (
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
+                <Avatar 
+                  sx={{ 
+                    width: 100, 
+                    height: 100, 
+                    mb: 2,
+                    bgcolor: 'primary.main',
+                    fontSize: '2.5rem'
+                  }}
+                >
+                  {selectedDoctor.name ? selectedDoctor.name.charAt(0).toUpperCase() : 'D'}
+                </Avatar>
+                <Typography variant="h5" component="div">
+                  {selectedDoctor.name || 'N/A'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedDoctor.specialty || 'General Practitioner'}
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 2 }}>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Email</Typography>
+                  <Typography>{selectedDoctor.email || 'N/A'}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Mobile</Typography>
+                  <Typography>{selectedDoctor.mobile || 'N/A'}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
+                  <Typography>{selectedDoctor.gender ? selectedDoctor.gender.charAt(0).toUpperCase() + selectedDoctor.gender.slice(1) : 'N/A'}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">Status</Typography>
+                  <Chip
+                    label={selectedDoctor.approval_status ? selectedDoctor.approval_status.charAt(0).toUpperCase() + selectedDoctor.approval_status.slice(1) : 'N/A'}
+                    color="success"
+                    size="small"
+                  />
+                </Box>
+                {selectedDoctor.pincode && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Typography variant="subtitle2" color="text.secondary">Address</Typography>
+                    <Typography>
+                      {selectedDoctor.address_line1 || ''}
+                      {selectedDoctor.address_line2 ? `, ${selectedDoctor.address_line2}` : ''}
+                      {selectedDoctor.city ? `, ${selectedDoctor.city}` : ''}
+                      {selectedDoctor.state ? `, ${selectedDoctor.state}` : ''}
+                      {selectedDoctor.pincode ? ` - ${selectedDoctor.pincode}` : ''}
+                    </Typography>
+                  </Box>
+                )}
+                {selectedDoctor.qualification && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Typography variant="subtitle2" color="text.secondary">Qualification</Typography>
+                    <Typography>{selectedDoctor.qualification}</Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewModalOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
