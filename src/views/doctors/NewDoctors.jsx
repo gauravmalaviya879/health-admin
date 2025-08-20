@@ -37,7 +37,7 @@ const NewDoctors = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   // Filter doctors to show only pending ones
-  const pendingDoctors = doctors.filter((doctor) => doctor.approval_status?.toLowerCase() === 'pandding');
+  const pendingDoctors = doctors.filter((doctor) => doctor.approval_status?.toLowerCase() === 'pending');
 
   useEffect(() => {
     fetchDoctors();
