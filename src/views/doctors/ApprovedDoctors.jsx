@@ -22,8 +22,9 @@ import {
   DialogTitle,
   Avatar
 } from '@mui/material';
-import { IconX, IconEye } from '@tabler/icons-react';
+import { IconX, IconEye, IconSearch } from '@tabler/icons-react';
 import approvedService from '../../services/approvedService';
+import { TextField, InputAdornment } from '@mui/material';
 
 const ApprovedDoctors = () => {
   const [doctors, setDoctors] = useState([]);
@@ -35,9 +36,15 @@ const ApprovedDoctors = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Filter doctors to show only approved ones
-  const approvedDoctors = doctors.filter((doctor) => doctor.approval_status?.toLowerCase() === 'approved');
+  // Filter doctors to show only approved ones and apply search filter
+  const filteredDoctors = doctors.filter(doctor => {
+    const matchesStatus = doctor.approval_status?.toLowerCase() === 'approved';
+    const matchesSearch = doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         doctor.specialty?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && (searchTerm === '' || matchesSearch);
+  });
 
   useEffect(() => {
     fetchDoctors();
@@ -116,9 +123,24 @@ const ApprovedDoctors = () => {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 3 }}>
-        Approved Doctors
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5">Approved Doctors</Typography>
+        <TextField
+          variant="outlined"
+          size="small"
+          placeholder="Search by name or specialty..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <IconSearch size={20} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: 300 }}
+        />
+      </Box>
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer sx={{ maxHeight: 440 }}>
@@ -139,7 +161,7 @@ const ApprovedDoctors = () => {
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
-              ) : approvedDoctors.length === 0 ? (
+              ) : filteredDoctors.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
                     <Typography variant="body1" color="textSecondary">
@@ -148,7 +170,7 @@ const ApprovedDoctors = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                approvedDoctors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((doctor, index) => {
+                filteredDoctors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((doctor, index) => {
                   const isActionLoading = actionLoading === doctor._id;
 
                   return (
@@ -197,7 +219,7 @@ const ApprovedDoctors = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
-          count={approvedDoctors.length}
+          count={filteredDoctors.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
