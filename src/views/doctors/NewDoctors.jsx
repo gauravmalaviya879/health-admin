@@ -54,7 +54,7 @@ const NewDoctors = () => {
     try {
       setLoading(true);
       const response = await newDoctorsService.getDoctorsList();
-      console.log(response.data.Data);
+    
       setDoctors(response.data.Data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -109,6 +109,7 @@ const NewDoctors = () => {
   };
 
   const handleActionClick = (action, doctorId, doctorName) => {
+    
     setConfirmDialog({
       open: true,
       action,
@@ -118,6 +119,7 @@ const NewDoctors = () => {
   };
 
   const handleConfirmAction = () => {
+    console.log(confirmDialog , 'action');
     if (confirmDialog.action === 'approve') {
       handleApprove(confirmDialog.doctorId);
     } else if (confirmDialog.action === 'reject') {
@@ -258,10 +260,10 @@ const NewDoctors = () => {
                             color="primary"
                             size="small"
                             startIcon={<IconCheck size={18} />}
-                            onClick={() => handleActionClick('approve', doctor.id, doctor.name)}
+                            onClick={() => handleActionClick('approve', doctor._id, doctor.name)}
                             disabled={isActionLoading}
                           >
-                            {isActionLoading && actionLoading === doctor.id ? 'Approving...' : 'Approve'}
+                            {isActionLoading && actionLoading === doctor._id ? 'Approving...' : 'Approve'}
                           </Button>
                           <Button
                             variant="contained"

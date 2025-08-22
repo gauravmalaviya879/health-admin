@@ -54,7 +54,7 @@ const ApprovedDoctors = () => {
     try {
       setLoading(true);
       const response = await approvedService.getDoctorsList();
-      console.log(response.data.Data);
+      // console.log(response.data.Data);
       setDoctors(response.data.Data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);

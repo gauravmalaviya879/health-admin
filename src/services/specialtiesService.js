@@ -18,7 +18,7 @@ class SpecialtiesService {
           "search": "",
         }
       });
-      console.log(response.data)
+    
       return {
         success: true,
         data: response.data.Data || []

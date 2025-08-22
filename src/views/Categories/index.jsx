@@ -83,7 +83,7 @@ const index = () => {
     try {
       const result = await specialtiesService.getAllSpecialties();
       if (result.success) {
-        console.log(result.data , "result.data-SPECIALTY")
+   
         setSpecialties(result.data);
       } else {
         showSnackbar('Failed to load specialties', 'error');
