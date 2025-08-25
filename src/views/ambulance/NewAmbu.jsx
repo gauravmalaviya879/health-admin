@@ -50,7 +50,7 @@ const NewAmbu = () => {
     try {
       setLoading(true);
       const response = await ambulanceService.getAmbulances();
-      console.log(response)
+     
       setAmbulances(response.Data || []);
     } catch (error) {
       console.error('Error fetching ambulances:', error);
@@ -114,7 +114,7 @@ const NewAmbu = () => {
     setViewModalOpen(true);
   };
 
-  console.log(ambulances)
+
   const filteredAmbulances = ambulances.filter((ambulance) =>
     ambulance.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) &&
     ambulance.approval_status === 'Pending'
