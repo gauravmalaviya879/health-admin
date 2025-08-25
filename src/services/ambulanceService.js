@@ -25,12 +25,16 @@ export const ambulanceService = {
     }
   },
 
-  updateApproval: async (id, status) => {
+  approveAmbulance: async (ambulanceId) => {
     const token = authService.getToken();
+    console.log(ambulanceId,status)
     try {
-      const response = await axios.put(
-        `${API_URL}/admin/ambulances/${id}/status`,
-        { approval_status: status },
+      const response = await axios.post(
+        `${API_URL}/admin/ambulances/approved`,
+        { 
+          ambulanceid: ambulanceId,
+          status: 'Approved' 
+        },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -40,7 +44,30 @@ export const ambulanceService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Error updating ambulance status:', error);
+      console.error('Error updating ambulance approval status:', error);
+      throw error;
+    }
+  },
+
+  rejectAmbulance: async (ambulanceId) => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${API_URL}/admin/ambulances/approved`,
+        { 
+          ambulanceid: ambulanceId,
+          status: 'Rejected' 
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error rejecting ambulance:', error);
       throw error;
     }
   }

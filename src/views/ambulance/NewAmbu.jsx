@@ -34,7 +34,7 @@ const NewAmbu = () => {
   const [ambulances, setAmbulances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAmbulance, setSelectedAmbulance] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -70,7 +70,7 @@ const NewAmbu = () => {
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(parseInt(event.target.value, 5));
     setPage(0);
   };
 
@@ -85,17 +85,24 @@ const NewAmbu = () => {
     
     try {
       setProcessing(true);
-      await ambulanceService.updateApproval(selectedAmbulance._id, actionType);
+      
+      if (actionType === 'approved') {
+        await ambulanceService.approveAmbulance(selectedAmbulance._id);
+      } else if (actionType === 'rejected') {
+        await ambulanceService.rejectAmbulance(selectedAmbulance._id);
+      }
+      
       // Update the local state to reflect the change
       setAmbulances(ambulances.map(ambulance => 
         ambulance._id === selectedAmbulance._id 
-          ? { ...ambulance, approval_status: actionType }
+          ? { ...ambulance, approval_status: actionType === 'approved' ? 'Approved' : 'Rejected' }
           : ambulance
       ));
+      
       setDialogOpen(false);
       // You might want to add a success notification here
     } catch (error) {
-      console.error('Error updating ambulance status:', error);
+      console.error(`Error ${actionType === 'approved' ? 'approving' : 'rejecting'} ambulance:`, error);
       // You might want to add an error notification here
     } finally {
       setProcessing(false);
@@ -109,7 +116,8 @@ const NewAmbu = () => {
 
   console.log(ambulances)
   const filteredAmbulances = ambulances.filter((ambulance) =>
-    ambulance.fullname?.toLowerCase().includes(searchTerm.toLowerCase())
+    ambulance.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    ambulance.approval_status === 'Pending'
   );
 
   const paginatedAmbulances = filteredAmbulances.slice(
@@ -120,7 +128,6 @@ const NewAmbu = () => {
   const getStatusChip = (status) => {
     const statusMap = {
       pending: { label: 'Pending', color: 'warning' },
-      approved: { label: 'Approved', color: 'success' },
       rejected: { label: 'Rejected', color: 'error' },
     };
     
@@ -458,7 +465,6 @@ const NewAmbu = () => {
                 <TableCell>Full Name</TableCell>
                 <TableCell>Mobile</TableCell>
                 <TableCell>City</TableCell>
-            
                 <TableCell>Status</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -478,7 +484,7 @@ const NewAmbu = () => {
                 </TableRow>
               ) : (
                 paginatedAmbulances.map((ambulance) => (
-                  <TableRow key={ambulance.id} hover>
+                  <TableRow key={ambulance._id} hover>
                     <TableCell>
                       <Avatar
                         src={ambulance.profilepic || '/default-avatar.png'}
