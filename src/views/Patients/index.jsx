@@ -26,10 +26,48 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
+  DialogActions,
+  Grid
 } from '@mui/material';
-import { IconEye, IconSearch, IconPlus } from '@tabler/icons-react';
+import { 
+  IconEye, 
+  IconSearch, 
+  IconPlus, 
+  IconUser,
+  IconMail,
+  IconPhone,
+  IconDropletFilled,
+  IconMapPin,
+  IconX
+} from '@tabler/icons-react';
 import patientService from '../../services/patientService';
+
+const DetailItem = ({ icon, label, value }) => (
+  <Grid item xs={12} sm={6}>
+    <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', p: 1.5, bgcolor: 'grey.50', borderRadius: 1, height: '100%' }}>
+      <Box sx={{ 
+        width: 36, 
+        height: 36, 
+        borderRadius: '50%', 
+        bgcolor: 'primary.lighter',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'primary.main'
+      }}>
+        {icon}
+      </Box>
+      <Box>
+        <Typography variant="caption" color="textSecondary">
+          {label}
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          {value || 'N/A'}
+        </Typography>
+      </Box>
+    </Box>
+  </Grid>
+);
 
 const Patients = () => {
   const [patients, setPatients] = useState([]);
@@ -288,22 +326,113 @@ const Patients = () => {
       </Box>
 
       {/* Patient Details Dialog */}
-      <Dialog open={detailsOpen} onClose={handleCloseDetails} maxWidth="sm" fullWidth>
-        <DialogTitle>Patient Details</DialogTitle>
-        <DialogContent>
+      <Dialog 
+        open={detailsOpen} 
+        onClose={handleCloseDetails} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle 
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            py: 2,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5
+          }}
+        >
+          <IconUser size={24} />
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            Patient Details
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
           {selectedPatient && (
-            <Box sx={{ mt: 1 }}>
-              <DialogContentText><strong>Name:</strong> {selectedPatient.name || 'N/A'}</DialogContentText>
-              <DialogContentText><strong>Email:</strong> {selectedPatient.email || 'N/A'}</DialogContentText>
-              <DialogContentText><strong>Gender:</strong> {selectedPatient.gender || 'N/A'}</DialogContentText>
-              <DialogContentText><strong>Mobile:</strong> {selectedPatient.mobile || 'N/A'}</DialogContentText>
-              <DialogContentText><strong>Blood Group:</strong> {selectedPatient.blood_group || 'N/A'}</DialogContentText>
-              <DialogContentText><strong>Pincode:</strong> {selectedPatient.pincode || 'N/A'}</DialogContentText>
+            <Box sx={{ p: 3 }}>
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 2,
+                  mb: 3,
+                  p: 2,
+                  bgcolor: 'grey.50',
+                  borderRadius: 1
+                }}
+              >
+                <Box 
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    bgcolor: 'primary.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: 24,
+                    fontWeight: 600
+                  }}
+                >
+                  {selectedPatient.name?.charAt(0) || 'P'}
+                </Box>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {selectedPatient.name || 'N/A'}
+                  </Typography>
+                  <Chip 
+                    label={selectedPatient.gender || 'N/A'} 
+                    size="small"
+                    sx={{
+                      bgcolor: selectedPatient.gender?.toLowerCase() === 'male' ? 'primary.main' : 'secondary.main',
+                      color: 'white',
+                      fontWeight: 500
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              <Grid container spacing={2}>
+                <DetailItem 
+                  icon={<IconMail size={20} />} 
+                  label="Email" 
+                  value={selectedPatient.email} 
+                />
+                <DetailItem 
+                  icon={<IconPhone size={20} />} 
+                  label="Mobile" 
+                  value={selectedPatient.mobile} 
+                />
+                <DetailItem 
+                  icon={<IconDropletFilled size={20} />} 
+                  label="Blood Group" 
+                  value={selectedPatient.blood_group} 
+                />
+                <DetailItem 
+                  icon={<IconMapPin size={20} />} 
+                  label="Pincode" 
+                  value={selectedPatient.pincode} 
+                />
+              </Grid>
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDetails} color="primary">
+        <DialogActions sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button 
+            onClick={handleCloseDetails}
+            variant="outlined"
+            startIcon={<IconX size={18} />}
+            sx={{ borderRadius: 2 }}
+          >
             Close
           </Button>
         </DialogActions>

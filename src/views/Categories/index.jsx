@@ -255,6 +255,7 @@ const index = () => {
               <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                 <TableCell sx={{ fontWeight: 'bold' }}>ID</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Category Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Specialty</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }} align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -287,6 +288,11 @@ const index = () => {
                     <TableCell>
                       <Typography variant="body1">
                         {category.categoryname || 'N/A'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {category?.surgerytypename || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
