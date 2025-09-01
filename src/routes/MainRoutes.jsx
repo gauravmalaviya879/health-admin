@@ -10,6 +10,7 @@ import ApprovedDoctors from '../views/doctors/ApprovedDoctors';
 import Specialties from '../views/Specialties';
 import ApprovedAmbu from '../views/ambulance/ApprovedAmbu';
 import NewAmbu from '../views/ambulance/NewAmbu';
+import Patients from '../views/Patients';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
@@ -64,6 +65,10 @@ const MainRoutes = {
           element: <ApprovedAmbu />
         }
       ]
+    },
+    {
+      path: 'patients',
+      element: <Patients/>
     }
 
 
