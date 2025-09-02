@@ -8,7 +8,7 @@ const icons = { IconDashboard };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
-const doctorList = {
+const categories = {
   id: 'DoctorSpecialties',
   title: 'Categories',
   type: 'item',
@@ -42,7 +42,7 @@ const dashboard = {
       breadcrumbs: false
     },
     specialties,
-    doctorList
+    categories
    
   ]
 };
