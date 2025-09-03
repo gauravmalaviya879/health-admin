@@ -22,11 +22,13 @@ import {
   DialogTitle,
   Avatar
 } from '@mui/material';
-import { IconCheck, IconX, IconEye, IconSearch } from '@tabler/icons-react';
+import { IconCheck, IconX, IconSearch } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import { TextField, InputAdornment } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const NewDoctors = () => {
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -34,8 +36,6 @@ const NewDoctors = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, action: '', doctorId: null, doctorName: '' });
   const [actionLoading, setActionLoading] = useState(null);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter doctors to show only pending ones and apply search filter
@@ -144,14 +144,8 @@ const NewDoctors = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleOpenViewModal = (doctor) => {
-    setSelectedDoctor(doctor);
-    setViewModalOpen(true);
-  };
-
-  const handleCloseViewModal = () => {
-    setViewModalOpen(false);
-    setSelectedDoctor(null);
+  const handleViewDoctor = (doctorId) => {
+    navigate(`/doctors/${doctorId}`);
   };
 
   const getStatusColor = (status) => {
@@ -244,13 +238,11 @@ const NewDoctors = () => {
                       <TableCell>
                         <Button
                           variant="outlined"
-                          color="info"
                           size="small"
-                          onClick={() => handleOpenViewModal(doctor)}
-                          sx={{ minWidth: 'auto', p: 0.5 }}
-                          title="View Details"
+                          onClick={() => handleViewDoctor(doctor._id)}
+                          sx={{ textTransform: 'none' }}
                         >
-                          <IconEye size={18} />
+                          View
                         </Button>
                       </TableCell>
                       <TableCell>
@@ -327,76 +319,6 @@ const NewDoctors = () => {
           >
             {actionLoading ? <CircularProgress size={20} color="inherit" /> : 'Confirm'}
           </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* View Doctor Details Modal */}
-      <Dialog open={viewModalOpen} onClose={handleCloseViewModal} maxWidth="sm" fullWidth>
-        <DialogTitle>Doctor Details</DialogTitle>
-        <DialogContent>
-          {selectedDoctor && (
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-                {selectedDoctor.profile_image ? (
-                  <Avatar src={selectedDoctor.profile_image} alt={selectedDoctor.name} sx={{ width: 100, height: 100, mb: 2 }} />
-                ) : (
-                  <Avatar sx={{ width: 100, height: 100, mb: 2, bgcolor: 'primary.main', fontSize: '2.5rem' }}>
-                    {selectedDoctor.name ? selectedDoctor.name.charAt(0).toUpperCase() : 'D'}
-                  </Avatar>
-                )}
-                <Typography variant="h5" component="div">
-                  {selectedDoctor.name || 'N/A'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedDoctor.specialty || 'General Practitioner'}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 2 }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Email</Typography>
-                  <Typography>{selectedDoctor.email || 'N/A'}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Mobile</Typography>
-                  <Typography>{selectedDoctor.mobile || 'N/A'}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
-                  <Typography>{selectedDoctor.gender ? selectedDoctor.gender.charAt(0).toUpperCase() + selectedDoctor.gender.slice(1) : 'N/A'}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Status</Typography>
-                  <Chip
-                    label={selectedDoctor.approval_status ? selectedDoctor.approval_status.charAt(0).toUpperCase() + selectedDoctor.approval_status.slice(1) : 'N/A'}
-                    color={getStatusColor(selectedDoctor.approval_status)}
-                    size="small"
-                  />
-                </Box>
-                {selectedDoctor.pincode && (
-                  <Box sx={{ gridColumn: '1 / -1' }}>
-                    <Typography variant="subtitle2" color="text.secondary">Address</Typography>
-                    <Typography>
-                      {selectedDoctor.address_line1 || ''}
-                      {selectedDoctor.address_line2 ? `, ${selectedDoctor.address_line2}` : ''}
-                      {selectedDoctor.city ? `, ${selectedDoctor.city}` : ''}
-                      {selectedDoctor.state ? `, ${selectedDoctor.state}` : ''}
-                      {selectedDoctor.pincode ? ` - ${selectedDoctor.pincode}` : ''}
-                    </Typography>
-                  </Box>
-                )}
-                {selectedDoctor.qualification && (
-                  <Box sx={{ gridColumn: '1 / -1' }}>
-                    <Typography variant="subtitle2" color="text.secondary">Qualification</Typography>
-                    <Typography>{selectedDoctor.qualification}</Typography>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseViewModal}>Close</Button>
         </DialogActions>
       </Dialog>
 

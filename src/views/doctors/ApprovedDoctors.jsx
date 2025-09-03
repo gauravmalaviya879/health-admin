@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -20,13 +21,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Avatar
+  Avatar,
+  TextField,
+  InputAdornment
 } from '@mui/material';
-import { IconX, IconEye, IconSearch } from '@tabler/icons-react';
+import { IconX, IconSearch } from '@tabler/icons-react';
 import approvedService from '../../services/approvedService';
-import { TextField, InputAdornment } from '@mui/material';
 
 const ApprovedDoctors = () => {
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -34,8 +37,6 @@ const ApprovedDoctors = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, doctorId: null, doctorName: '' });
   const [actionLoading, setActionLoading] = useState(null);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter doctors to show only approved ones and apply search filter
@@ -54,7 +55,6 @@ const ApprovedDoctors = () => {
     try {
       setLoading(true);
       const response = await approvedService.getDoctorsList();
-      // console.log(response.data.Data);
       setDoctors(response.data.Data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -62,6 +62,14 @@ const ApprovedDoctors = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewDoctor = (doctorId) => {
+    if (!doctorId) {
+      console.error('No doctor ID provided for navigation');
+      return;
+    }
+    navigate(`/doctors/${doctorId}`);
   };
 
   const handleReject = async (doctorId) => {
@@ -105,7 +113,12 @@ const ApprovedDoctors = () => {
     setPage(0);
   };
 
-  const showSnackbar = (message, severity) => {
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    setPage(0);
+  };
+
+  const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
   };
 
@@ -113,24 +126,23 @@ const ApprovedDoctors = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  // Calculate pagination
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredDoctors.length) : 0;
+  const paginatedDoctors = filteredDoctors.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5">Approved Doctors</Typography>
+        <Typography variant="h4">Approved Doctors</Typography>
         <TextField
           variant="outlined"
           size="small"
-          placeholder="Search by name or specialty..."
+          placeholder="Search doctors..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={handleSearch}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -138,13 +150,12 @@ const ApprovedDoctors = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ width: 300 }}
         />
       </Box>
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="approved doctors table">
+          <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
                 <TableCell>No</TableCell>
@@ -157,67 +168,59 @@ const ApprovedDoctors = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={4} align="center">
+                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : filteredDoctors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    <Typography variant="body1" color="textSecondary">
-                      No approved doctors found
-                    </Typography>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                    <Typography>No approved doctors found</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredDoctors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((doctor, index) => {
-                  const isActionLoading = actionLoading === doctor._id;
-
-                  return (
-                    <TableRow key={doctor._id || index} hover>
-                      <TableCell>
-                        <Chip label={page * rowsPerPage + index + 1} size="small" variant="outlined" />
-                      </TableCell>
-                      <TableCell>{doctor.name || 'N/A'}</TableCell>
-                      <TableCell>{doctor.specialty || 'N/A'}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outlined"
-                          color="info"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDoctor(doctor);
-                            setViewModalOpen(true);
-                          }}
-                          sx={{ minWidth: 'auto', p: 0.5 }}
-                          title="View Details"
-                        >
-                          <IconEye size={18} />
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          size="small"
-                          startIcon={isActionLoading ? <CircularProgress size={16} color="inherit" /> : <IconX size={16} />}
-                          onClick={() => handleActionClick(doctor._id, doctor.name)}
-                          disabled={isActionLoading}
-                        >
-                          Reject
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                paginatedDoctors.map((doctor, index) => (
+                  <TableRow hover key={doctor._id}>
+                    <TableCell>
+                      <Chip label={page * rowsPerPage + index + 1} size="small" variant="outlined" />
+                    </TableCell>
+                    <TableCell>{doctor.name || 'N/A'}</TableCell>
+                    <TableCell>{doctor.specialty || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleViewDoctor(doctor._id)}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        startIcon={<IconX size={16} />}
+                        onClick={() => handleActionClick(doctor._id, doctor.name)}
+                        disabled={actionLoading === doctor._id}
+                      >
+                        Reject
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 53 * emptyRows }}>
+                  <TableCell colSpan={5} />
+                </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
-
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={filteredDoctors.length}
           rowsPerPage={rowsPerPage}
@@ -230,111 +233,35 @@ const ApprovedDoctors = () => {
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog({ open: false, doctorId: null, doctorName: '' })}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        onClose={() => setConfirmDialog({ ...confirmDialog, open: false })}
       >
-        <DialogTitle id="alert-dialog-title">Reject Doctor</DialogTitle>
+        <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to reject Dr. {confirmDialog.doctorName}? This will revoke their access to the system.
+          <DialogContentText>
+            Are you sure you want to reject {confirmDialog.doctorName}? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDialog({ open: false, doctorId: null, doctorName: '' })} disabled={actionLoading}>
+          <Button onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}>
             Cancel
           </Button>
           <Button
             onClick={handleConfirmAction}
             color="error"
             variant="contained"
-            disabled={actionLoading}
-            autoFocus
+            disabled={actionLoading === confirmDialog.doctorId}
           >
-            {actionLoading ? <CircularProgress size={20} color="inherit" /> : 'Confirm'}
+            {actionLoading === confirmDialog.doctorId ? 'Processing...' : 'Reject'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* View Doctor Details Modal */}
-      <Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Doctor Details</DialogTitle>
-        <DialogContent>
-          {selectedDoctor && (
-            <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-                <Avatar 
-                  sx={{ 
-                    width: 100, 
-                    height: 100, 
-                    mb: 2,
-                    bgcolor: 'primary.main',
-                    fontSize: '2.5rem'
-                  }}
-                >
-                  {selectedDoctor.name ? selectedDoctor.name.charAt(0).toUpperCase() : 'D'}
-                </Avatar>
-                <Typography variant="h5" component="div">
-                  {selectedDoctor.name || 'N/A'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedDoctor.specialty || 'General Practitioner'}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 2 }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Email</Typography>
-                  <Typography>{selectedDoctor.email || 'N/A'}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Mobile</Typography>
-                  <Typography>{selectedDoctor.mobile || 'N/A'}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
-                  <Typography>{selectedDoctor.gender ? selectedDoctor.gender.charAt(0).toUpperCase() + selectedDoctor.gender.slice(1) : 'N/A'}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Status</Typography>
-                  <Chip
-                    label={selectedDoctor.approval_status ? selectedDoctor.approval_status.charAt(0).toUpperCase() + selectedDoctor.approval_status.slice(1) : 'N/A'}
-                    color="success"
-                    size="small"
-                  />
-                </Box>
-                {selectedDoctor.pincode && (
-                  <Box sx={{ gridColumn: '1 / -1' }}>
-                    <Typography variant="subtitle2" color="text.secondary">Address</Typography>
-                    <Typography>
-                      {selectedDoctor.address_line1 || ''}
-                      {selectedDoctor.address_line2 ? `, ${selectedDoctor.address_line2}` : ''}
-                      {selectedDoctor.city ? `, ${selectedDoctor.city}` : ''}
-                      {selectedDoctor.state ? `, ${selectedDoctor.state}` : ''}
-                      {selectedDoctor.pincode ? ` - ${selectedDoctor.pincode}` : ''}
-                    </Typography>
-                  </Box>
-                )}
-                {selectedDoctor.qualification && (
-                  <Box sx={{ gridColumn: '1 / -1' }}>
-                    <Typography variant="subtitle2" color="text.secondary">Qualification</Typography>
-                    <Typography>{selectedDoctor.qualification}</Typography>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewModalOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}

@@ -7,6 +7,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import Categories from '../views/Categories';
 import NewDoctors from '../views/doctors/NewDoctors';
 import ApprovedDoctors from '../views/doctors/ApprovedDoctors';
+import DoctorDetails from '../views/doctors/DoctorDetails';
 import Specialties from '../views/Specialties';
 import ApprovedAmbu from '../views/ambulance/ApprovedAmbu';
 import NewAmbu from '../views/ambulance/NewAmbu';
@@ -44,7 +45,6 @@ const MainRoutes = {
       path: 'categories',
       element: <Categories />
     },
-
     {
       path: 'doctors',
       children: [
@@ -55,6 +55,10 @@ const MainRoutes = {
         {
           path: 'approved',
           element: <ApprovedDoctors />
+        },
+        {
+          path: ':id',
+          element: <DoctorDetails />
         }
       ]
     },
@@ -75,8 +79,6 @@ const MainRoutes = {
       path: 'patients',
       element: <Patients/>
     }
-
-
   ]
 };
 

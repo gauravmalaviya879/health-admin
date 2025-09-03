@@ -62,7 +62,29 @@ const newDoctorsService = {
       console.error('Error rejecting doctor:', error);
       throw error;
     }
-  }
+  },
+
+  // Get a single doctor by ID
+  getDoctorById: async (doctorId) => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/admin/doctors/getone`,
+        { doctorid: doctorId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      return { data: response.data };
+    } catch (error) {
+      console.error('Error fetching doctor details:', error);
+      throw error;
+    }
+  },
 };
 
 export default newDoctorsService;
