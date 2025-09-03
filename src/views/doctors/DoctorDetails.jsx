@@ -11,9 +11,18 @@ import {
   Divider,
   Grid,
   Container,
-  IconButton
+  IconButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material';
-import { IconArrowLeft } from '@tabler/icons-react';
+import { IconArrowLeft, IconChevronDown, IconCheck, IconX, IconChevronUp } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 
 const DoctorDetails = () => {
@@ -22,6 +31,14 @@ const DoctorDetails = () => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expanded, setExpanded] = useState('surgery-0'); // Set first one as default
+  const [showAllSurgeries, setShowAllSurgeries] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+    setInitialLoad(false);
+  };
 
   useEffect(() => {
     const fetchDoctorDetails = async () => {
@@ -44,6 +61,13 @@ const DoctorDetails = () => {
     fetchDoctorDetails();
   }, [id]);
 
+  // Initialize first surgery as expanded on first load
+  useEffect(() => {
+    if (doctor?.surgeriesDetails?.length > 0 && initialLoad) {
+      setExpanded('surgery-0');
+    }
+  }, [doctor, initialLoad]);
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved':
@@ -56,6 +80,265 @@ const DoctorDetails = () => {
       default:
         return 'default';
     }
+  };
+
+  const renderSurgeries = (surgeries, isAccordion = true) => {
+    const visibleSurgeries = showAllSurgeries ? surgeries : surgeries.slice(0, 4);
+    const hasMoreSurgeries = surgeries.length > 4 && !showAllSurgeries;
+
+    return (
+      <>
+        {visibleSurgeries.map((surgery, index) => (
+          <Accordion 
+            key={surgery._id || index} 
+            elevation={2} 
+            sx={{ 
+              mb: 2,
+              '&:before': { display: 'none' },
+              '&.Mui-expanded': {
+                my: 2,
+              },
+            }}
+            expanded={isAccordion ? expanded === `surgery-${index}` : true}
+            onChange={handleAccordionChange(`surgery-${index}`)}
+          >
+            <AccordionSummary
+              expandIcon={isAccordion ? <IconChevronDown /> : null}
+              aria-controls={`surgery-${index}-content`}
+              id={`surgery-${index}-header`}
+              sx={{
+                backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                borderRadius: 1,
+                '&.Mui-expanded': {
+                  backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                },
+                alignItems: 'flex-start',
+                py: 2,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%', gap: 2 }}>
+                {surgery.surgery_photo && (
+                  <Box 
+                    component="img"
+                    src={surgery.surgery_photo}
+                    alt={surgery.name}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      objectFit: 'cover',
+                      borderRadius: 1,
+                      border: '1px solid #e0e0e0'
+                    }}
+                  />
+                )}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {surgery.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      {surgery.general_price > 0 && (
+                        <Chip 
+                          label={`From ₹${surgery.general_price.toLocaleString()}`} 
+                          color="primary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                      {surgery.duration && (
+                        <Chip
+                          label={`${surgery.duration} ${surgery.duration === '1' ? 'Day' : 'Days'}`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                  {surgery.surgerytype && (
+                    <Chip 
+                      label={surgery.surgerytype} 
+                      size="small" 
+                      color="primary" 
+                      variant="outlined"
+                      sx={{ mb: 1 }}
+                    />
+                  )}
+                  {surgery.features && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {surgery.features}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container spacing={2}>
+                {/* What's Included */}
+                <Grid item xs={12} md={6}>
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 2, 
+                      border: '1px solid',
+                      borderColor: 'success.light',
+                      borderRadius: 1,
+                      height: '100%',
+                      backgroundColor: 'rgba(46, 125, 50, 0.04)'
+                    }}
+                  >
+                    <Box display="flex" alignItems="center" mb={1}>
+                      <IconCheck size={20} color="#2e7d32" style={{ marginRight: 8 }} />
+                      <Typography variant="subtitle2" color="success.dark" sx={{ fontWeight: 600 }}>
+                        What's Included
+                      </Typography>
+                    </Box>
+                    {surgery.inclusive ? (
+                      <Box component="ul" sx={{ pl: 3, m: 0, '& li': { mb: 0.5 } }}>
+                        {surgery.inclusive.split('\n').map((item, i) => (
+                          <li key={i}>
+                            <Typography variant="body2">
+                              {item.trim()}
+                            </Typography>
+                          </li>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="textSecondary">
+                        No inclusion details available.
+                      </Typography>
+                    )}
+                  </Paper>
+                </Grid>
+                
+                {/* What's Not Included */}
+                <Grid item xs={12} md={6}>
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 2, 
+                      border: '1px solid',
+                      borderColor: 'error.light',
+                      borderRadius: 1,
+                      height: '100%',
+                      backgroundColor: 'rgba(211, 47, 47, 0.04)'
+                    }}
+                  >
+                    <Box display="flex" alignItems="center" mb={1}>
+                      <IconX size={20} color="#d32f2f" style={{ marginRight: 8 }} />
+                      <Typography variant="subtitle2" color="error.dark" sx={{ fontWeight: 600 }}>
+                        What's Not Included
+                      </Typography>
+                    </Box>
+                    {surgery.exclusive ? (
+                      <Box component="ul" sx={{ pl: 3, m: 0, '& li': { mb: 0.5 } }}>
+                        {surgery.exclusive.split('\n').map((item, i) => (
+                          <li key={i}>
+                            <Typography variant="body2">
+                              {item.trim()}
+                            </Typography>
+                          </li>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="textSecondary">
+                        No exclusion details available.
+                      </Typography>
+                    )}
+                  </Paper>
+                </Grid>
+
+                {/* Additional Features */}
+                {surgery.additional_features && (
+                  <Grid item xs={12}>
+                    <Paper 
+                      elevation={0} 
+                      sx={{ 
+                        p: 2, 
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                      }}
+                    >
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, mb: 1 }}>
+                        Additional Features
+                      </Typography>
+                      <Typography variant="body2">
+                        {surgery.additional_features}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
+
+                {/* Pricing Table */}
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, mb: 1 }}>
+                    Pricing Details
+                  </Typography>
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Room Type</TableCell>
+                          <TableCell align="right">Price (₹)</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {surgery.general_price > 0 && (
+                          <TableRow>
+                            <TableCell>General</TableCell>
+                            <TableCell align="right">₹{surgery.general_price.toLocaleString()}</TableCell>
+                          </TableRow>
+                        )}
+                        {surgery.semiprivate_price > 0 && (
+                          <TableRow>
+                            <TableCell>Semi-Private</TableCell>
+                            <TableCell align="right">₹{surgery.semiprivate_price.toLocaleString()}</TableCell>
+                          </TableRow>
+                        )}
+                        {surgery.private_price > 0 && (
+                          <TableRow>
+                            <TableCell>Private</TableCell>
+                            <TableCell align="right">₹{surgery.private_price.toLocaleString()}</TableCell>
+                          </TableRow>
+                        )}
+                        {surgery.delux_price > 0 && (
+                          <TableRow>
+                            <TableCell>Deluxe</TableCell>
+                            <TableCell align="right">₹{surgery.delux_price.toLocaleString()}</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+
+        {/* Show More/Less Button */}
+        {surgeries.length > 4 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              color="primary"
+              onClick={() => setShowAllSurgeries(!showAllSurgeries)}
+              endIcon={showAllSurgeries ? <IconChevronUp /> : <IconChevronDown />}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 500,
+                borderRadius: 2,
+                px: 3,
+                py: 1,
+              }}
+            >
+              {showAllSurgeries ? 'Show Less' : `Show ${surgeries.length - 4} More Surgeries`}
+            </Button>
+          </Box>
+        )}
+      </>
+    );
   };
 
   if (loading) {
@@ -235,128 +518,9 @@ const DoctorDetails = () => {
         {doctor.surgeriesDetails && doctor.surgeriesDetails.length > 0 && (
           <Box mb={4}>
             <Typography variant="h5" gutterBottom>Surgeries & Procedures</Typography>
-            <Grid container spacing={3}>
-              {doctor.surgeriesDetails.map((surgery, index) => (
-                <Grid item xs={12} key={surgery._id || index}>
-                  <Paper elevation={1} sx={{ p: 3, borderRadius: 2 }}>
-                    <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={3}>
-                      <Box flex={1}>
-                        <Box display="flex" flexWrap="wrap" alignItems="center" gap={1} mb={1.5}>
-                          <Typography variant="h6" component="h2">{surgery.name}</Typography>
-                          <Chip 
-                            label={surgery.surgerytype || surgery.surgerytypeid?.surgerytypename} 
-                            size="small" 
-                            color="primary" 
-                            variant="outlined"
-                          />
-                        </Box>
-                        
-                        {surgery.description && (
-                          <Typography variant="body2" color="text.secondary" paragraph>
-                            {surgery.description}
-                          </Typography>
-                        )}
-                        
-                        <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-                          {surgery.yearsof_experience && (
-                            <Chip 
-                              label={`${surgery.yearsof_experience} Experience`} 
-                              size="small" 
-                              variant="outlined"
-                              color="info"
-                            />
-                          )}
-                          {surgery.completed_surgery && (
-                            <Chip 
-                              label={`${surgery.completed_surgery} Surgeries`} 
-                              size="small" 
-                              variant="outlined"
-                              color="success"
-                            />
-                          )}
-                          {surgery.days && (
-                            <Chip 
-                              label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'} Stay`} 
-                              size="small" 
-                              variant="outlined"
-                            />
-                          )}
-                        </Box>
-                        
-                        <Grid container spacing={2}>
-                          <Grid item xs={12} md={6}>
-                            <Paper elevation={0} sx={{ p: 2, bgcolor: 'success.light', borderRadius: 1, height: '100%' }}>
-                              <Typography variant="subtitle2" color="success.dark" sx={{ fontWeight: 600, mb: 1 }}>
-                                What's Included
-                              </Typography>
-                              <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                                {surgery.inclusive}
-                              </Typography>
-                            </Paper>
-                          </Grid>
-                          <Grid item xs={12} md={6}>
-                            <Paper elevation={0} sx={{ p: 2, bgcolor: 'error.light', borderRadius: 1, height: '100%' }}>
-                              <Typography variant="subtitle2" color="error.dark" sx={{ fontWeight: 600, mb: 1 }}>
-                                What's Not Included
-                              </Typography>
-                              <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                                {surgery.exclusive}
-                              </Typography>
-                            </Paper>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                      
-                      <Box sx={{ minWidth: { xs: '100%', md: 250 }, mt: { xs: 2, md: 0 } }}>
-                        <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
-                          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                            Pricing
-                          </Typography>
-                          <Divider sx={{ mb: 2 }} />
-                          <Box display="flex" flexDirection="column" gap={1.5}>
-                            {surgery.general_price > 0 && (
-                              <Box display="flex" justifyContent="space-between">
-                                <Typography variant="body2">General</Typography>
-                                <Typography fontWeight={500}>₹{surgery.general_price}</Typography>
-                              </Box>
-                            )}
-                            {surgery.semiprivate_price > 0 && (
-                              <Box display="flex" justifyContent="space-between">
-                                <Typography variant="body2">Semi-Private</Typography>
-                                <Typography fontWeight={500}>₹{surgery.semiprivate_price}</Typography>
-                              </Box>
-                            )}
-                            {surgery.private_price > 0 && (
-                              <Box display="flex" justifyContent="space-between">
-                                <Typography variant="body2">Private</Typography>
-                                <Typography fontWeight={500}>₹{surgery.private_price}</Typography>
-                              </Box>
-                            )}
-                            {surgery.delux_price > 0 && (
-                              <Box display="flex" justifyContent="space-between">
-                                <Typography variant="body2">Deluxe</Typography>
-                                <Typography fontWeight={500}>₹{surgery.delux_price}</Typography>
-                              </Box>
-                            )}
-                          </Box>
-                        </Paper>
-                      </Box>
-                    </Box>
-                    
-                    {surgery.additional_features && (
-                      <Box mt={2}>
-                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                          Additional Features
-                        </Typography>
-                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                          {surgery.additional_features}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
+            <Box sx={{ width: '100%' }}>
+              {renderSurgeries(doctor.surgeriesDetails)}
+            </Box>
           </Box>
         )}
       </Box>
