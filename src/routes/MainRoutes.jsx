@@ -13,6 +13,7 @@ import NewAmbu from '../views/ambulance/NewAmbu';
 import Patients from '../views/Patients';
 import Dashboard from '../views/Dashboard';
 
+
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
