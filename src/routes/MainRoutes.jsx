@@ -11,7 +11,7 @@ import Specialties from '../views/Specialties';
 import ApprovedAmbu from '../views/ambulance/ApprovedAmbu';
 import NewAmbu from '../views/ambulance/NewAmbu';
 import Patients from '../views/Patients';
-import Dashboard from '../views/Dashboard';
+import Dashboard from '../views/dashboard';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
