@@ -26,13 +26,11 @@ import {
   InputLabel,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  InputAdornment
 } from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon
-} from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { IconSearch } from '@tabler/icons-react';
 import categoriesService from '../../services/categoriesService';
 import specialtiesService from '../../services/specialtiesService';
 
@@ -42,6 +40,7 @@ const index = () => {
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogLoading, setDialogLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [openDialog, setOpenDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -49,7 +48,7 @@ const index = () => {
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
-  
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -83,7 +82,6 @@ const index = () => {
     try {
       const result = await specialtiesService.getAllSpecialties();
       if (result.success) {
-   
         setSpecialties(result.data);
       } else {
         showSnackbar('Failed to load specialties', 'error');
@@ -113,7 +111,7 @@ const index = () => {
     setCategoryName(category.categoryname || '');
     // Set the current specialty as selected
     setSelectedSpecialtyId(category.surgerytypeid?._id || category.surgerytypeid || '');
-    console.log(category, "category data for edit");
+    console.log(category, 'category data for edit');
     setOpenDialog(true);
   };
 
@@ -149,10 +147,7 @@ const index = () => {
         );
       } else {
         // Add new category
-        result = await categoriesService.addCategory(
-          categoryName.trim(),
-          selectedSpecialtyId
-        );
+        result = await categoriesService.addCategory(categoryName.trim(), selectedSpecialtyId);
       }
 
       if (result.success) {
@@ -184,9 +179,7 @@ const index = () => {
 
     setDialogLoading(true);
     try {
-      const result = await categoriesService.deleteCategory(
-        categoryToDelete._id
-      );
+      const result = await categoriesService.deleteCategory(categoryToDelete._id);
 
       if (result.success) {
         showSnackbar(result.message, 'success');
@@ -226,11 +219,15 @@ const index = () => {
     setPage(0);
   };
 
-  // Calculate pagination
-  const paginatedCategories = categories.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+  // Filter categories based on search term
+  const filteredCategories = categories.filter(
+    (category) =>
+      category.categoryname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (category.specialty && category.specialty.specialtyname?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Calculate pagination
+  const paginatedCategories = filteredCategories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Card>
@@ -239,14 +236,38 @@ const index = () => {
           <Typography variant="h5" component="h2">
             Doctor Categories
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAdd}
-            sx={{ bgcolor: 'primary.main' }}
-          >
-            Add Category
-          </Button>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd} sx={{ bgcolor: 'primary.main' }}>
+              Add Category
+            </Button>
+          </Box>
+        </Box>
+
+        <Box mb={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              width: 300,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'background.paper',
+                borderRadius: 2,
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main'
+                }
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconSearch size={20} />
+                </InputAdornment>
+              )
+            }}
+          />
         </Box>
 
         <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0' }}>
@@ -256,7 +277,9 @@ const index = () => {
                 <TableCell sx={{ fontWeight: 'bold' }}>ID</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Category Name</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Specialty</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }} align="center">Actions</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }} align="center">
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -278,29 +301,20 @@ const index = () => {
                 paginatedCategories.map((category, index) => (
                   <TableRow key={index} hover>
                     <TableCell>
-                      <Chip 
-                        label={ `${page * rowsPerPage + index + 1}`}
-                        size="small" 
-                        color="primary" 
-                        variant="outlined"
-                      />
+                      <Chip label={`${page * rowsPerPage + index + 1}`} size="small" color="primary" variant="outlined" />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">
-                        {category.categoryname || 'N/A'}
-                      </Typography>
+                      <Typography variant="body1">{category.categoryname || 'N/A'}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">
-                        {category?.surgerytypename || 'N/A'}
-                      </Typography>
+                      <Typography variant="body1">{category?.surgerytypename || 'N/A'}</Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Box display="flex" gap={1} justifyContent="center">
                         <IconButton
                           size="small"
                           onClick={() => handleEdit(category)}
-                          sx={{ 
+                          sx={{
                             color: 'primary.main',
                             '&:hover': { backgroundColor: 'primary.light', color: 'white' }
                           }}
@@ -310,7 +324,7 @@ const index = () => {
                         <IconButton
                           size="small"
                           onClick={() => handleDeleteClick(category)}
-                          sx={{ 
+                          sx={{
                             color: 'error.main',
                             '&:hover': { backgroundColor: 'error.light', color: 'white' }
                           }}
@@ -327,12 +341,12 @@ const index = () => {
         </TableContainer>
 
         {/* Pagination Controls */}
-        <Box 
-          display="flex" 
-          justifyContent="space-between" 
-          alignItems="center" 
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
           mt={2}
-          sx={{ 
+          sx={{
             borderTop: '1px solid #e0e0e0',
             pt: 2
           }}
@@ -342,12 +356,7 @@ const index = () => {
               Rows per page:
             </Typography>
             <FormControl size="small" sx={{ minWidth: 80 }}>
-              <Select
-                value={rowsPerPage}
-                onChange={handleChangeRowsPerPage}
-                displayEmpty
-                sx={{ height: 32 }}
-              >
+              <Select value={rowsPerPage} onChange={handleChangeRowsPerPage} displayEmpty sx={{ height: 32 }}>
                 <MenuItem value={5}>5</MenuItem>
                 <MenuItem value={10}>10</MenuItem>
                 <MenuItem value={25}>25</MenuItem>
@@ -355,13 +364,12 @@ const index = () => {
               </Select>
             </FormControl>
           </Box>
-          
+
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="body2" color="text.secondary">
-              {categories.length === 0 
+              {filteredCategories.length === 0
                 ? '0 of 0'
-                : `${page * rowsPerPage + 1}-${Math.min((page + 1) * rowsPerPage, categories.length)} of ${categories.length}`
-              }
+                : `${page * rowsPerPage + 1}-${Math.min((page + 1) * rowsPerPage, filteredCategories.length)} of ${filteredCategories.length}`}
             </Typography>
             <Button
               onClick={() => handleChangePage(null, page - 1)}
@@ -374,7 +382,7 @@ const index = () => {
             </Button>
             <Button
               onClick={() => handleChangePage(null, page + 1)}
-              disabled={page >= Math.ceil(categories.length / rowsPerPage) - 1}
+              disabled={page >= Math.ceil(filteredCategories.length / rowsPerPage) - 1}
               size="small"
               variant="outlined"
               sx={{ minWidth: 'auto', px: 1 }}
@@ -386,36 +394,29 @@ const index = () => {
 
         {/* Add/Edit Dialog */}
         <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-          <DialogTitle>
-            {editingCategory ? 'Edit Category' : 'Add New Category'}
-          </DialogTitle>
+          <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
           <DialogContent>
             {!editingCategory && (
               <FormControl fullWidth margin="dense" sx={{ mt: 2 }}>
                 <InputLabel>Select Specialty</InputLabel>
                 <Select
                   value={selectedSpecialtyId}
-                  onChange={(e) =>{
-                    setSelectedSpecialtyId(e.target.value)
+                  onChange={(e) => {
+                    setSelectedSpecialtyId(e.target.value);
                   }}
                   label="Select Specialty"
                   MenuProps={{
                     PaperProps: {
                       style: {
-                        maxHeight: 48 * 6 + 8, 
-                        width: 250,
-                      },
-                    },
+                        maxHeight: 48 * 6 + 8,
+                        width: 250
+                      }
+                    }
                   }}
                 >
-                 
                   {specialties.map((specialty) => (
-                    <MenuItem 
-                      key={specialty._id } 
-                      value={specialty._id}
-                      label={specialty.surgerytypename}
-                    >
-                      {specialty.surgerytypename }
+                    <MenuItem key={specialty._id} value={specialty._id} label={specialty.surgerytypename}>
+                      {specialty.surgerytypename}
                     </MenuItem>
                   ))}
                 </Select>
@@ -426,28 +427,27 @@ const index = () => {
                 <InputLabel>Select Specialty</InputLabel>
                 <Select
                   value={selectedSpecialtyId}
-                  onChange={(e) =>{
-                    setSelectedSpecialtyId(e.target.value)
+                  onChange={(e) => {
+                    setSelectedSpecialtyId(e.target.value);
                   }}
                   label="Select Specialty"
                   MenuProps={{
                     PaperProps: {
                       style: {
-                        maxHeight: 48 * 6 + 8, 
-                        width: 250,
-                      },
-                    },
+                        maxHeight: 48 * 6 + 8,
+                        width: 250
+                      }
+                    }
                   }}
                 >
-                 
                   {specialties.map((specialty) => (
-                    <MenuItem 
-                      key={specialty._id } 
+                    <MenuItem
+                      key={specialty._id}
                       value={specialty._id}
                       label={specialty.surgerytypename}
                       selected={specialty._id === editingCategory.surgerytypeid._id}
                     >
-                      {specialty.surgerytypename }
+                      {specialty.surgerytypename}
                     </MenuItem>
                   ))}
                 </Select>
@@ -468,8 +468,8 @@ const index = () => {
             <Button onClick={handleDialogClose} color="inherit" disabled={dialogLoading}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               variant="contained"
               disabled={!categoryName.trim() || (!editingCategory && !selectedSpecialtyId) || dialogLoading}
               startIcon={dialogLoading ? <CircularProgress size={16} /> : null}
@@ -483,18 +483,15 @@ const index = () => {
         <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
           <DialogTitle>Confirm Delete</DialogTitle>
           <DialogContent>
-            <Typography>
-              Are you sure you want to delete the category "{categoryToDelete?.categoryname }"?
-
-            </Typography>
+            <Typography>Are you sure you want to delete the category "{categoryToDelete?.categoryname}"?</Typography>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
             <Button onClick={() => setDeleteConfirmOpen(false)} color="inherit" disabled={dialogLoading}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleDelete} 
-              color="error" 
+            <Button
+              onClick={handleDelete}
+              color="error"
               variant="contained"
               disabled={dialogLoading}
               startIcon={dialogLoading ? <CircularProgress size={16} /> : null}
@@ -511,11 +508,7 @@ const index = () => {
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-            sx={{ width: '100%' }}
-          >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
             {snackbar.message}
           </Alert>
         </Snackbar>

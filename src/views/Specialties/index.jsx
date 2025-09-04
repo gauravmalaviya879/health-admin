@@ -21,8 +21,9 @@ import {
   Alert,
   CircularProgress,
   Chip,
+  InputAdornment,
 } from '@mui/material';
-import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconSearch } from '@tabler/icons-react';
 import specialtiesService from '../../services/specialtiesService';
 
 const Specialties = () => {
@@ -30,6 +31,7 @@ const Specialties = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState('');
   
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
@@ -188,8 +190,13 @@ const Specialties = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  // Filter specialties based on search term
+  const filteredSpecialties = specialties.filter(specialty => 
+    specialty.surgerytypename?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Get paginated data
-  const paginatedSpecialties = specialties.slice(
+  const paginatedSpecialties = filteredSpecialties.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
@@ -201,14 +208,43 @@ const Specialties = () => {
         <Typography variant="h4" component="h1">
           Specialties Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<IconPlus />}
-          onClick={handleAddSpecialty}
-          sx={{ borderRadius: 2 }}
-        >
-          Add Specialty
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          
+          <Button
+            variant="contained"
+            startIcon={<IconPlus />}
+            onClick={handleAddSpecialty}
+            sx={{ borderRadius: 2 }}
+          >
+            Add Specialty
+          </Button>
+        </Box>
+      </Box>
+      <Box sx={{ mb: 3 , display: 'flex', justifyContent: 'flex-end' }}>
+      <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search specialties..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              width: 300,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'background.paper',
+                borderRadius: 2,
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main',
+                },
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconSearch size={20} />
+                </InputAdornment>
+              ),
+            }}
+          />
       </Box>
 
       {/* Data Table */}
@@ -288,7 +324,7 @@ const Specialties = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
-          count={specialties.length}
+          count={filteredSpecialties.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
