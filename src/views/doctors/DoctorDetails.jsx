@@ -377,9 +377,9 @@ const DoctorDetails = () => {
         <Paper elevation={2} sx={{ p: 4, mb: 4, borderRadius: 2 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-              {doctor.profile_image ? (
+              {doctor.profile_pic ? (
                 <Avatar 
-                  src={doctor.profile_image} 
+                  src={doctor.profile_pic} 
                   alt={doctor.name} 
                   sx={{ width: 150, height: 150, border: '3px solid', borderColor: 'primary.main' }} 
                 />

@@ -369,22 +369,38 @@ const Patients = () => {
                   borderRadius: 1
                 }}
               >
-                <Box 
-                  sx={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: 24,
-                    fontWeight: 600
-                  }}
-                >
-                  {selectedPatient.name?.charAt(0) || 'P'}
-                </Box>
+                {selectedPatient.profile_pic ? (
+                  <Box 
+                    component="img"
+                    src={selectedPatient.profile_pic}
+                    alt={selectedPatient.name || 'Patient'}
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid',
+                      borderColor: 'primary.main'
+                    }}
+                  />
+                ) : (
+                  <Box 
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      bgcolor: 'primary.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: 24,
+                      fontWeight: 600
+                    }}
+                  >
+                    {selectedPatient.name?.charAt(0) || 'P'}
+                  </Box>
+                )}
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                     {selectedPatient.name || 'N/A'}
