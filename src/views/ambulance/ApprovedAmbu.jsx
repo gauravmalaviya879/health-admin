@@ -453,6 +453,7 @@ const NewAmbu = () => {
                 <TableCell>Mobile</TableCell>
                 <TableCell>City</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell>Approved At</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -482,9 +483,20 @@ const NewAmbu = () => {
                     <TableCell>{ambulance.fullname}</TableCell>
                     <TableCell>{ambulance.mobile}</TableCell>
                     <TableCell>{ambulance.city}</TableCell>
-            
                     <TableCell>
                       {getStatusChip(ambulance.approval_status?.toLowerCase())}
+                    </TableCell>
+                    <TableCell>
+                      {ambulance.updatedAt 
+                        ? new Date(ambulance.updatedAt).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          })
+                        : 'N/A'}
                     </TableCell>
                     <TableCell>
                       {renderActions(ambulance)}

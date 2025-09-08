@@ -161,6 +161,7 @@ const ApprovedDoctors = () => {
                 <TableCell>No</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Specialty</TableCell>
+                <TableCell>Approved At</TableCell>
                 <TableCell>View</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -168,52 +169,66 @@ const ApprovedDoctors = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : filteredDoctors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     <Typography>No approved doctors found</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedDoctors.map((doctor, index) => (
-                  <TableRow hover key={doctor._id}>
-                    <TableCell>
-                      <Chip label={page * rowsPerPage + index + 1} size="small" variant="outlined" />
-                    </TableCell>
-                    <TableCell>{doctor.name || 'N/A'}</TableCell>
-                    <TableCell>{doctor.specialty || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleViewDoctor(doctor._id)}
-                        sx={{ textTransform: 'none' }}
-                      >
-                        View
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        startIcon={<IconX size={16} />}
-                        onClick={() => handleActionClick(doctor._id, doctor.name)}
-                        disabled={actionLoading === doctor._id}
-                      >
-                        Reject
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                paginatedDoctors.map((doctor, index) => {
+                  const approvedAt = doctor.updatedAt 
+                    ? new Date(doctor.updatedAt).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })
+                    : 'N/A';
+                  
+                  return (
+                    <TableRow hover key={doctor._id}>
+                      <TableCell>
+                        <Chip label={page * rowsPerPage + index + 1} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>{doctor.name || 'N/A'}</TableCell>
+                      <TableCell>{doctor.specialty || 'N/A'}</TableCell>
+                      <TableCell>{approvedAt}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleViewDoctor(doctor._id)}
+                          sx={{ textTransform: 'none' }}
+                        >
+                          View
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          startIcon={<IconX size={16} />}
+                          onClick={() => handleActionClick(doctor._id, doctor.name)}
+                          disabled={actionLoading === doctor._id}
+                        >
+                          Reject
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={5} />
+                  <TableCell colSpan={6} />
                 </TableRow>
               )}
             </TableBody>

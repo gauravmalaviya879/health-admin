@@ -201,6 +201,7 @@ const NewDoctors = () => {
                 <TableCell>No</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell>Registration Date</TableCell>
                 <TableCell>Specialty</TableCell>
                 <TableCell>View</TableCell>
                 <TableCell>Actions</TableCell>
@@ -209,13 +210,13 @@ const NewDoctors = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : filteredDoctors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     <Typography variant="body1" color="textSecondary">
                       No pending doctors found
                     </Typography>
@@ -224,6 +225,16 @@ const NewDoctors = () => {
               ) : (
                 filteredDoctors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((doctor, index) => {
                   const isActionLoading = actionLoading === doctor.id;
+                  const registrationDate = doctor.createdAt 
+                    ? new Date(doctor.createdAt).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })
+                    : 'N/A';
 
                   return (
                     <TableRow key={doctor.id || index} hover>
@@ -234,6 +245,7 @@ const NewDoctors = () => {
                       <TableCell>
                         <Chip label={doctor.approval_status || 'Pending'} color={getStatusColor(doctor.approval_status)} size="small" />
                       </TableCell>
+                      <TableCell>{registrationDate}</TableCell>
                       <TableCell>{doctor.specialty || 'N/A'}</TableCell>
                       <TableCell>
                         <Button
