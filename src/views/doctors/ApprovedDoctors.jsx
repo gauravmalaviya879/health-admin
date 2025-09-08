@@ -161,7 +161,7 @@ const ApprovedDoctors = () => {
                 <TableCell>No</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Specialty</TableCell>
-                <TableCell>Approved At</TableCell>
+                <TableCell>Updated At</TableCell>
                 <TableCell>View</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>

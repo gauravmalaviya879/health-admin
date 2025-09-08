@@ -453,7 +453,7 @@ const NewAmbu = () => {
                 <TableCell>Mobile</TableCell>
                 <TableCell>City</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Approved At</TableCell>
+                <TableCell>Updated At</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
