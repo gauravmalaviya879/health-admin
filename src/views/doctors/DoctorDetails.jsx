@@ -35,7 +35,8 @@ import {
   DialogActions,
   TablePagination,
   TextField,
-  InputAdornment
+  InputAdornment,
+  CardMedia
 } from '@mui/material';
 import { 
   IconArrowLeft, 
@@ -50,7 +51,8 @@ import {
   IconCalendar,
   IconPhone,
   IconInfoCircle,
-  IconClipboardText
+  IconClipboardText,
+  IconId
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 
@@ -729,6 +731,66 @@ const DoctorDetails = () => {
     </Card>
   );
 
+  // Render Identity Proof Tab
+  const renderIdentityProof = (identityProofUrl) => (
+    <Card variant="outlined">
+      <CardContent>
+        <Typography variant="h6" gutterBottom>Identity Proof</Typography>
+        <Divider sx={{ mb: 3 }} />
+        
+        {identityProofUrl ? (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center',
+              p: 2
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={identityProofUrl}
+              alt="Doctor's Identity Proof"
+              sx={{ 
+                maxWidth: '100%',
+                maxHeight: '70vh',
+                objectFit: 'contain',
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'divider',
+                mb: 2
+              }}
+            />
+            <Button 
+              variant="outlined" 
+              color="primary"
+              component="a"
+              href={identityProofUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              startIcon={<IconId />}
+            >
+              Open in New Tab
+            </Button>
+          </Box>
+        ) : (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center',
+              py: 6,
+              color: 'text.secondary'
+            }}
+          >
+            <IconId size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+            <Typography>No identity proof available</Typography>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   // Appointment Details Dialog
   const renderAppointmentDialog = () => (
     <Dialog 
@@ -796,51 +858,7 @@ const DoctorDetails = () => {
               </Grid>
             </Grid>
             
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                SURGERY DETAILS
-              </Typography>
-              {selectedAppointment.surgerydetails ? (
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {selectedAppointment.surgerydetails.name}
-                    </Typography>
-                    <Chip 
-                      label={selectedAppointment.surgerydetails.surgerytype}
-                      size="small"
-                      color="secondary"
-                      variant="outlined"
-                      sx={{ mb: 1 }}
-                    />
-                    
-                    <Box mt={2}>
-                      <Typography variant="subtitle2" color="textSecondary">Specialty</Typography>
-                      <Typography>{selectedAppointment.surgerydetails.specialty || 'N/A'}</Typography>
-                    </Box>
-                    
-                    <Box mt={2}>
-                      <Typography variant="subtitle2" color="textSecondary">Duration</Typography>
-                      <Typography>{selectedAppointment.surgerydetails.days} day(s)</Typography>
-                    </Box>
-                    
-                    <Box mt={2}>
-                      <Typography variant="subtitle2" color="textSecondary">Price</Typography>
-                      <Typography>₹{selectedAppointment.surgerydetails.price?.toLocaleString() || 'N/A'}</Typography>
-                    </Box>
-                    
-                    {selectedAppointment.surgerydetails.additional_features && (
-                      <Box mt={2}>
-                        <Typography variant="subtitle2" color="textSecondary">Features</Typography>
-                        <Typography>{selectedAppointment.surgerydetails.additional_features}</Typography>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              ) : (
-                <Typography>No surgery details available</Typography>
-              )}
-            </Grid>
+          
           </Grid>
         )}
       </DialogContent>
@@ -974,31 +992,41 @@ const DoctorDetails = () => {
           scrollButtons="auto"
         >
           <Tab 
+            icon={<IconId size={20} />} 
+            iconPosition="start"
+            label="Identity Proof" 
+            {...a11yProps(0)} 
+          />
+          <Tab 
             icon={<IconBuildingHospital size={20} />} 
             iconPosition="start"
             label="Hospital Information" 
-            {...a11yProps(0)} 
+            {...a11yProps(1)} 
           />
           <Tab 
             icon={<IconStethoscope size={20} />} 
             iconPosition="start"
-            label="Surgeries & Procedures" 
-            {...a11yProps(1)} 
+            label="Surgeries" 
+            {...a11yProps(2)} 
           />
           <Tab 
             icon={<IconClipboardText size={20} />} 
             iconPosition="start"
-            label="Appointments" 
-            {...a11yProps(2)} 
+            label="Consultations Appointments" 
+            {...a11yProps(3)} 
           />
         </Tabs>
       </Box>
       
       <TabPanel value={tabValue} index={0}>
-        {renderHospitalInfo()}
+        {renderIdentityProof(doctor.identity_proof || doctor.identityProof || null)}
       </TabPanel>
       
       <TabPanel value={tabValue} index={1}>
+        {renderHospitalInfo()}
+      </TabPanel>
+      
+      <TabPanel value={tabValue} index={2}>
         {doctor?.surgeriesDetails?.length > 0 ? (
           renderSurgeries()
         ) : (
@@ -1010,7 +1038,7 @@ const DoctorDetails = () => {
         )}
       </TabPanel>
       
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={3}>
         {renderAppointments()}
       </TabPanel>
       
