@@ -924,7 +924,7 @@ const DoctorDetails = () => {
               <Divider sx={{ my: 2 }} />
               
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} >
                   <Typography variant="subtitle2" color="textSecondary">Email</Typography>
                   <Typography variant="body1" paragraph>{doctor.email || 'N/A'}</Typography>
                   
@@ -948,7 +948,7 @@ const DoctorDetails = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="textSecondary">Address</Typography>
-                  <Typography variant="body1" maxWidth={450} overflow="hidden">
+                  <Typography variant="body1" maxWidth={350} overflow="hidden">
                     {[
                       doctor.hospital_address,
                       doctor.city,
