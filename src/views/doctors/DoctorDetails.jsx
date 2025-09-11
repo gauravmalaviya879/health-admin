@@ -36,7 +36,12 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  CardMedia
+  CardMedia,
+  useTheme,
+  useMediaQuery,
+  Paper as MuiPaper,
+  Tooltip,
+  Zoom
 } from '@mui/material';
 import { 
   IconArrowLeft, 
@@ -52,7 +57,10 @@ import {
   IconPhone,
   IconInfoCircle,
   IconClipboardText,
-  IconId
+  IconId,
+  IconCertificate,
+  IconZoomIn,
+  IconDownload
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 
@@ -102,6 +110,12 @@ const DoctorDetails = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+
+  // Add state for lightbox
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -182,6 +196,17 @@ const DoctorDetails = () => {
     }
   };
 
+  // Function to handle opening lightbox
+  const handleOpenLightbox = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpenLightbox(true);
+  };
+
+  // Function to handle closing lightbox
+  const handleCloseLightbox = () => {
+    setOpenLightbox(false);
+  };
+
   // Render Contact Information Tab
   const renderContactInfo = () => (
     <Card variant="outlined">
@@ -256,7 +281,7 @@ const DoctorDetails = () => {
             {doctor.hospitals && doctor.hospitals.length > 0 ? (
               <List sx={{ width: '100%' }}>
                 {doctor.hospitals.map((hospital, index) => (
-                  <Paper 
+                  <MuiPaper 
                     key={index} 
                     elevation={0} 
                     sx={{ 
@@ -342,11 +367,11 @@ const DoctorDetails = () => {
                         )}
                       </Box>
                     </Box>
-                  </Paper>
+                  </MuiPaper>
                 ))}
               </List>
             ) : (
-              <Paper 
+              <MuiPaper 
                 elevation={0} 
                 sx={{ 
                   p: 3, 
@@ -359,7 +384,7 @@ const DoctorDetails = () => {
                 <Typography variant="body1" color="text.secondary">
                   No hospitals found for this doctor.
                 </Typography>
-              </Paper>
+              </MuiPaper>
             )}
           </Grid>
         </Grid>
@@ -732,66 +757,282 @@ const DoctorDetails = () => {
   );
 
   // Render Identity Proof Tab
-  const renderIdentityProof = (identityProofUrl) => (
-    <Card variant="outlined">
-      <CardContent>
-        <Typography variant="h6" gutterBottom>Identity Proof</Typography>
-        <Divider sx={{ mb: 3 }} />
-        
-        {identityProofUrl ? (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              alignItems: 'center',
-              p: 2
-            }}
-          >
-            <CardMedia
-              component="img"
-              image={identityProofUrl}
-              alt="Doctor's Identity Proof"
-              sx={{ 
-                maxWidth: '100%',
-                maxHeight: '70vh',
-                objectFit: 'contain',
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'divider',
-                mb: 2
-              }}
-            />
-            <Button 
-              variant="outlined" 
-              color="primary"
-              component="a"
-              href={identityProofUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              startIcon={<IconId />}
-            >
-              Open in New Tab
-            </Button>
-          </Box>
-        ) : (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
-              py: 6,
-              color: 'text.secondary'
-            }}
-          >
-            <IconId size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
-            <Typography>No identity proof available</Typography>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
-  );
+  const renderIdentityProof = (identityProofs) => {
+    const proofs = Array.isArray(identityProofs) ? identityProofs : [];
+    
+    return (
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Identity Proof</Typography>
+          <Divider sx={{ mb: 3 }} />
+          
+          {proofs.length > 0 ? (
+            <Box>
+              <Grid container spacing={2}>
+                {proofs.map((proof, index) => {
+                  const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
+                  const imageName = proof?.name || `Identity Proof ${index + 1}`;
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper 
+                        elevation={2} 
+                        sx={{ 
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Box
+                          component="div"
+                          sx={{
+                            width: '100%',
+                            height: 200,
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&:hover img': {
+                              transform: 'scale(1.03)',
+                            },
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={imageUrl}
+                            alt={imageName}
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              transition: 'transform 0.3s ease-in-out',
+                              backgroundColor: '#f5f5f5',
+                              display: 'block',
+                            }}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
+                            {imageName}
+                          </Typography>
+                          <Button 
+                            variant="outlined" 
+                            size="small"
+                            onClick={() => handleOpenLightbox(imageUrl)}
+                            startIcon={<IconZoomIn size={16} />}
+                          >
+                            View
+                          </Button>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+              <IconId size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+              <Typography>No identity proofs available</Typography>
+            </Box>
+          )}
+        </CardContent>
 
-  // Appointment Details Dialog
+        {/* Lightbox Dialog */}
+        <Dialog
+          open={openLightbox}
+          onClose={() => setOpenLightbox(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              maxHeight: '90vh',
+              background: 'transparent',
+              boxShadow: 'none',
+              overflow: 'hidden',
+            },
+          }}
+        >
+          <DialogContent sx={{ p: 0, position: 'relative' }}>
+            <IconButton
+              onClick={() => setOpenLightbox(false)}
+              size="large"
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                color: 'white',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                },
+                zIndex: 1,
+              }}
+            >
+              <IconX />
+            </IconButton>
+            {selectedImage && (
+              <Box
+                component="img"
+                src={selectedImage}
+                alt="Full size document"
+                sx={{
+                  width: '100%',
+                  maxHeight: '80vh',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </Card>
+    );
+  };
+
+  // Render Certificate Proof Tab
+  const renderCertificateProof = (certificateProofs) => {
+    const proofs = Array.isArray(certificateProofs) ? certificateProofs : [];
+    
+    return (
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Certificate Proof</Typography>
+          <Divider sx={{ mb: 3 }} />
+          
+          {proofs.length > 0 ? (
+            <Box>
+              <Grid container spacing={2}>
+                {proofs.map((proof, index) => {
+                  const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
+                  const imageName = proof?.name || `Certificate ${index + 1}`;
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper 
+                        elevation={2} 
+                        sx={{ 
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <Box
+                          component="div"
+                          sx={{
+                            width: '100%',
+                            height: 200,
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&:hover img': {
+                              transform: 'scale(1.03)',
+                            },
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={imageUrl}
+                            alt={imageName}
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              transition: 'transform 0.3s ease-in-out',
+                              backgroundColor: '#f5f5f5',
+                              display: 'block',
+                            }}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
+                            {imageName}
+                          </Typography>
+                          <Button 
+                            variant="outlined" 
+                            size="small"
+                            onClick={() => handleOpenLightbox(imageUrl)}
+                            startIcon={<IconZoomIn size={16} />}
+                          >
+                            View
+                          </Button>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+              <IconCertificate size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+              <Typography>No certificate proofs available</Typography>
+            </Box>
+          )}
+        </CardContent>
+
+        {/* Lightbox Dialog for Certificate Proofs */}
+        <Dialog
+          open={openLightbox}
+          onClose={() => setOpenLightbox(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              maxHeight: '90vh',
+              background: 'transparent',
+              boxShadow: 'none',
+              overflow: 'hidden',
+            },
+          }}
+        >
+          <DialogContent sx={{ p: 0, position: 'relative' }}>
+            <IconButton
+              onClick={() => setOpenLightbox(false)}
+              size="large"
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                color: 'white',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                },
+                zIndex: 1,
+              }}
+            >
+              <IconX />
+            </IconButton>
+            {selectedImage && (
+              <Box
+                component="img"
+                src={selectedImage}
+                alt="Full size certificate"
+                sx={{
+                  width: '100%',
+                  maxHeight: '80vh',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </Card>
+    );
+  };
+
+  // Render Appointment Details Dialog
   const renderAppointmentDialog = () => (
     <Dialog 
       open={openDialog} 
@@ -998,35 +1239,45 @@ const DoctorDetails = () => {
             {...a11yProps(0)} 
           />
           <Tab 
+            icon={<IconCertificate size={20} />} 
+            iconPosition="start"
+            label="Certificate Proofs" 
+            {...a11yProps(1)} 
+          />
+          <Tab 
             icon={<IconBuildingHospital size={20} />} 
             iconPosition="start"
             label="Hospital Information" 
-            {...a11yProps(1)} 
+            {...a11yProps(2)} 
           />
           <Tab 
             icon={<IconStethoscope size={20} />} 
             iconPosition="start"
             label="Surgeries" 
-            {...a11yProps(2)} 
+            {...a11yProps(3)} 
           />
           <Tab 
             icon={<IconClipboardText size={20} />} 
             iconPosition="start"
             label="Consultations Appointments" 
-            {...a11yProps(3)} 
+            {...a11yProps(4)} 
           />
         </Tabs>
       </Box>
       
       <TabPanel value={tabValue} index={0}>
-        {renderIdentityProof(doctor.identity_proof || doctor.identityProof || null)}
+        {renderIdentityProof(doctor.identityproof || doctor.identityProof || [])}
       </TabPanel>
       
       <TabPanel value={tabValue} index={1}>
-        {renderHospitalInfo()}
+        {renderCertificateProof(doctor.certificateproof || doctor.certificateProofs || [])}
       </TabPanel>
       
       <TabPanel value={tabValue} index={2}>
+        {renderHospitalInfo()}
+      </TabPanel>
+      
+      <TabPanel value={tabValue} index={3}>
         {doctor?.surgeriesDetails?.length > 0 ? (
           renderSurgeries()
         ) : (
@@ -1038,7 +1289,7 @@ const DoctorDetails = () => {
         )}
       </TabPanel>
       
-      <TabPanel value={tabValue} index={3}>
+      <TabPanel value={tabValue} index={4}>
         {renderAppointments()}
       </TabPanel>
       
