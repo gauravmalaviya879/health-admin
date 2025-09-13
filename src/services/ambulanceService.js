@@ -27,7 +27,7 @@ export const ambulanceService = {
 
   approveAmbulance: async (ambulanceId) => {
     const token = authService.getToken();
-    console.log(ambulanceId,status)
+
     try {
       const response = await axios.post(
         `${API_URL}/admin/ambulances/approved`,

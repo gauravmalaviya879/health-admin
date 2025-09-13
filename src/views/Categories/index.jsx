@@ -111,7 +111,7 @@ const index = () => {
     setCategoryName(category.categoryname || '');
     // Set the current specialty as selected
     setSelectedSpecialtyId(category.surgerytypeid?._id || category.surgerytypeid || '');
-    console.log(category, 'category data for edit');
+    
     setOpenDialog(true);
   };
 

@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         // Set user data
-        console.log(user)
+       
         const userData =  {
          
           email: user.email,

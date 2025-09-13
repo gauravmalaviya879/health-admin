@@ -119,7 +119,7 @@ const NewDoctors = () => {
   };
 
   const handleConfirmAction = () => {
-    console.log(confirmDialog , 'action');
+
     if (confirmDialog.action === 'approve') {
       handleApprove(confirmDialog.doctorId);
     } else if (confirmDialog.action === 'reject') {

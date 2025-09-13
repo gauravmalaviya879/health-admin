@@ -151,7 +151,7 @@ const Specialties = () => {
   // Handle delete specialty
   const handleDeleteSpecialty = async () => {
     if (!deletingSpecialty) return;
-    console.log(deletingSpecialty._id)
+
     setDialogLoading(true);
     try {
       const result = await specialtiesService.deleteSpecialty(

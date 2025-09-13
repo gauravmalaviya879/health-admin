@@ -760,7 +760,7 @@ const DoctorDetails = () => {
           {proofs.length > 0 ? (
             <Box>
               <Grid container spacing={2}>
-                {console.log(proofs, "identti")}
+              
                 {proofs.map((proof, index) => {
                   const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
                   const imageName = proof?.name || `Identity Proof ${index + 1}`;
@@ -1045,7 +1045,7 @@ const DoctorDetails = () => {
                   const fileUrl =
                     typeof proof === "string" ? proof : proof?.url || "";
                   const fileName = proof?.name || `Certificate ${index + 1}`;
-                  console.log(isPdf(fileUrl), 'chaek')
+                 
                   return (
                     <Grid item xs={12} sm={6} md={4} key={index}>
                       <Paper
