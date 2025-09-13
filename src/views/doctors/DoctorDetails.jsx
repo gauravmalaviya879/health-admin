@@ -24,9 +24,6 @@ import {
   Tabs,
   Tab,
   List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Card,
   CardContent,
   Dialog,
@@ -36,21 +33,15 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  CardMedia,
-  useTheme,
-  useMediaQuery,
   Paper as MuiPaper,
-  Tooltip,
-  Zoom
 } from '@mui/material';
-import { 
-  IconArrowLeft, 
-  IconChevronDown, 
-  IconCheck, 
-  IconX, 
-  IconChevronUp, 
-  IconBuildingHospital, 
-  IconUser, 
+import {
+  IconArrowLeft,
+  IconChevronDown,
+  IconCheck,
+  IconX,
+  IconChevronUp,
+  IconBuildingHospital,
   IconStethoscope,
   IconSearch,
   IconCalendar,
@@ -60,7 +51,7 @@ import {
   IconId,
   IconCertificate,
   IconZoomIn,
-  IconDownload
+  IconFileText
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 
@@ -103,7 +94,7 @@ const DoctorDetails = () => {
   const [showAllSurgeries, setShowAllSurgeries] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [tabValue, setTabValue] = useState(0);
-  
+
   // Appointments state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -114,8 +105,8 @@ const DoctorDetails = () => {
   // Add state for lightbox
   const [selectedImage, setSelectedImage] = useState(null);
   const [openLightbox, setOpenLightbox] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -135,7 +126,7 @@ const DoctorDetails = () => {
     setOpenDialog(false);
   };
 
-  const filteredAppointments = doctor?.appointmentsDetails?.filter(appointment => 
+  const filteredAppointments = doctor?.appointmentsDetails?.filter(appointment =>
     appointment.patientname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     appointment.mobile.includes(searchTerm)
   ) || [];
@@ -213,12 +204,12 @@ const DoctorDetails = () => {
       <CardContent>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Avatar 
-              src={doctor.profile_pic} 
+            <Avatar
+              src={doctor.profile_pic}
               sx={{ width: 150, height: 150, mb: 2 }}
             />
-            <Chip 
-              label={doctor.approval_status || 'N/A'} 
+            <Chip
+              label={doctor.approval_status || 'N/A'}
               color={getStatusColor(doctor.approval_status)}
               sx={{ mb: 2 }}
             />
@@ -226,30 +217,30 @@ const DoctorDetails = () => {
           <Grid item xs={12} md={8}>
             <Typography variant="h5" gutterBottom>{doctor.name || 'N/A'}</Typography>
             <Divider sx={{ my: 2 }} />
-            
+
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2" color="textSecondary">Email</Typography>
                 <Typography variant="body1" paragraph>{doctor.email || 'N/A'}</Typography>
-                
+
                 <Typography variant="subtitle2" color="textSecondary">Mobile</Typography>
                 <Typography variant="body1" paragraph>{doctor.mobile || 'N/A'}</Typography>
-                
+
                 <Typography variant="subtitle2" color="textSecondary">Gender</Typography>
                 <Typography variant="body1" paragraph>{doctor.gender || 'N/A'}</Typography>
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2" color="textSecondary">Qualification</Typography>
                 <Typography variant="body1" paragraph>{doctor.qualification || 'N/A'}</Typography>
-                
+
                 <Typography variant="subtitle2" color="textSecondary">Experience</Typography>
                 <Typography variant="body1" paragraph>{doctor.experience || 'N/A'}</Typography>
-                
+
                 <Typography variant="subtitle2" color="textSecondary">Specialty</Typography>
                 <Typography variant="body1" paragraph>{doctor.specialty || 'N/A'}</Typography>
               </Grid>
-              
+
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="textSecondary">Address</Typography>
                 <Typography variant="body1">
@@ -275,18 +266,18 @@ const DoctorDetails = () => {
       <CardContent>
         <Typography variant="h6" gutterBottom>Hospitals List</Typography>
         <Divider sx={{ mb: 3 }} />
-        
+
         <Grid container spacing={3}>
           <Grid item xs={12} width={'100%'}>
             {doctor.hospitals && doctor.hospitals.length > 0 ? (
               <List sx={{ width: '100%' }}>
                 {doctor.hospitals.map((hospital, index) => (
-                  <MuiPaper 
-                    key={index} 
-                    elevation={0} 
-                    sx={{ 
-                      p: 2, 
-                      mb: 2, 
+                  <MuiPaper
+                    key={index}
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      mb: 2,
                       border: '1px solid',
                       borderColor: 'divider',
                       borderRadius: 1,
@@ -296,7 +287,7 @@ const DoctorDetails = () => {
                     }}
                   >
                     <Box display="flex" alignItems="flex-start">
-                      <Box 
+                      <Box
                         sx={{
                           width: 28,
                           height: 28,
@@ -317,24 +308,24 @@ const DoctorDetails = () => {
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Box mb={1}>
-                          <Typography 
-                            variant="subtitle2" 
+                          <Typography
+                            variant="subtitle2"
                             color="text.secondary"
                             sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}
                           >
                             Hospital Name
                           </Typography>
-                          <Typography 
-                            variant="body1" 
+                          <Typography
+                            variant="body1"
                             sx={{ fontWeight: 500 }}
                           >
                             {hospital.name || 'N/A'}
                           </Typography>
                         </Box>
-                        
+
                         <Box>
-                          <Typography 
-                            variant="subtitle2" 
+                          <Typography
+                            variant="subtitle2"
                             color="text.secondary"
                             sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}
                           >
@@ -350,11 +341,11 @@ const DoctorDetails = () => {
                             ].filter(Boolean).join(', ') || 'Address not available'}
                           </Typography>
                         </Box>
-                        
+
                         {hospital.phone && (
                           <Box mt={1}>
-                            <Typography 
-                              variant="subtitle2" 
+                            <Typography
+                              variant="subtitle2"
                               color="text.secondary"
                               sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}
                             >
@@ -371,10 +362,10 @@ const DoctorDetails = () => {
                 ))}
               </List>
             ) : (
-              <MuiPaper 
-                elevation={0} 
-                sx={{ 
-                  p: 3, 
+              <MuiPaper
+                elevation={0}
+                sx={{
+                  p: 3,
                   textAlign: 'center',
                   border: '1px dashed',
                   borderColor: 'divider',
@@ -394,20 +385,20 @@ const DoctorDetails = () => {
 
   // Render Surgeries with accordion functionality
   const renderSurgeries = () => {
-    const visibleSurgeries = showAllSurgeries 
-      ? doctor.surgeriesDetails 
+    const visibleSurgeries = showAllSurgeries
+      ? doctor.surgeriesDetails
       : doctor.surgeriesDetails.slice(0, 4);
     const hasMoreSurgeries = doctor.surgeriesDetails.length > 4 && !showAllSurgeries;
 
     return (
       <>
         {visibleSurgeries.map((surgery, index) => (
-          <Accordion 
-            key={surgery._id || index} 
+          <Accordion
+            key={surgery._id || index}
             expanded={expanded === `surgery-${index}`}
             onChange={handleAccordionChange(`surgery-${index}`)}
-            elevation={2} 
-            sx={{ 
+            elevation={2}
+            sx={{
               mb: 2,
               '&:before': { display: 'none' },
               '&.Mui-expanded': {
@@ -431,7 +422,7 @@ const DoctorDetails = () => {
             >
               <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%', gap: 2 }}>
                 {surgery.surgery_photo && (
-                  <Box 
+                  <Box
                     component="img"
                     src={surgery.surgery_photo}
                     alt={surgery.name}
@@ -451,8 +442,8 @@ const DoctorDetails = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       {surgery.general_price > 0 && (
-                        <Chip 
-                          label={`From ₹${surgery.general_price.toLocaleString()}`} 
+                        <Chip
+                          label={`From ₹${surgery.general_price.toLocaleString()}`}
                           color="primary"
                           variant="outlined"
                           size="small"
@@ -468,10 +459,10 @@ const DoctorDetails = () => {
                     </Box>
                   </Box>
                   {surgery.surgerytype && (
-                    <Chip 
-                      label={surgery.surgerytype} 
-                      size="small" 
-                      color="primary" 
+                    <Chip
+                      label={surgery.surgerytype}
+                      size="small"
+                      color="primary"
                       variant="outlined"
                       sx={{ mb: 1 }}
                     />
@@ -488,10 +479,10 @@ const DoctorDetails = () => {
               <Grid container spacing={2}>
                 {/* What's Included */}
                 <Grid item xs={12} md={6}>
-                  <Paper 
-                    elevation={0} 
-                    sx={{ 
-                      p: 2, 
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
                       border: '1px solid',
                       borderColor: 'success.light',
                       borderRadius: 1,
@@ -525,10 +516,10 @@ const DoctorDetails = () => {
 
                 {/* What's Not Included */}
                 <Grid item xs={12} md={6}>
-                  <Paper 
-                    elevation={0} 
-                    sx={{ 
-                      p: 2, 
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
                       border: '1px solid',
                       borderColor: 'error.light',
                       borderRadius: 1,
@@ -563,10 +554,10 @@ const DoctorDetails = () => {
                 {/* Additional Features */}
                 {surgery.additional_features && (
                   <Grid item xs={12}>
-                    <Paper 
-                      elevation={0} 
-                      sx={{ 
-                        p: 2, 
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2,
                         border: '1px solid',
                         borderColor: 'divider',
                         borderRadius: 1,
@@ -633,8 +624,8 @@ const DoctorDetails = () => {
         {/* Show More/Less Button */}
         {hasMoreSurgeries && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               color="primary"
               onClick={() => setShowAllSurgeries(!showAllSurgeries)}
               endIcon={showAllSurgeries ? <IconChevronUp /> : <IconChevronDown />}
@@ -676,7 +667,7 @@ const DoctorDetails = () => {
             sx={{ width: 300 }}
           />
         </Box>
-        
+
         <TableContainer component={Paper} variant="outlined">
           <Table>
             <TableHead>
@@ -707,19 +698,19 @@ const DoctorDetails = () => {
                     <TableCell>{appointment.date}</TableCell>
                     <TableCell>{appointment.time}</TableCell>
                     <TableCell>
-                      <Chip 
-                        label={appointment.status} 
-                        size="small" 
+                      <Chip
+                        label={appointment.status}
+                        size="small"
                         color={
-                          appointment.status.toLowerCase() === 'accept' ? 'success' : 
-                          appointment.status.toLowerCase() === 'pending' ? 'warning' : 'default'
-                        } 
+                          appointment.status.toLowerCase() === 'accept' ? 'success' :
+                            appointment.status.toLowerCase() === 'pending' ? 'warning' : 'default'
+                        }
                         variant="outlined"
                       />
                     </TableCell>
                     <TableCell>
-                      <Button 
-                        variant="outlined" 
+                      <Button
+                        variant="outlined"
                         size="small"
                         onClick={() => handleOpenDialog(appointment)}
                         startIcon={<IconInfoCircle size={16} />}
@@ -742,7 +733,7 @@ const DoctorDetails = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        
+
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -759,25 +750,26 @@ const DoctorDetails = () => {
   // Render Identity Proof Tab
   const renderIdentityProof = (identityProofs) => {
     const proofs = Array.isArray(identityProofs) ? identityProofs : [];
-    
+
     return (
       <Card variant="outlined">
         <CardContent>
           <Typography variant="h6" gutterBottom>Identity Proof</Typography>
           <Divider sx={{ mb: 3 }} />
-          
+
           {proofs.length > 0 ? (
             <Box>
               <Grid container spacing={2}>
+                {console.log(proofs, "identti")}
                 {proofs.map((proof, index) => {
                   const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
                   const imageName = proof?.name || `Identity Proof ${index + 1}`;
-                  
+
                   return (
                     <Grid item xs={12} sm={6} md={4} key={index}>
-                      <Paper 
-                        elevation={2} 
-                        sx={{ 
+                      <Paper
+                        elevation={2}
+                        sx={{
                           borderRadius: 1,
                           overflow: 'hidden',
                           height: '100%',
@@ -819,8 +811,8 @@ const DoctorDetails = () => {
                           <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
                             {imageName}
                           </Typography>
-                          <Button 
-                            variant="outlined" 
+                          <Button
+                            variant="outlined"
                             size="small"
                             onClick={() => handleOpenLightbox(imageUrl)}
                             startIcon={<IconZoomIn size={16} />}
@@ -895,73 +887,259 @@ const DoctorDetails = () => {
   };
 
   // Render Certificate Proof Tab
+  // const renderCertificateProof = (certificateProofs) => {
+  //   const proofs = Array.isArray(certificateProofs) ? certificateProofs : [];
+
+  //   return (
+  //     <Card variant="outlined">
+  //       <CardContent>
+  //         <Typography variant="h6" gutterBottom>Certificate Proof</Typography>
+  //         <Divider sx={{ mb: 3 }} />
+
+  //         {proofs.length > 0 ? (
+  //           <Box>
+  //             {console.log(proofs, "consulting")}
+  //             <Grid container spacing={2}>
+  //               {proofs.map((proof, index) => {
+  //                 const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
+  //                 const imageName = proof?.name || `Certificate ${index + 1}`;
+
+  //                 return (
+  //                   <Grid item xs={12} sm={6} md={4} key={index}>
+  //                     <Paper
+  //                       elevation={2}
+  //                       sx={{
+  //                         borderRadius: 1,
+  //                         overflow: 'hidden',
+  //                         height: '100%',
+  //                         display: 'flex',
+  //                         flexDirection: 'column',
+  //                       }}
+  //                     >
+  //                       <Box
+  //                         component="div"
+  //                         sx={{
+  //                           width: '100%',
+  //                           height: 200,
+  //                           position: 'relative',
+  //                           overflow: 'hidden',
+  //                           '&:hover img': {
+  //                             transform: 'scale(1.03)',
+  //                           },
+  //                         }}
+  //                       >
+  //                         <Box
+  //                           component="img"
+  //                           src={imageUrl}
+  //                           alt={imageName}
+  //                           sx={{
+  //                             width: '100%',
+  //                             height: '100%',
+  //                             objectFit: 'contain',
+  //                             transition: 'transform 0.3s ease-in-out',
+  //                             backgroundColor: '#f5f5f5',
+  //                             display: 'block',
+  //                           }}
+  //                           onError={(e) => {
+  //                             e.target.onerror = null;
+  //                             e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
+  //                           }}
+  //                         />
+  //                       </Box>
+  //                       <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  //                         <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
+  //                           {imageName}
+  //                         </Typography>
+  //                         <Button
+  //                           variant="outlined"
+  //                           size="small"
+  //                           onClick={() => handleOpenLightbox(imageUrl)}
+  //                           startIcon={<IconZoomIn size={16} />}
+  //                         >
+  //                           View
+  //                         </Button>
+  //                       </Box>
+  //                     </Paper>
+  //                   </Grid>
+  //                 );
+  //               })}
+  //             </Grid>
+  //           </Box>
+  //         ) : (
+  //           <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+  //             <IconCertificate size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+  //             <Typography>No certificate proofs available</Typography>
+  //           </Box>
+  //         )}
+  //       </CardContent>
+
+  //       {/* Lightbox Dialog for Certificate Proofs */}
+  //       <Dialog
+  //         open={openLightbox}
+  //         onClose={() => setOpenLightbox(false)}
+  //         maxWidth="md"
+  //         fullWidth
+  //         PaperProps={{
+  //           sx: {
+  //             maxHeight: '90vh',
+  //             background: 'transparent',
+  //             boxShadow: 'none',
+  //             overflow: 'hidden',
+  //           },
+  //         }}
+  //       >
+  //         <DialogContent sx={{ p: 0, position: 'relative' }}>
+  //           <IconButton
+  //             onClick={() => setOpenLightbox(false)}
+  //             size="large"
+  //             sx={{
+  //               position: 'absolute',
+  //               top: 8,
+  //               right: 8,
+  //               color: 'white',
+  //               backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  //               '&:hover': {
+  //                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  //               },
+  //               zIndex: 1,
+  //             }}
+  //           >
+  //             <IconX />
+  //           </IconButton>
+  //           {selectedImage && (
+  //             <Box
+  //               component="img"
+  //               src={selectedImage}
+  //               alt="Full size certificate"
+  //               sx={{
+  //                 width: '100%',
+  //                 maxHeight: '80vh',
+  //                 objectFit: 'contain',
+  //                 display: 'block',
+  //               }}
+  //             />
+  //           )}
+  //         </DialogContent>
+  //       </Dialog>
+  //     </Card>
+  //   );
+  // };
   const renderCertificateProof = (certificateProofs) => {
     const proofs = Array.isArray(certificateProofs) ? certificateProofs : [];
-    
+
+    const isPdf = (url = "") =>
+      url.includes("/raw/upload/") || url.toLowerCase().endsWith(".pdf");
+
     return (
       <Card variant="outlined">
         <CardContent>
-          <Typography variant="h6" gutterBottom>Certificate Proof</Typography>
+          <Typography variant="h6" gutterBottom>
+            Certificate Proof
+          </Typography>
           <Divider sx={{ mb: 3 }} />
-          
+
           {proofs.length > 0 ? (
             <Box>
               <Grid container spacing={2}>
                 {proofs.map((proof, index) => {
-                  const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
-                  const imageName = proof?.name || `Certificate ${index + 1}`;
-                  
+                  const fileUrl =
+                    typeof proof === "string" ? proof : proof?.url || "";
+                  const fileName = proof?.name || `Certificate ${index + 1}`;
+                  console.log(isPdf(fileUrl), 'chaek')
                   return (
                     <Grid item xs={12} sm={6} md={4} key={index}>
-                      <Paper 
-                        elevation={2} 
-                        sx={{ 
+                      <Paper
+                        elevation={2}
+                        sx={{
                           borderRadius: 1,
-                          overflow: 'hidden',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
+                          overflow: "hidden",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
                         }}
                       >
+                        {/* Preview */}
                         <Box
-                          component="div"
                           sx={{
-                            width: '100%',
+                            width: "100%",
                             height: 200,
-                            position: 'relative',
-                            overflow: 'hidden',
-                            '&:hover img': {
-                              transform: 'scale(1.03)',
-                            },
+                            position: "relative",
+                            overflow: "hidden",
+                            backgroundColor: "#f5f5f5",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            "&:hover img": { transform: "scale(1.03)" },
                           }}
                         >
-                          <Box
-                            component="img"
-                            src={imageUrl}
-                            alt={imageName}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'contain',
-                              transition: 'transform 0.3s ease-in-out',
-                              backgroundColor: '#f5f5f5',
-                              display: 'block',
-                            }}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
-                            }}
-                          />
+                          {isPdf(fileUrl) ? (
+                            // PDF preview with Google Docs
+                            <iframe
+                              src={`https://docs.google.com/gview?embedded=true&url=${fileUrl
+                                }`}
+                              title={fileName}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              component="img"
+                              src={fileUrl}
+                              alt={fileName}
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                                transition: "transform 0.3s ease-in-out",
+                                display: "block",
+                              }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                  "data:image/svg+xml;charset=UTF-8,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='14' text-anchor='middle' alignment-baseline='middle' fill='%23999'%3EPreview not available%3C/text%3E%3C/svg%3E";
+                              }}
+                            />
+                          )}
                         </Box>
-                        <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
-                            {imageName}
+
+                        {/* Footer */}
+                        <Box
+                          sx={{
+                            p: 1.5,
+                            pt: 1,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            noWrap
+                            title={fileName}
+                            sx={{ flex: 1, mr: 1 }}
+                          >
+                            {fileName}
                           </Typography>
-                          <Button 
-                            variant="outlined" 
+
+                          <Button
+                            variant="outlined"
                             size="small"
-                            onClick={() => handleOpenLightbox(imageUrl)}
-                            startIcon={<IconZoomIn size={16} />}
+                            onClick={() =>
+                              isPdf(fileUrl)
+                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl
+                                  }`, "_blank") // open PDFs in new tab
+                                : handleOpenLightbox(fileUrl) // open images in lightbox
+                            }
+                            startIcon={
+                              isPdf(fileUrl) ? (
+                                <IconFileText size={16} />
+                              ) : (
+                                <IconZoomIn size={16} />
+                              )
+                            }
                           >
                             View
                           </Button>
@@ -973,14 +1151,19 @@ const DoctorDetails = () => {
               </Grid>
             </Box>
           ) : (
-            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
-              <IconCertificate size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+            <Box
+              sx={{ py: 6, textAlign: "center", color: "text.secondary" }}
+            >
+              <IconCertificate
+                size={48}
+                style={{ opacity: 0.5, marginBottom: 16 }}
+              />
               <Typography>No certificate proofs available</Typography>
             </Box>
           )}
         </CardContent>
 
-        {/* Lightbox Dialog for Certificate Proofs */}
+        {/* Lightbox Dialog for Images */}
         <Dialog
           open={openLightbox}
           onClose={() => setOpenLightbox(false)}
@@ -988,26 +1171,24 @@ const DoctorDetails = () => {
           fullWidth
           PaperProps={{
             sx: {
-              maxHeight: '90vh',
-              background: 'transparent',
-              boxShadow: 'none',
-              overflow: 'hidden',
+              maxHeight: "90vh",
+              background: "transparent",
+              boxShadow: "none",
+              overflow: "hidden",
             },
           }}
         >
-          <DialogContent sx={{ p: 0, position: 'relative' }}>
+          <DialogContent sx={{ p: 0, position: "relative" }}>
             <IconButton
               onClick={() => setOpenLightbox(false)}
               size="large"
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 top: 8,
                 right: 8,
-                color: 'white',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                },
+                color: "white",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.7)" },
                 zIndex: 1,
               }}
             >
@@ -1019,10 +1200,10 @@ const DoctorDetails = () => {
                 src={selectedImage}
                 alt="Full size certificate"
                 sx={{
-                  width: '100%',
-                  maxHeight: '80vh',
-                  objectFit: 'contain',
-                  display: 'block',
+                  width: "100%",
+                  maxHeight: "80vh",
+                  objectFit: "contain",
+                  display: "block",
                 }}
               />
             )}
@@ -1032,10 +1213,11 @@ const DoctorDetails = () => {
     );
   };
 
+
   // Render Appointment Details Dialog
   const renderAppointmentDialog = () => (
-    <Dialog 
-      open={openDialog} 
+    <Dialog
+      open={openDialog}
       onClose={handleCloseDialog}
       maxWidth="md"
       fullWidth
@@ -1063,23 +1245,23 @@ const DoctorDetails = () => {
                     </Box>
                   </Box>
                 </Box>
-                
+
                 <Box mb={2}>
                   <Typography variant="subtitle2" color="textSecondary">Alternate Mobile</Typography>
                   <Typography>{selectedAppointment.alt_mobile || 'N/A'}</Typography>
                 </Box>
-                
+
                 <Box mb={2}>
                   <Typography variant="subtitle2" color="textSecondary">Visit Type</Typography>
-                  <Chip 
-                    label={selectedAppointment.visit_types.replace('_', ' ').toUpperCase()} 
+                  <Chip
+                    label={selectedAppointment.visit_types.replace('_', ' ').toUpperCase()}
                     size="small"
                     color="primary"
                     variant="outlined"
                   />
                 </Box>
               </Box>
-              
+
               <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                 APPOINTMENT DETAILS
               </Typography>
@@ -1098,8 +1280,8 @@ const DoctorDetails = () => {
                 </Grid>
               </Grid>
             </Grid>
-            
-          
+
+
           </Grid>
         )}
       </DialogContent>
@@ -1123,9 +1305,9 @@ const DoctorDetails = () => {
     return (
       <Box textAlign="center" p={3}>
         <Typography color="error">{error}</Typography>
-        <Button 
-          variant="outlined" 
-          color="primary" 
+        <Button
+          variant="outlined"
+          color="primary"
           onClick={() => navigate(-1)}
           startIcon={<IconArrowLeft />}
           sx={{ mt: 2 }}
@@ -1140,9 +1322,9 @@ const DoctorDetails = () => {
     return (
       <Box textAlign="center" p={3}>
         <Typography>No doctor data available</Typography>
-        <Button 
-          variant="outlined" 
-          color="primary" 
+        <Button
+          variant="outlined"
+          color="primary"
           onClick={() => navigate(-1)}
           startIcon={<IconArrowLeft />}
           sx={{ mt: 2 }}
@@ -1155,25 +1337,25 @@ const DoctorDetails = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button 
-        startIcon={<IconArrowLeft />} 
+      <Button
+        startIcon={<IconArrowLeft />}
         onClick={() => navigate(-1)}
         sx={{ mb: 3 }}
       >
         Back to Doctors
       </Button>
-      
+
       {/* Contact Information Section */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent>
           <Grid container spacing={3}>
             <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Avatar 
-                src={doctor.profile_pic} 
+              <Avatar
+                src={doctor.profile_pic}
                 sx={{ width: 150, height: 150, mb: 2 }}
               />
-              <Chip 
-                label={doctor.approval_status || 'N/A'} 
+              <Chip
+                label={doctor.approval_status || 'N/A'}
                 color={getStatusColor(doctor.approval_status)}
                 sx={{ mb: 2 }}
               />
@@ -1181,30 +1363,30 @@ const DoctorDetails = () => {
             <Grid item xs={12} md={8}>
               <Typography variant="h5" gutterBottom>{doctor.name || 'N/A'}</Typography>
               <Divider sx={{ my: 2 }} />
-              
+
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} >
                   <Typography variant="subtitle2" color="textSecondary">Email</Typography>
                   <Typography variant="body1" paragraph>{doctor.email || 'N/A'}</Typography>
-                  
+
                   <Typography variant="subtitle2" color="textSecondary">Mobile</Typography>
                   <Typography variant="body1" paragraph>{doctor.mobile || 'N/A'}</Typography>
-                  
+
                   <Typography variant="subtitle2" color="textSecondary">Gender</Typography>
                   <Typography variant="body1" paragraph>{doctor.gender || 'N/A'}</Typography>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="textSecondary">Qualification</Typography>
                   <Typography variant="body1" paragraph>{doctor.qualification || 'N/A'}</Typography>
-                  
+
                   <Typography variant="subtitle2" color="textSecondary">Experience</Typography>
                   <Typography variant="body1" paragraph>{doctor.experience || 'N/A'}</Typography>
-                  
+
                   <Typography variant="subtitle2" color="textSecondary">Specialty</Typography>
                   <Typography variant="body1" paragraph>{doctor.specialty || 'N/A'}</Typography>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="textSecondary">Address</Typography>
                   <Typography variant="body1" maxWidth={350} overflow="hidden">
@@ -1222,61 +1404,61 @@ const DoctorDetails = () => {
           </Grid>
         </CardContent>
       </Card>
-      
+
       {/* Tabs */}
       <Box sx={{ width: '100%', mb: 4 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange} 
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
           aria-label="doctor details tabs"
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab 
-            icon={<IconId size={20} />} 
+          <Tab
+            icon={<IconId size={20} />}
             iconPosition="start"
-            label="Identity Proof" 
-            {...a11yProps(0)} 
+            label="Identity Proof"
+            {...a11yProps(0)}
           />
-          <Tab 
-            icon={<IconCertificate size={20} />} 
+          <Tab
+            icon={<IconCertificate size={20} />}
             iconPosition="start"
-            label="Certificate Proofs" 
-            {...a11yProps(1)} 
+            label="Certificate Proofs"
+            {...a11yProps(1)}
           />
-          <Tab 
-            icon={<IconBuildingHospital size={20} />} 
+          <Tab
+            icon={<IconBuildingHospital size={20} />}
             iconPosition="start"
-            label="Hospital Information" 
-            {...a11yProps(2)} 
+            label="Hospital Information"
+            {...a11yProps(2)}
           />
-          <Tab 
-            icon={<IconStethoscope size={20} />} 
+          <Tab
+            icon={<IconStethoscope size={20} />}
             iconPosition="start"
-            label="Surgeries" 
-            {...a11yProps(3)} 
+            label="Surgeries"
+            {...a11yProps(3)}
           />
-          <Tab 
-            icon={<IconClipboardText size={20} />} 
+          <Tab
+            icon={<IconClipboardText size={20} />}
             iconPosition="start"
-            label="Consultations Appointments" 
-            {...a11yProps(4)} 
+            label="Consultations Appointments"
+            {...a11yProps(4)}
           />
         </Tabs>
       </Box>
-      
+
       <TabPanel value={tabValue} index={0}>
         {renderIdentityProof(doctor.identityproof || doctor.identityProof || [])}
       </TabPanel>
-      
+
       <TabPanel value={tabValue} index={1}>
         {renderCertificateProof(doctor.certificateproof || doctor.certificateProofs || [])}
       </TabPanel>
-      
+
       <TabPanel value={tabValue} index={2}>
         {renderHospitalInfo()}
       </TabPanel>
-      
+
       <TabPanel value={tabValue} index={3}>
         {doctor?.surgeriesDetails?.length > 0 ? (
           renderSurgeries()
@@ -1288,11 +1470,11 @@ const DoctorDetails = () => {
           </Paper>
         )}
       </TabPanel>
-      
+
       <TabPanel value={tabValue} index={4}>
         {renderAppointments()}
       </TabPanel>
-      
+
       {renderAppointmentDialog()}
     </Container>
   );
