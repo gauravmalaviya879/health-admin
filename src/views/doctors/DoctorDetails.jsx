@@ -746,6 +746,8 @@ const DoctorDetails = () => {
       </CardContent>
     </Card>
   );
+  const isPdf = (url = "") =>
+    url.includes("/raw/upload/") || url.toLowerCase().endsWith(".pdf");
 
   // Render Identity Proof Tab
   const renderIdentityProof = (identityProofs) => {
@@ -760,10 +762,9 @@ const DoctorDetails = () => {
           {proofs.length > 0 ? (
             <Box>
               <Grid container spacing={2}>
-              
                 {proofs.map((proof, index) => {
-                  const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
-                  const imageName = proof?.name || `Identity Proof ${index + 1}`;
+                  const fileUrl = typeof proof === 'string' ? proof : proof?.url || '';
+                  const fileName = proof?.name || `Identity Proof ${index + 1}`;
 
                   return (
                     <Grid item xs={12} sm={6} md={4} key={index}>
@@ -777,311 +778,29 @@ const DoctorDetails = () => {
                           flexDirection: 'column',
                         }}
                       >
+                        {/* Preview */}
                         <Box
-                          component="div"
                           sx={{
                             width: '100%',
                             height: 200,
                             position: 'relative',
                             overflow: 'hidden',
-                            '&:hover img': {
-                              transform: 'scale(1.03)',
-                            },
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={imageUrl}
-                            alt={imageName}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'contain',
-                              transition: 'transform 0.3s ease-in-out',
-                              backgroundColor: '#f5f5f5',
-                              display: 'block',
-                            }}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
-                            }}
-                          />
-                        </Box>
-                        <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
-                            {imageName}
-                          </Typography>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => handleOpenLightbox(imageUrl)}
-                            startIcon={<IconZoomIn size={16} />}
-                          >
-                            View
-                          </Button>
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Box>
-          ) : (
-            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
-              <IconId size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
-              <Typography>No identity proofs available</Typography>
-            </Box>
-          )}
-        </CardContent>
-
-        {/* Lightbox Dialog */}
-        <Dialog
-          open={openLightbox}
-          onClose={() => setOpenLightbox(false)}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: {
-              maxHeight: '90vh',
-              background: 'transparent',
-              boxShadow: 'none',
-              overflow: 'hidden',
-            },
-          }}
-        >
-          <DialogContent sx={{ p: 0, position: 'relative' }}>
-            <IconButton
-              onClick={() => setOpenLightbox(false)}
-              size="large"
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                color: 'white',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                },
-                zIndex: 1,
-              }}
-            >
-              <IconX />
-            </IconButton>
-            {selectedImage && (
-              <Box
-                component="img"
-                src={selectedImage}
-                alt="Full size document"
-                sx={{
-                  width: '100%',
-                  maxHeight: '80vh',
-                  objectFit: 'contain',
-                  display: 'block',
-                }}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
-      </Card>
-    );
-  };
-
-  // Render Certificate Proof Tab
-  // const renderCertificateProof = (certificateProofs) => {
-  //   const proofs = Array.isArray(certificateProofs) ? certificateProofs : [];
-
-  //   return (
-  //     <Card variant="outlined">
-  //       <CardContent>
-  //         <Typography variant="h6" gutterBottom>Certificate Proof</Typography>
-  //         <Divider sx={{ mb: 3 }} />
-
-  //         {proofs.length > 0 ? (
-  //           <Box>
-  //             {console.log(proofs, "consulting")}
-  //             <Grid container spacing={2}>
-  //               {proofs.map((proof, index) => {
-  //                 const imageUrl = typeof proof === 'string' ? proof : proof?.url || '';
-  //                 const imageName = proof?.name || `Certificate ${index + 1}`;
-
-  //                 return (
-  //                   <Grid item xs={12} sm={6} md={4} key={index}>
-  //                     <Paper
-  //                       elevation={2}
-  //                       sx={{
-  //                         borderRadius: 1,
-  //                         overflow: 'hidden',
-  //                         height: '100%',
-  //                         display: 'flex',
-  //                         flexDirection: 'column',
-  //                       }}
-  //                     >
-  //                       <Box
-  //                         component="div"
-  //                         sx={{
-  //                           width: '100%',
-  //                           height: 200,
-  //                           position: 'relative',
-  //                           overflow: 'hidden',
-  //                           '&:hover img': {
-  //                             transform: 'scale(1.03)',
-  //                           },
-  //                         }}
-  //                       >
-  //                         <Box
-  //                           component="img"
-  //                           src={imageUrl}
-  //                           alt={imageName}
-  //                           sx={{
-  //                             width: '100%',
-  //                             height: '100%',
-  //                             objectFit: 'contain',
-  //                             transition: 'transform 0.3s ease-in-out',
-  //                             backgroundColor: '#f5f5f5',
-  //                             display: 'block',
-  //                           }}
-  //                           onError={(e) => {
-  //                             e.target.onerror = null;
-  //                             e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
-  //                           }}
-  //                         />
-  //                       </Box>
-  //                       <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  //                         <Typography variant="body2" noWrap title={imageName} sx={{ flex: 1, mr: 1 }}>
-  //                           {imageName}
-  //                         </Typography>
-  //                         <Button
-  //                           variant="outlined"
-  //                           size="small"
-  //                           onClick={() => handleOpenLightbox(imageUrl)}
-  //                           startIcon={<IconZoomIn size={16} />}
-  //                         >
-  //                           View
-  //                         </Button>
-  //                       </Box>
-  //                     </Paper>
-  //                   </Grid>
-  //                 );
-  //               })}
-  //             </Grid>
-  //           </Box>
-  //         ) : (
-  //           <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
-  //             <IconCertificate size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
-  //             <Typography>No certificate proofs available</Typography>
-  //           </Box>
-  //         )}
-  //       </CardContent>
-
-  //       {/* Lightbox Dialog for Certificate Proofs */}
-  //       <Dialog
-  //         open={openLightbox}
-  //         onClose={() => setOpenLightbox(false)}
-  //         maxWidth="md"
-  //         fullWidth
-  //         PaperProps={{
-  //           sx: {
-  //             maxHeight: '90vh',
-  //             background: 'transparent',
-  //             boxShadow: 'none',
-  //             overflow: 'hidden',
-  //           },
-  //         }}
-  //       >
-  //         <DialogContent sx={{ p: 0, position: 'relative' }}>
-  //           <IconButton
-  //             onClick={() => setOpenLightbox(false)}
-  //             size="large"
-  //             sx={{
-  //               position: 'absolute',
-  //               top: 8,
-  //               right: 8,
-  //               color: 'white',
-  //               backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  //               '&:hover': {
-  //                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  //               },
-  //               zIndex: 1,
-  //             }}
-  //           >
-  //             <IconX />
-  //           </IconButton>
-  //           {selectedImage && (
-  //             <Box
-  //               component="img"
-  //               src={selectedImage}
-  //               alt="Full size certificate"
-  //               sx={{
-  //                 width: '100%',
-  //                 maxHeight: '80vh',
-  //                 objectFit: 'contain',
-  //                 display: 'block',
-  //               }}
-  //             />
-  //           )}
-  //         </DialogContent>
-  //       </Dialog>
-  //     </Card>
-  //   );
-  // };
-  const renderCertificateProof = (certificateProofs) => {
-    const proofs = Array.isArray(certificateProofs) ? certificateProofs : [];
-
-    const isPdf = (url = "") =>
-      url.includes("/raw/upload/") || url.toLowerCase().endsWith(".pdf");
-
-    return (
-      <Card variant="outlined">
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Certificate Proof
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-
-          {proofs.length > 0 ? (
-            <Box>
-              <Grid container spacing={2}>
-                {proofs.map((proof, index) => {
-                  const fileUrl =
-                    typeof proof === "string" ? proof : proof?.url || "";
-                  const fileName = proof?.name || `Certificate ${index + 1}`;
-                 
-                  return (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
-                      <Paper
-                        elevation={2}
-                        sx={{
-                          borderRadius: 1,
-                          overflow: "hidden",
-                          height: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
-                        {/* Preview */}
-                        <Box
-                          sx={{
-                            width: "100%",
-                            height: 200,
-                            position: "relative",
-                            overflow: "hidden",
-                            backgroundColor: "#f5f5f5",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            "&:hover img": { transform: "scale(1.03)" },
+                            backgroundColor: '#f5f5f5',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            '&:hover img': { transform: 'scale(1.03)' },
                           }}
                         >
                           {isPdf(fileUrl) ? (
                             // PDF preview with Google Docs
                             <iframe
-                              src={`https://docs.google.com/gview?embedded=true&url=${fileUrl
-                                }`}
+                              src={`https://docs.google.com/gview?embedded=true&url=${fileUrl}`}
                               title={fileName}
                               style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "none",
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
                               }}
                             />
                           ) : (
@@ -1090,48 +809,32 @@ const DoctorDetails = () => {
                               src={fileUrl}
                               alt={fileName}
                               sx={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                                transition: "transform 0.3s ease-in-out",
-                                display: "block",
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                transition: 'transform 0.3s ease-in-out',
+                                display: 'block',
                               }}
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src =
-                                  "data:image/svg+xml;charset=UTF-8,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='14' text-anchor='middle' alignment-baseline='middle' fill='%23999'%3EPreview not available%3C/text%3E%3C/svg%3E";
+                                e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
                               }}
                             />
                           )}
                         </Box>
 
                         {/* Footer */}
-                        <Box
-                          sx={{
-                            p: 1.5,
-                            pt: 1,
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            noWrap
-                            title={fileName}
-                            sx={{ flex: 1, mr: 1 }}
-                          >
+                        <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" noWrap title={fileName} sx={{ flex: 1, mr: 1 }}>
                             {fileName}
                           </Typography>
-
                           <Button
                             variant="outlined"
                             size="small"
                             onClick={() =>
                               isPdf(fileUrl)
-                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl
-                                  }`, "_blank") // open PDFs in new tab
-                                : handleOpenLightbox(fileUrl) // open images in lightbox
+                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, "_blank")
+                                : handleOpenLightbox(fileUrl)
                             }
                             startIcon={
                               isPdf(fileUrl) ? (
@@ -1151,13 +854,123 @@ const DoctorDetails = () => {
               </Grid>
             </Box>
           ) : (
-            <Box
-              sx={{ py: 6, textAlign: "center", color: "text.secondary" }}
-            >
-              <IconCertificate
-                size={48}
-                style={{ opacity: 0.5, marginBottom: 16 }}
-              />
+            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+              <IconId size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+              <Typography>No identity proofs available</Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Render Certificate Proof Tab
+  const renderCertificateProof = (certificateProofs) => {
+    const proofs = Array.isArray(certificateProofs) ? certificateProofs : [];
+
+    return (
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="h6" gutterBottom>Certificate Proof</Typography>
+          <Divider sx={{ mb: 3 }} />
+
+          {proofs.length > 0 ? (
+            <Box>
+              <Grid container spacing={2}>
+                {proofs.map((proof, index) => {
+                  const fileUrl = typeof proof === 'string' ? proof : proof?.url || '';
+                  const fileName = proof?.name || `Certificate ${index + 1}`;
+
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper
+                        elevation={2}
+                        sx={{
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        {/* Preview */}
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: 200,
+                            position: 'relative',
+                            overflow: 'hidden',
+                            backgroundColor: '#f5f5f5',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            '&:hover img': { transform: 'scale(1.03)' },
+                          }}
+                        >
+                          {isPdf(fileUrl) ? (
+                            // PDF preview with Google Docs
+                            <iframe
+                              src={`https://docs.google.com/gview?embedded=true&url=${fileUrl}`}
+                              title={fileName}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              component="img"
+                              src={fileUrl}
+                              alt={fileName}
+                              sx={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                transition: 'transform 0.3s ease-in-out',
+                                display: 'block',
+                              }}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
+                              }}
+                            />
+                          )}
+                        </Box>
+
+                        {/* Footer */}
+                        <Box sx={{ p: 1.5, pt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" noWrap title={fileName} sx={{ flex: 1, mr: 1 }}>
+                            {fileName}
+                          </Typography>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() =>
+                              isPdf(fileUrl)
+                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, "_blank")
+                                : handleOpenLightbox(fileUrl)
+                            }
+                            startIcon={
+                              isPdf(fileUrl) ? (
+                                <IconFileText size={16} />
+                              ) : (
+                                <IconZoomIn size={16} />
+                              )
+                            }
+                          >
+                            View
+                          </Button>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+              <IconCertificate size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
               <Typography>No certificate proofs available</Typography>
             </Box>
           )}
@@ -1212,7 +1025,6 @@ const DoctorDetails = () => {
       </Card>
     );
   };
-
 
   // Render Appointment Details Dialog
   const renderAppointmentDialog = () => (
@@ -1280,8 +1092,6 @@ const DoctorDetails = () => {
                 </Grid>
               </Grid>
             </Grid>
-
-
           </Grid>
         )}
       </DialogContent>
