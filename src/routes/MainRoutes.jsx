@@ -14,6 +14,7 @@ import NewAmbu from '../views/ambulance/NewAmbu';
 import Patients from '../views/Patients';
 import Dashboard from '../views/dashboard';
 import Policy from '../views/Policy';
+import AdminUsers from '../views/Admin/Users';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -45,6 +46,10 @@ const MainRoutes = {
     {
       path: 'categories',
       element: <Categories />
+    },
+    {
+      path: 'adminusers',
+      element: <AdminUsers />
     },
     {
       path: 'doctors',

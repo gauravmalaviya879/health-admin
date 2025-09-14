@@ -1,3 +1,4 @@
+import admin from './admin';
 import ambulance from './ambulance';
 import dashboard from './dashboard';
 import doctors from './doctors';
@@ -7,7 +8,7 @@ import policy from './policy';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [dashboard, doctors, ambulance, patients, policy]
+  items: [dashboard, admin, doctors, ambulance, patients, policy]
 };
 
 export default menuItems;
