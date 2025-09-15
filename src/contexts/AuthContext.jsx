@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
       }
 
       const result = await authService.login(email, password);
-      console.log(result)
       if (result.success) {
         const { token, user, data } = result;
         

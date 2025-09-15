@@ -22,7 +22,7 @@ import {
   TablePagination,
   InputAdornment
 } from '@mui/material';
-import {  IconEdit, IconCircleMinus,IconShieldPlus, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { IconEdit, IconCircleMinus, IconShieldPlus, IconEye, IconEyeOff } from '@tabler/icons-react';
 import adminService from 'services/adminService';
 
 const AdminUsers = () => {
@@ -53,12 +53,12 @@ const AdminUsers = () => {
     try {
       setLoading(true);
       const response = await adminService.getAdminUsers();
-      
+
       // Ensure we're working with an array and filter for active users (status: true)
-      const users = Array.isArray(response.Data) 
-        ? response.Data.filter(user => user.status === true || user.status === undefined) 
+      const users = Array.isArray(response.Data)
+        ? response.Data.filter(user => user.status === true && user.subadmin === true)
         : [];
-      
+
       setAdminUsers(users);
     } catch (error) {
       console.error('Error fetching admin users:', error);
@@ -71,11 +71,12 @@ const AdminUsers = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error for the field being edited
     if (errors[name]) {
       setErrors(prev => ({
@@ -87,29 +88,29 @@ const AdminUsers = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     }
-    
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
-    
+
     if (!formData.mobile) {
       newErrors.mobile = 'Mobile number is required';
     } else if (!/^[0-9]{10}$/.test(formData.mobile)) {
       newErrors.mobile = 'Mobile number must be 10 digits';
     }
-    
+
     if (!editingUser && !formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password && formData.password.length < 4) {
       newErrors.password = 'Password must be at least 4 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -139,18 +140,20 @@ const AdminUsers = () => {
 
   const handleConfirmDelete = async () => {
     if (!userToDelete.id) return;
-    
+
     try {
       // First, fetch the complete user data
       const userData = await adminService.getUserById(userToDelete.id);
-      
+
       if (!userData) {
         throw new Error('User not found');
       }
-      
+
       // Update the user's status to false
-      await adminService.updateUserStatus(userData);
-      
+     let response =  await adminService.updateUserStatus(userData);
+
+     console.log(response)
+ 
       // Update local state to remove the deactivated user from the list
       setAdminUsers(prevUsers => prevUsers.filter(user => user._id !== userToDelete.id));
       showSnackbar(`User "${userToDelete.name}" has been deactivated`, 'success');
@@ -165,12 +168,12 @@ const AdminUsers = () => {
 
   const handleCancelDelete = () => {
     setDeleteConfirmOpen(false);
-    setUserToDelete({ id: null, name: '' , });
+    setUserToDelete({ id: null, name: '', });
   };
 
   const handleEdit = (user) => {
     setFormData({
-      adminuserid: user.adminuserid,
+      adminuserid: user._id,
       name: user.name,
       email: user.email,
       mobile: user.mobile,
@@ -223,7 +226,14 @@ const AdminUsers = () => {
   };
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, adminUsers.length - page * rowsPerPage);
-
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
+  };
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" mb={3}>
@@ -246,6 +256,8 @@ const AdminUsers = () => {
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Mobile</TableCell>
+                <TableCell>Created At</TableCell>
+                <TableCell>Updated At</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -266,16 +278,18 @@ const AdminUsers = () => {
                 adminUsers
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((user) => (
-                    <TableRow key={user.adminuserid}>
+                    <TableRow key={user._id}>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.mobile}</TableCell>
+                      <TableCell>{formatDateTime(user.createdAt)}</TableCell>
+                      <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
                       <TableCell align="right">
                         <IconButton onClick={() => handleEdit(user)} color="primary">
                           <IconEdit />
                         </IconButton>
-                        <IconButton 
-                          onClick={() => handleDeleteClick(user)} 
+                        <IconButton
+                          onClick={() => handleDeleteClick(user)}
                           color="error"
                           title="Deactivate User"
                         >
@@ -309,6 +323,7 @@ const AdminUsers = () => {
         <DialogTitle>{editingUser ? 'Edit Admin User' : 'Add New Admin User'}</DialogTitle>
         <DialogContent>
           <Box mt={2}>
+             
             <TextField
               fullWidth
               label="Name"
@@ -399,9 +414,9 @@ const AdminUsers = () => {
           <Button onClick={handleCancelDelete} variant="outlined">
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirmDelete} 
-            color="error" 
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
             variant="contained"
             startIcon={<IconCircleMinus size={20} />}
             autoFocus
