@@ -6,7 +6,7 @@ const icons = { IconUserShield };
 
 // ==============================|| ADMIN MENU ITEMS ||============================== //
 
-const admin = {
+const admin =  {
   id: 'admin',
   title: 'Admin',
   type: 'group',

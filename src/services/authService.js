@@ -15,22 +15,34 @@ class AuthService {
       });
 
       const data = await response.json();
-     
-      this.setToken(data.Data.accessToken);
-     
-      if (response.ok) {
-        // Successful login
+      
+      if (response.ok && data.IsSuccess) {
+        const { accessToken, adminData } = data.Data;
+        
+        // Store the access token
+        this.setToken(accessToken);
+        
+        // Store admin data in localStorage
+        if (adminData) {
+          localStorage.setItem('adminData', JSON.stringify(adminData));
+        }
+
         return {
           success: true,
           data: data.Data,
-          token: data.Data.accessToken,
-          user: { email :email , password: password }
+          token: accessToken,
+          user: {
+            id: adminData._id,
+            name: adminData.name,
+            email: adminData.email,
+            mobile: adminData.mobile,
+            isAdmin: !adminData.subadmin // Convert subadmin to isAdmin (inverse logic)
+          }
         };
       } else {
-        // Failed login
         return {
           success: false,
-          error: data.message || data.error || 'Login failed. Please check your credentials.',
+          error: data.Message || 'Login failed. Please check your credentials.',
         };
       }
     } catch (error) {

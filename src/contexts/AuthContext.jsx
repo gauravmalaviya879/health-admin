@@ -14,6 +14,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
       const authData = JSON.parse(savedAuth);
       setIsAuthenticated(true);
       setUser(authData.user);
+      setIsAdmin(authData.isAdmin);
     } else {
       // Clear invalid auth data
       authService.clearToken();
@@ -40,37 +42,36 @@ export const AuthProvider = ({ children }) => {
 
       const result = await authService.login(email, password);
       if (result.success) {
-        const { token, user, data } = result;
-        
-        // Store token
-        if (token) {
-          authService.setToken(token);
-        }
-        
-        // Set user data
-       
-        const userData =  {
-         
-          email: user.email,
-        
-        };
+        const { user } = result;
         
         setIsAuthenticated(true);
-        setUser(userData);
+        setUser(user);
+        setIsAdmin(user.isAdmin);
         
         // Save auth data to localStorage
         localStorage.setItem('healthAdminAuth', JSON.stringify({
-          user: userData,
+          user,
+          isAdmin: user.isAdmin,
           timestamp: Date.now()
         }));
         
-        return { success: true };
+        return { 
+          success: true,
+          isAdmin: user.isAdmin,
+          user
+        };
       } else {
-        return { success: false, error: result.error };
+        return { 
+          success: false, 
+          error: result.error || 'Login failed. Please check your credentials.' 
+        };
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: 'Login failed. Please try again.' };
+      return { 
+        success: false, 
+        error: 'Login failed. Please try again.' 
+      };
     }
   };
 
@@ -82,12 +83,14 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsAuthenticated(false);
       setUser(null);
+      setIsAdmin(false);
     }
   };
 
   const value = {
     isAuthenticated,
     user,
+    isAdmin,
     login,
     logout,
     loading

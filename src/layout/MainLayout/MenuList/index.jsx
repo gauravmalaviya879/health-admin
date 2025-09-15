@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
@@ -7,20 +7,23 @@ import Box from '@mui/material/Box';
 // project imports
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
-import menuItems from 'menu-items';
-
+import { getMenuItems } from 'menu-items';
 import { useGetMenuMaster } from 'api/menu';
 
 // ==============================|| SIDEBAR MENU LIST ||============================== //
 
 function MenuList() {
   const { menuMaster } = useGetMenuMaster();
+  const [menuItems, setMenuItems] = useState({ items: [] });
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
-
   const [selectedID, setSelectedID] = useState('');
 
-  const lastItem = null;
+  // Update menu items when component mounts
+  useEffect(() => {
+    setMenuItems(getMenuItems());
+  }, []);
 
+  const lastItem = null;
   let lastItemIndex = menuItems.items.length - 1;
   let remItems = [];
   let lastItemId;
