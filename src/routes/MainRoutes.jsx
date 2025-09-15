@@ -1,4 +1,6 @@
 import { lazy } from 'react';
+import { Navigate } from 'react-router-dom';
+import { isAdminUser } from '../utils/authUtils';
 
 // project imports
 import MainLayout from 'layout/MainLayout';
@@ -19,6 +21,11 @@ import AdminUsers from '../views/Admin/Users';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
+// Admin route wrapper
+const AdminRoute = ({ children }) => {
+  return isAdminUser() ? children : <Navigate to="/dashboard" replace />;
+};
+
 // Note: Utility and sample page components removed as they don't exist in this project
 
 // ==============================|| MAIN ROUTING ||============================== //
@@ -33,7 +40,7 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <Dashboard />
+      element: <Navigate to="/dashboard" replace />
     },
     {
       path: 'dashboard',
@@ -49,7 +56,11 @@ const MainRoutes = {
     },
     {
       path: 'adminusers',
-      element: <AdminUsers />
+      element: (
+        <AdminRoute>
+          <AdminUsers />
+        </AdminRoute>
+      )
     },
     {
       path: 'doctors',
