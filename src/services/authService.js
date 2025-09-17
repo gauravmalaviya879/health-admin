@@ -1,6 +1,8 @@
-const API_BASE_URL = 'https://healtheasy-o25g.onrender.com';
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import CryptoJS from "crypto-js";
+const secretKey =  import.meta.env.VITE_SECRET_KEY;
 class AuthService {
+  
   async login(email, password) {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/login`, {
@@ -24,7 +26,11 @@ class AuthService {
         
         // Store admin data in localStorage
         if (adminData) {
-          localStorage.setItem('adminData', JSON.stringify(adminData));
+          const encryptedData = CryptoJS.AES.encrypt(
+            JSON.stringify(adminData),
+            secretKey
+          ).toString();
+          localStorage.setItem('adminData', JSON.stringify(encryptedData));
         }
 
         return {
@@ -87,6 +93,7 @@ class AuthService {
   clearToken() {
     localStorage.removeItem('healthAdminToken');
     localStorage.removeItem('healthAdminAuth');
+    localStorage.removeItem('adminData');
   }
 
   isTokenValid() {

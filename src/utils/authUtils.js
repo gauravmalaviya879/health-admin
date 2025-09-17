@@ -6,12 +6,30 @@
  * Check if the current user is an admin
  * @returns {boolean} True if user is admin, false otherwise
  */
+import CryptoJS from "crypto-js";
+const secretKey = import.meta.env.VITE_SECRET_KEY;
 export const isAdminUser = () => {
   try {
-    const adminData = localStorage.getItem('adminData');
+    const stored = localStorage.getItem('adminData');
+    if (!stored) return false;
+
+    // adminData is stored as JSON.stringify(encryptedString)
+    let cipherText;
+    try {
+      cipherText = JSON.parse(stored);
+    } catch {
+      // Fallback if it was stored directly without JSON.stringify
+      cipherText = stored;
+    }
+
+    const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+    const decryptedJson = bytes.toString(CryptoJS.enc.Utf8);
+    if (!decryptedJson) return false;
+
+    const adminData = JSON.parse(decryptedJson);
     if (!adminData) return false;
-    
-    const { subadmin } = JSON.parse(adminData);
+
+    const { subadmin } = adminData;
     return !subadmin; // If subadmin is false, user is admin
   } catch (error) {
     console.error('Error checking admin status:', error);
@@ -25,8 +43,22 @@ export const isAdminUser = () => {
  */
 export const getUserData = () => {
   try {
-    const adminData = localStorage.getItem('adminData');
-    return adminData ? JSON.parse(adminData) : null;
+    const stored = localStorage.getItem('adminData');
+    if (!stored) return null;
+
+    let cipherText;
+    try {
+      cipherText = JSON.parse(stored);
+    } catch {
+      cipherText = stored;
+    }
+
+    const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+    const decryptedJson = bytes.toString(CryptoJS.enc.Utf8);
+    if (!decryptedJson) return null;
+
+    const adminData = JSON.parse(decryptedJson);
+    return adminData || null;
   } catch (error) {
     console.error('Error getting user data:', error);
     return null;
@@ -38,6 +70,6 @@ export const getUserData = () => {
  * @returns {boolean} True if user is authenticated, false otherwise
  */
 export const isAuthenticated = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('healthAdminToken');
   return !!token;
 };

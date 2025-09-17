@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService from '../services/authService';
-
+import CryptoJS from "crypto-js";
 const AuthContext = createContext();
-
+const secretKey = import.meta.env.VITE_SECRET_KEY;
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -19,11 +19,25 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is already logged in with valid token
-    const savedAuth = localStorage.getItem('healthAdminAuth');
+    const healthAdminAuth = localStorage.getItem('healthAdminAuth');
+    let savedAuth = null;
+
+    if (healthAdminAuth) {
+      try {
+        const bytes = CryptoJS.AES.decrypt(healthAdminAuth, secretKey);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        if (decrypted) {
+          savedAuth = JSON.parse(decrypted);
+        }
+      } catch (e) {
+        console.error('Failed to decrypt saved auth', e);
+      }
+    }
+
     const hasValidToken = authService.isTokenValid();
     
     if (savedAuth && hasValidToken) {
-      const authData = JSON.parse(savedAuth);
+      const authData = savedAuth;
       setIsAuthenticated(true);
       setUser(authData.user);
       setIsAdmin(authData.isAdmin);
@@ -47,13 +61,16 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         setUser(user);
         setIsAdmin(user.isAdmin);
-        
+        const encryptedData = CryptoJS.AES.encrypt(
+          JSON.stringify({
+            user,
+            isAdmin: user.isAdmin,
+            timestamp: Date.now()
+          }),
+          secretKey
+        ).toString();
         // Save auth data to localStorage
-        localStorage.setItem('healthAdminAuth', JSON.stringify({
-          user,
-          isAdmin: user.isAdmin,
-          timestamp: Date.now()
-        }));
+        localStorage.setItem('healthAdminAuth', encryptedData);
         
         return { 
           success: true,

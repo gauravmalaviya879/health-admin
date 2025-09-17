@@ -1,7 +1,7 @@
 import axios from 'axios';
 import authService from "./authService";
 
-const BASE_URL = 'https://healtheasy-o25g.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const newDoctorsService = {
   // Get all doctors list

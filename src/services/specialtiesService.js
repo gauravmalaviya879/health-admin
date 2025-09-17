@@ -1,7 +1,7 @@
 import authService from './authService';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://healtheasy-o25g.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class SpecialtiesService {
   // Get all specialties
