@@ -70,5 +70,26 @@ export const ambulanceService = {
       console.error('Error rejecting ambulance:', error);
       throw error;
     }
-  }
+  },
+
+  getAmbulanceById: async (ambulanceId) => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${API_URL}/admin/ambulances/getone`,
+        { ambulanceid: ambulanceId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      return { data: response.data };
+    } catch (error) {
+      console.error('Error fetching ambulance details:', error);
+      throw error;
+    }
+  },
 };

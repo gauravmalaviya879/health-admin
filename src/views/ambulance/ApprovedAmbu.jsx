@@ -29,8 +29,10 @@ import {
 } from '@mui/material';
 import { IconCheck, IconSearch, IconX, IconEye, IconDeviceMobile, IconMapPinFilled } from '@tabler/icons-react';
 import { ambulanceService } from '../../services/ambulanceService';
+import { useNavigate } from 'react-router-dom';
 
 const NewAmbu = () => {
+  const navigate = useNavigate();
   const [ambulances, setAmbulances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -107,8 +109,8 @@ const NewAmbu = () => {
   };
 
   const handleViewClick = (ambulance) => {
-    setSelectedAmbulance(ambulance);
-    setViewModalOpen(true);
+    if (!ambulance?._id) return;
+    navigate(`/ambulance/${ambulance._id}`);
   };
 
   
@@ -390,38 +392,7 @@ const NewAmbu = () => {
     );
   };
 
-  const ViewAmbulanceModal = () => (
-    <Dialog 
-      open={viewModalOpen} 
-      onClose={() => setViewModalOpen(false)}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{ sx: { borderRadius: 2 } }}
-    >
-      <DialogTitle sx={{ 
-        bgcolor: 'primary.main', 
-        color: 'white',
-        py: 2,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        Ambulance Details
-      </DialogTitle>
-      <DialogContent sx={{ p: 0 }}>
-        {selectedAmbulance && <AmbuComponent ambulance={selectedAmbulance} />}
-      </DialogContent>
-      <DialogActions sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Button 
-          onClick={() => setViewModalOpen(false)} 
-          variant="contained"
-          size="small"
-        >
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+
 
   return (
     <div>
@@ -541,7 +512,7 @@ const NewAmbu = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <ViewAmbulanceModal />
+     
     </div>
   );
 };

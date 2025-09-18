@@ -16,12 +16,7 @@ export default function Footer() {
         mt: 'auto'
       }}
     >
-      <Typography variant="caption">
-        &copy; All rights reserved{' '}
-        <Typography component={Link} href="/health-admin" underline="hover" target="_blank" color="secondary.main">
-          CodeZeel Technology
-        </Typography>
-      </Typography>
+      
       
     </Stack>
   );

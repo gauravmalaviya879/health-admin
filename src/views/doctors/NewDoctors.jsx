@@ -19,8 +19,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
-  Avatar
+  DialogTitle
 } from '@mui/material';
 import { IconCheck, IconX, IconSearch } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';

@@ -7,12 +7,10 @@ import Stack from '@mui/material/Stack';
 
 export default function AuthFooter() {
   return (
-    <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-      <Typography variant="subtitle2" component={Link} href="" target="_blank" underline="hover">
-        berrydashboard.com
-      </Typography>
-      <Typography variant="subtitle2" component={Link} href="" target="_blank" underline="hover">
-        &copy; codedthemes.com
+    <Stack direction="row" sx={{ justifyContent: 'end' }}>
+      
+      <Typography variant="subtitle2" component={Link} href="https://codeziltechnologies.com/" target="_blank" underline="hover">
+        &copy;Devlopment By CodeZeel Technology
       </Typography>
     </Stack>
   );

@@ -13,6 +13,7 @@ import DoctorDetails from '../views/doctors/DoctorDetails';
 import Specialties from '../views/Specialties';
 import ApprovedAmbu from '../views/ambulance/ApprovedAmbu';
 import NewAmbu from '../views/ambulance/NewAmbu';
+import ShowAmbulance from '../views/ambulance/ShowAmbulance';
 import Patients from '../views/Patients';
 import Dashboard from '../views/dashboard';
 import Policy from '../views/Policy';
@@ -89,6 +90,10 @@ const MainRoutes = {
         {
           path: 'approved',
           element: <ApprovedAmbu />
+        },
+        {
+          path: ':id',
+          element: <ShowAmbulance />
         }
       ]
     },
