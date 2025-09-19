@@ -104,7 +104,7 @@ const DoctorDetails = () => {
 
   // Add state for lightbox
   const [selectedImage, setSelectedImage] = useState(null);
-  const [openLightbox, setOpenLightbox] = useState(false);
+
 
 
 
@@ -187,78 +187,9 @@ const DoctorDetails = () => {
     }
   };
 
-  // Function to handle opening lightbox
-  const handleOpenLightbox = (imageUrl) => {
-    setSelectedImage(imageUrl);
-    setOpenLightbox(true);
-  };
 
-  // Function to handle closing lightbox
-  const handleCloseLightbox = () => {
-    setOpenLightbox(false);
-  };
 
-  // Render Contact Information Tab
-  const renderContactInfo = () => (
-    <Card variant="outlined">
-      <CardContent>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Avatar
-              src={doctor.profile_pic}
-              sx={{ width: 150, height: 150, mb: 2 }}
-            />
-            <Chip
-              label={doctor.approval_status || 'N/A'}
-              color={getStatusColor(doctor.approval_status)}
-              sx={{ mb: 2 }}
-            />
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Typography variant="h5" gutterBottom>{doctor.name || 'N/A'}</Typography>
-            <Divider sx={{ my: 2 }} />
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2" color="textSecondary">Email</Typography>
-                <Typography variant="body1" paragraph>{doctor.email || 'N/A'}</Typography>
-
-                <Typography variant="subtitle2" color="textSecondary">Mobile</Typography>
-                <Typography variant="body1" paragraph>{doctor.mobile || 'N/A'}</Typography>
-
-                <Typography variant="subtitle2" color="textSecondary">Gender</Typography>
-                <Typography variant="body1" paragraph>{doctor.gender || 'N/A'}</Typography>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2" color="textSecondary">Qualification</Typography>
-                <Typography variant="body1" paragraph>{doctor.qualification || 'N/A'}</Typography>
-
-                <Typography variant="subtitle2" color="textSecondary">Experience</Typography>
-                <Typography variant="body1" paragraph>{doctor.experience || 'N/A'}</Typography>
-
-                <Typography variant="subtitle2" color="textSecondary">Specialty</Typography>
-                <Typography variant="body1" paragraph>{doctor.specialty || 'N/A'}</Typography>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary">Address</Typography>
-                <Typography variant="body1">
-                  {[
-                    doctor.hospital_address,
-                    doctor.city,
-                    doctor.state,
-                    doctor.pincode,
-                    doctor.country
-                  ].filter(Boolean).join(', ') || 'N/A'}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
-  );
+  
 
   // Render Hospital Information Tab
   const renderHospitalInfo = () => (
@@ -834,7 +765,7 @@ const DoctorDetails = () => {
                             onClick={() =>
                               isPdf(fileUrl)
                                 ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, "_blank")
-                                : handleOpenLightbox(fileUrl)
+                                : window.open(fileUrl, "_blank")
                             }
                             startIcon={
                               isPdf(fileUrl) ? (
@@ -949,7 +880,7 @@ const DoctorDetails = () => {
                             onClick={() =>
                               isPdf(fileUrl)
                                 ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, "_blank")
-                                : handleOpenLightbox(fileUrl)
+                                : window.open(fileUrl, "_blank")
                             }
                             startIcon={
                               isPdf(fileUrl) ? (
@@ -976,52 +907,7 @@ const DoctorDetails = () => {
           )}
         </CardContent>
 
-        {/* Lightbox Dialog for Images */}
-        <Dialog
-          open={openLightbox}
-          onClose={() => setOpenLightbox(false)}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: {
-              maxHeight: "90vh",
-              background: "transparent",
-              boxShadow: "none",
-              overflow: "hidden",
-            },
-          }}
-        >
-          <DialogContent sx={{ p: 0, position: "relative" }}>
-            <IconButton
-              onClick={() => setOpenLightbox(false)}
-              size="large"
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                color: "white",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.7)" },
-                zIndex: 1,
-              }}
-            >
-              <IconX />
-            </IconButton>
-            {selectedImage && (
-              <Box
-                component="img"
-                src={selectedImage}
-                alt="Full size certificate"
-                sx={{
-                  width: "100%",
-                  maxHeight: "80vh",
-                  objectFit: "contain",
-                  display: "block",
-                }}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+       
       </Card>
     );
   };
