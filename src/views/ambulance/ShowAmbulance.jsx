@@ -1,26 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  Avatar,
-  Button,
-  Card,
-  CardContent,
-} from '@mui/material';
-import {
-  IconArrowLeft,
-  IconMapPin,
-  IconUser,
-  IconShieldCheck,
-  IconAmbulance,
-} from '@tabler/icons-react';
-import {ambulanceService} from '../../services/ambulanceService';
+import { Box, Typography, Paper, Chip, CircularProgress, Divider, Grid, Avatar, Button, Card, CardContent } from '@mui/material';
+import { IconArrowLeft, IconMapPin, IconUser, IconShieldCheck, IconAmbulance, IconFileText } from '@tabler/icons-react';
+import { ambulanceService } from '../../services/ambulanceService';
 
 const LabelValue = ({ label, value }) => (
   <Box mb={1.5}>
@@ -30,6 +12,8 @@ const LabelValue = ({ label, value }) => (
     <Typography variant="body1">{value || 'N/A'}</Typography>
   </Box>
 );
+
+const isPdf = (url = '') => url.includes('/raw/upload/') || url.toLowerCase().endsWith('.pdf');
 
 const ImageCard = ({ title, url }) => (
   <Card variant="outlined" sx={{ height: '100%' }}>
@@ -66,6 +50,52 @@ const ImageCard = ({ title, url }) => (
           <Typography variant="caption" color="text.secondary">
             No image
           </Typography>
+        )}
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+const DocumentCard = ({ title, url }) => (
+  <Card variant="outlined" sx={{ height: '100%' }}>
+    <CardContent>
+      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        {title}
+      </Typography>
+      <Box
+        sx={{
+          width: '100%',
+          height: 180,
+          borderRadius: 1,
+          overflow: 'hidden',
+          bgcolor: '#f5f5f5',
+          border: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 1
+        }}
+      >
+        {!url ? (
+          <Typography variant="caption" color="text.secondary">No document</Typography>
+        ) : isPdf(url) ? (
+          <iframe
+            src={`https://docs.google.com/gview?embedded=true&url=${url}`}
+            title={title}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+          />
+        ) : (
+          <Box
+            component="img"
+            src={url}
+            alt={title}
+            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => {
+              e.currentTarget.src =
+                "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='180'%3E%3Crect width='100%25' height='100%25' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-family='Arial' font-size='14'%3EImage not available%3C/text%3E%3C/svg%3E";
+            }}
+          />
         )}
       </Box>
     </CardContent>
@@ -165,7 +195,9 @@ const ShowAmbulance = () => {
               <Grid item xs={12} md={4}>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconUser size={18} />
-                  <Typography variant="subtitle1" fontWeight={600}>Owner Details</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Owner Details
+                  </Typography>
                 </Box>
                 <Divider sx={{ my: 1.5 }} />
                 <LabelValue label="Full Name" value={data?.fullname} />
@@ -176,11 +208,13 @@ const ShowAmbulance = () => {
                 <LabelValue label="Date of Birth" value={data?.dob} />
               </Grid>
 
-              <Grid item xs={12} md={4} >
+              <Grid item xs={12} md={4}>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconAmbulance size={18} />
-                  
-                  <Typography variant="subtitle1" fontWeight={600}>Ambulance Details</Typography>
+
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Ambulance Details
+                  </Typography>
                 </Box>
                 <Divider sx={{ my: 1.5 }} />
                 <LabelValue label="Vehicle No" value={data?.vehicle_no} />
@@ -194,7 +228,9 @@ const ShowAmbulance = () => {
               <Grid item xs={12} md={4}>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconShieldCheck size={18} />
-                  <Typography variant="subtitle1" fontWeight={600}>Expiry & Validity</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Expiry & Validity
+                  </Typography>
                 </Box>
                 <Divider sx={{ my: 1.5 }} />
                 <LabelValue label="Insurance Expiry" value={data?.insurance_expiry} />
@@ -205,7 +241,9 @@ const ShowAmbulance = () => {
               <Grid item xs={12} md={6}>
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconMapPin size={18} />
-                  <Typography variant="subtitle1" fontWeight={600}>Address</Typography>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Address
+                  </Typography>
                 </Box>
                 <Divider sx={{ my: 1.5 }} />
                 <LabelValue label="Address" value={data?.address} />
@@ -219,37 +257,38 @@ const ShowAmbulance = () => {
       </Paper>
 
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>Documents & Photos</Typography>
+        <Typography variant="h6" gutterBottom>
+          Documents & Photos
+        </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Insurance" url={data?.insurance_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <DocumentCard width="100%" title="Insurance" url={data?.insurance_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Pollution" url={data?.polution_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <DocumentCard width="100%" title="Pollution" url={data?.polution_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="RC" url={data?.rc_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <DocumentCard width="100%" title="RC" url={data?.rc_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Driving Licence" url={data?.driving_licence_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <DocumentCard width="100%" title="Fitness" url={data?.ambulance_fitness_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Ambulance Front" url={data?.ambulance_front_pic} />
+
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Ambulance Back" url={data?.ambulance_back_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Fitness" url={data?.ambulance_fitness_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <ImageCard title="Driver Photo" url={data?.driver_pic} />
+          <Grid item xs={12} sm={6} md={6} lg={4}>
+            <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} />
           </Grid>
         </Grid>
       </Paper>
-
-    
     </Box>
   );
 };
