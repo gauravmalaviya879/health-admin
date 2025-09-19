@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Chip, CircularProgress, Divider, Grid, Avatar, Button, Card, CardContent } from '@mui/material';
-import { IconArrowLeft, IconMapPin, IconUser, IconShieldCheck, IconAmbulance, IconFileText } from '@tabler/icons-react';
+import { Box, Typography, Paper, Chip, CircularProgress, Divider, Grid, Avatar, Button, Card, CardContent, Tabs, Tab, Stack, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import { IconArrowLeft, IconMapPin, IconUser, IconShieldCheck, IconAmbulance, IconFileText, IconCircleCheck, IconEye, IconX } from '@tabler/icons-react';
 import { ambulanceService } from '../../services/ambulanceService';
 
 const LabelValue = ({ label, value }) => (
@@ -15,7 +15,7 @@ const LabelValue = ({ label, value }) => (
 
 const isPdf = (url = '') => url.includes('/raw/upload/') || url.toLowerCase().endsWith('.pdf');
 
-const ImageCard = ({ title, url }) => (
+const ImageCard = ({ title, url, onView }) => (
   <Card variant="outlined" sx={{ height: '100%' }}>
     <CardContent>
       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -32,7 +32,8 @@ const ImageCard = ({ title, url }) => (
           borderColor: 'divider',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          position: 'relative'
         }}
       >
         {url ? (
@@ -50,6 +51,17 @@ const ImageCard = ({ title, url }) => (
           <Typography variant="caption" color="text.secondary">
             No image
           </Typography>
+        )}
+        {url && onView && (
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<IconEye size={16} />}
+            onClick={() => onView(title, url)}
+            sx={{ position: 'absolute', right: 8, bottom: 8, textTransform: 'none' }}
+          >
+            View
+          </Button>
         )}
       </Box>
     </CardContent>
@@ -102,6 +114,49 @@ const DocumentCard = ({ title, url }) => (
   </Card>
 );
 
+// Simple TabPanel helper
+const TabPanel = ({ value, index, children }) => {
+  return (
+    <div role="tabpanel" hidden={value !== index}>
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+    </div>
+  );
+};
+
+// Facilities list with pretty chips and checklist
+const FacilitiesList = ({ facilities }) => {
+  if (!facilities) {
+    return <Typography variant="body2" color="text.secondary">No facilities provided</Typography>;
+  }
+
+  const list = Array.isArray(facilities)
+    ? facilities
+    : String(facilities)
+        .split(/[,|]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+  if (!list.length) {
+    return <Typography variant="body2" color="text.secondary">No facilities provided</Typography>;
+  }
+
+  return (
+    <Box>
+
+      <List dense sx={{ py: 0 }}>
+        {list.map((item, idx) => (
+          <ListItem key={idx} sx={{ py: 0.25 }}>
+            <ListItemIcon sx={{ minWidth: 28 }}>
+              <IconCircleCheck size={18} color="#2e7d32" />
+            </ListItemIcon>
+            <ListItemText primaryTypographyProps={{ variant: 'body2' }} primary={item} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+};
+
 const getStatusColor = (status) => {
   if (!status) return 'default';
   switch (String(status).toLowerCase()) {
@@ -126,6 +181,8 @@ const ShowAmbulance = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tab, setTab] = useState(0);
+  const [preview, setPreview] = useState({ open: false, url: '', title: '' });
 
   useEffect(() => {
     const load = async () => {
@@ -191,67 +248,73 @@ const ShowAmbulance = () => {
           </Grid>
 
           <Grid item xs={12} md={9}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <IconUser size={18} />
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    Owner Details
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 1.5 }} />
-                <LabelValue label="Full Name" value={data?.fullname} />
-                <LabelValue label="Email" value={data?.email} />
-                <LabelValue label="Mobile" value={data?.mobile} />
-                <LabelValue label="Gender" value={data?.gender} />
-                <LabelValue label="Blood Group" value={data?.blood_group} />
-                <LabelValue label="Date of Birth" value={data?.dob} />
-              </Grid>
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons allowScrollButtonsMobile>
+              <Tab icon={<IconUser size={16} />} iconPosition="start" label="Owner Details" />
+              <Tab icon={<IconAmbulance size={16} />} iconPosition="start" label="Ambulance Details" />
+              <Tab icon={<IconShieldCheck size={16} />} iconPosition="start" label="Expiry & Validity" />
+              <Tab icon={<IconMapPin size={16} />} iconPosition="start" label="Address" />
+            </Tabs>
+            <Divider sx={{ mt: 1 }} />
 
-              <Grid item xs={12} md={4}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <IconAmbulance size={18} />
-
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    Ambulance Details
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 1.5 }} />
-                <LabelValue label="Vehicle No" value={data?.vehicle_no} />
-                <LabelValue label="Type" value={data?.ambulance_type} />
-                <LabelValue label="Facilities"  value={data?.ambulance_facilities} />
-                <LabelValue label="Experience" value={data?.experience} />
-                <LabelValue label="RC No" value={data?.rc_no} />
-                <LabelValue label="Insurance Holder" value={data?.insurance_holder} />
+            <TabPanel value={tab} index={0}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="Full Name" value={data?.fullname} />
+                  <LabelValue label="Email" value={data?.email} />
+                  <LabelValue label="Mobile" value={data?.mobile} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="Gender" value={data?.gender} />
+                  <LabelValue label="Blood Group" value={data?.blood_group} />
+                  <LabelValue label="Date of Birth" value={data?.dob} />
+                </Grid>
               </Grid>
+            </TabPanel>
 
-              <Grid item xs={12} md={4}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <IconShieldCheck size={18} />
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    Expiry & Validity
+            <TabPanel value={tab} index={1}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="Vehicle No" value={data?.vehicle_no} />
+                  <LabelValue label="Type" value={data?.ambulance_type} />
+                  <LabelValue label="Experience" value={data?.experience} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="RC No" value={data?.rc_no} />
+                  <LabelValue label="Insurance Holder" value={data?.insurance_holder} />
+                </Grid>
+                <Grid item xs={12} lg={8}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                    Facilities in Ambulance
                   </Typography>
-                </Box>
-                <Divider sx={{ my: 1.5 }} />
-                <LabelValue label="Insurance Expiry" value={data?.insurance_expiry} />
-                <LabelValue label="Pollution Expiry" value={data?.polution_expiry} />
-                <LabelValue label="Fitness Expiry" value={data?.ambulance_fitness_expiry} />
+                  <FacilitiesList facilities={data?.ambulance_facilities} />
+                </Grid>
               </Grid>
+            </TabPanel>
 
-              <Grid item xs={12} md={6}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <IconMapPin size={18} />
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    Address
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 1.5 }} />
-                <LabelValue label="Address" value={data?.address} />
-                <LabelValue label="City" value={data?.city} />
-                <LabelValue label="State" value={data?.state} />
-                <LabelValue label="Channel ID" value={data?.channelid} />
+            <TabPanel value={tab} index={2}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="Insurance Expiry" value={data?.insurance_expiry} />
+                  <LabelValue label="Pollution Expiry" value={data?.polution_expiry} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="Fitness Expiry" value={data?.ambulance_fitness_expiry} />
+                </Grid>
               </Grid>
-            </Grid>
+            </TabPanel>
+
+            <TabPanel value={tab} index={3}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="Address" value={data?.address} />
+                  <LabelValue label="City" value={data?.city} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4}>
+                  <LabelValue label="State" value={data?.state} />
+                  <LabelValue label="Channel ID" value={data?.channelid} />
+                </Grid>
+              </Grid>
+            </TabPanel>
           </Grid>
         </Grid>
       </Paper>
@@ -276,18 +339,34 @@ const ShowAmbulance = () => {
           </Grid>
 
           <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} />
+            <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} />
+            <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} />
+            <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} />
+            <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
           </Grid>
         </Grid>
+
+        <Dialog open={preview.open} onClose={() => setPreview({ open: false, url: '', title: '' })} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
+            {preview.title}
+            <IconButton aria-label="close" onClick={() => setPreview({ open: false, url: '', title: '' })} size="small">
+              <IconX size={18} />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            {preview.url ? (
+              <Box component="img" src={preview.url} alt={preview.title} sx={{ width: '100%', height: 'auto', borderRadius: 1 }} />
+            ) : (
+              <Typography variant="body2" color="text.secondary">No image to preview</Typography>
+            )}
+          </DialogContent>
+        </Dialog>
       </Paper>
     </Box>
   );
