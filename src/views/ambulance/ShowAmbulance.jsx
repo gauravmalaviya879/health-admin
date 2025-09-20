@@ -1,7 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Chip, CircularProgress, Divider, Grid, Avatar, Button, Card, CardContent, Tabs, Tab, Stack, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
-import { IconArrowLeft, IconMapPin, IconUser, IconShieldCheck, IconAmbulance, IconFileText, IconCircleCheck, IconEye, IconX } from '@tabler/icons-react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  Avatar,
+  Button,
+  Card,
+  CardContent,
+  Tabs,
+  Tab,
+  Stack,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
+import {
+  IconArrowLeft,
+  IconMapPin,
+  IconUser,
+  IconShieldCheck,
+  IconAmbulance,
+  IconFileText,
+  IconCircleCheck,
+  IconEye
+} from '@tabler/icons-react';
 import { ambulanceService } from '../../services/ambulanceService';
 
 const LabelValue = ({ label, value }) => (
@@ -15,7 +43,7 @@ const LabelValue = ({ label, value }) => (
 
 const isPdf = (url = '') => url.includes('/raw/upload/') || url.toLowerCase().endsWith('.pdf');
 
-const ImageCard = ({ title, url, onView }) => (
+const ImageCard = ({ title, url }) => (
   <Card variant="outlined" sx={{ height: '100%' }}>
     <CardContent>
       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -52,15 +80,15 @@ const ImageCard = ({ title, url, onView }) => (
             No image
           </Typography>
         )}
-        {url && onView && (
+        {url && (
           <Button
             size="small"
             variant="contained"
             startIcon={<IconEye size={16} />}
-            onClick={() => onView(title, url)}
+            onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
             sx={{ position: 'absolute', right: 8, bottom: 8, textTransform: 'none' }}
           >
-            View
+            Open
           </Button>
         )}
       </Box>
@@ -86,11 +114,14 @@ const DocumentCard = ({ title, url }) => (
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          p: 1
+          p: 1,
+          position: 'relative'
         }}
       >
         {!url ? (
-          <Typography variant="caption" color="text.secondary">No document</Typography>
+          <Typography variant="caption" color="text.secondary">
+            No document
+          </Typography>
         ) : isPdf(url) ? (
           <iframe
             src={`https://docs.google.com/gview?embedded=true&url=${url}`}
@@ -109,6 +140,17 @@ const DocumentCard = ({ title, url }) => (
             }}
           />
         )}
+        {url && (
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<IconEye size={16} />}
+            onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+            sx={{ position: 'absolute', right: 8, bottom: 8, textTransform: 'none' }}
+          >
+            Open
+          </Button>
+        )}
       </Box>
     </CardContent>
   </Card>
@@ -126,7 +168,11 @@ const TabPanel = ({ value, index, children }) => {
 // Facilities list with pretty chips and checklist
 const FacilitiesList = ({ facilities }) => {
   if (!facilities) {
-    return <Typography variant="body2" color="text.secondary">No facilities provided</Typography>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        No facilities provided
+      </Typography>
+    );
   }
 
   const list = Array.isArray(facilities)
@@ -137,12 +183,15 @@ const FacilitiesList = ({ facilities }) => {
         .filter(Boolean);
 
   if (!list.length) {
-    return <Typography variant="body2" color="text.secondary">No facilities provided</Typography>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        No facilities provided
+      </Typography>
+    );
   }
 
   return (
     <Box>
-
       <List dense sx={{ py: 0 }}>
         {list.map((item, idx) => (
           <ListItem key={idx} sx={{ py: 0.25 }}>
@@ -182,7 +231,6 @@ const ShowAmbulance = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState(0);
-  const [preview, setPreview] = useState({ open: false, url: '', title: '' });
 
   useEffect(() => {
     const load = async () => {
@@ -234,8 +282,8 @@ const ShowAmbulance = () => {
       </Button>
 
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Grid container>
+          <Grid item xs={12} md={12} mx={5} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Avatar src={data?.driver_pic} sx={{ width: 140, height: 140, mb: 1 }} />
             <Typography variant="h6" style={{ fontSize: '1.2rem' }} textAlign="center" gutterBottom>
               {name}
@@ -246,15 +294,17 @@ const ShowAmbulance = () => {
               <Chip label={data?.profile_completed ? 'Profile Completed' : 'Profile Pending'} variant="outlined" />
             </Box>
           </Grid>
-
-          <Grid item xs={12} md={9}>
+        </Grid>
+        <Grid container>
+          <Grid item xs={12} md={12}>
             <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons allowScrollButtonsMobile>
               <Tab icon={<IconUser size={16} />} iconPosition="start" label="Owner Details" />
               <Tab icon={<IconAmbulance size={16} />} iconPosition="start" label="Ambulance Details" />
               <Tab icon={<IconShieldCheck size={16} />} iconPosition="start" label="Expiry & Validity" />
               <Tab icon={<IconMapPin size={16} />} iconPosition="start" label="Address" />
+              <Tab icon={<IconFileText size={16} />} iconPosition="start" label="Documents & Photos" />
             </Tabs>
-            <Divider sx={{ mt: 1 }} />
+            {/* <Divider sx={{ mt: 1 }} /> */}
 
             <TabPanel value={tab} index={0}>
               <Grid container spacing={2}>
@@ -315,58 +365,38 @@ const ShowAmbulance = () => {
                 </Grid>
               </Grid>
             </TabPanel>
+
+            <TabPanel value={tab} index={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <DocumentCard width="100%" title="Insurance" url={data?.insurance_pic} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <DocumentCard width="100%" title="Pollution" url={data?.polution_pic} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <DocumentCard width="100%" title="RC" url={data?.rc_pic} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <DocumentCard width="100%" title="Fitness" url={data?.ambulance_fitness_pic} />
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} lg={4}>
+                  <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} />
+                </Grid>
+              </Grid>
+            </TabPanel>
           </Grid>
         </Grid>
-      </Paper>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Documents & Photos
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <DocumentCard width="100%" title="Insurance" url={data?.insurance_pic} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <DocumentCard width="100%" title="Pollution" url={data?.polution_pic} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <DocumentCard width="100%" title="RC" url={data?.rc_pic} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <DocumentCard width="100%" title="Fitness" url={data?.ambulance_fitness_pic} />
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6} lg={4}>
-            <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} onView={(t, u) => setPreview({ open: true, title: t, url: u })} />
-          </Grid>
-        </Grid>
-
-        <Dialog open={preview.open} onClose={() => setPreview({ open: false, url: '', title: '' })} maxWidth="md" fullWidth>
-          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-            {preview.title}
-            <IconButton aria-label="close" onClick={() => setPreview({ open: false, url: '', title: '' })} size="small">
-              <IconX size={18} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers>
-            {preview.url ? (
-              <Box component="img" src={preview.url} alt={preview.title} sx={{ width: '100%', height: 'auto', borderRadius: 1 }} />
-            ) : (
-              <Typography variant="body2" color="text.secondary">No image to preview</Typography>
-            )}
-          </DialogContent>
-        </Dialog>
       </Paper>
     </Box>
   );
