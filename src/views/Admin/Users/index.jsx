@@ -22,10 +22,12 @@ import {
   TablePagination,
   InputAdornment
 } from '@mui/material';
-import { IconEdit, IconCircleMinus, IconShieldPlus, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { IconEdit, IconCircleMinus, IconShieldPlus, IconEye, IconEyeOff, IconHistory } from '@tabler/icons-react';
 import adminService from 'services/adminService';
+import { useNavigate } from 'react-router-dom';
 
 const AdminUsers = () => {
+  const navigate = useNavigate();
   const [adminUsers, setAdminUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -287,6 +289,13 @@ const AdminUsers = () => {
                       <TableCell align="right">
                         <IconButton onClick={() => handleEdit(user)} color="primary">
                           <IconEdit />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => navigate(`/admin/history/${user._id}`)}
+                          color="secondary"
+                          title="View History"
+                        >
+                          <IconHistory />
                         </IconButton>
                         <IconButton
                           onClick={() => handleDeleteClick(user)}
