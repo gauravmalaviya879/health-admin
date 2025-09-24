@@ -49,7 +49,7 @@ const iconFor = (cat) => {
 const chipColorFor = (status) => {
   const s = String(status || '').toLowerCase();
   if (s.includes('approved')) return 'success';
-  if (s.includes('rejected')) return 'error';
+  if (s.includes('reject')) return 'error';
   if (s.includes('updated') || s.includes('edited')) return 'info';
   return 'default';
 };
@@ -236,40 +236,68 @@ const AdminHistory = () => {
                 const left = iconFor(cat);
                 const canView = !!it?.request_doctorid || !!it?.request_ambulanceid;
                 return (
-                  <ListItem key={it._id} alignItems="flex-start" divider
+                  <ListItem
+                    key={it._id}
+                    alignItems="flex-start"
+                    divider
                     secondaryAction={
                       canView ? (
-                        <IconButton edge="end" aria-label="view" onClick={() => setDetail({ open: true, item: it })}>
-                          <IconEye />
+                        <IconButton
+                          edge="end"
+                          aria-label="view"
+                          onClick={() => setDetail({ open: true, item: it })}
+                        >
+                          <IconEye size={20} />
                         </IconButton>
                       ) : undefined
                     }
                   >
+                    {/* Avatar / Left side */}
                     <ListItemAvatar>
                       <Avatar variant="rounded">{left}</Avatar>
                     </ListItemAvatar>
+
+                    {/* Main content */}
                     <ListItemText
+                      disableTypography
                       primary={
                         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                           <Typography variant="subtitle1" sx={{ mr: 1 }}>
                             {it.description || '—'}
                           </Typography>
-                          <Chip size="small" label={it.status || 'status'} color={chipColorFor(it.status)} variant="outlined" />
+                          <Chip
+                            size="small"
+                            label={it.status || 'status'}
+                            color={chipColorFor(it.status)}
+                            variant="outlined"
+                          />
                         </Stack>
                       }
                       secondary={
                         <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 0.5 }}>
+                          {/* Time with Icon */}
                           <Stack direction="row" spacing={0.5} alignItems="center">
-                            <IconClock size={14} />
+                            <IconClock size={14} style={{ opacity: 0.7 }} />
                             <Typography variant="caption" color="text.secondary">
                               {formatWhen(it.createdAt)}
                             </Typography>
                           </Stack>
+
+                          {/* Doctor Info */}
                           {it?.request_doctorid && (
-                            <Chip size="small" label={`Doctor: ${it.request_doctorid?.name}`} />
+                            <Chip
+                              size="small"
+                              
+                              label={`Doctor: ${it.request_doctorid?.name}`}
+                            />
                           )}
+
+                          {/* Ambulance Owner Info */}
                           {it?.request_ambulanceid && (
-                            <Chip size="small" label={`Ambulance: ${it.request_ambulanceid?.fullname}`} />
+                            <Chip
+                              size="small"
+                              label={`Ambulance Owner: ${it.request_ambulanceid?.fullname}`}
+                            />
                           )}
                         </Stack>
                       }
