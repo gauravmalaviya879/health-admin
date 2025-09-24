@@ -33,7 +33,7 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  Paper as MuiPaper,
+  Paper as MuiPaper
 } from '@mui/material';
 import {
   IconArrowLeft,
@@ -60,18 +60,8 @@ function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`doctor-tabpanel-${index}`}
-      aria-labelledby={`doctor-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+    <div role="tabpanel" hidden={value !== index} id={`doctor-tabpanel-${index}`} aria-labelledby={`doctor-tab-${index}`} {...other}>
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -80,7 +70,7 @@ function TabPanel(props) {
 function a11yProps(index) {
   return {
     id: `doctor-tab-${index}`,
-    'aria-controls': `doctor-tabpanel-${index}`,
+    'aria-controls': `doctor-tabpanel-${index}`
   };
 }
 
@@ -105,9 +95,6 @@ const DoctorDetails = () => {
   // Add state for lightbox
   const [selectedImage, setSelectedImage] = useState(null);
 
-
-
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -126,15 +113,12 @@ const DoctorDetails = () => {
     setOpenDialog(false);
   };
 
-  const filteredAppointments = doctor?.appointmentsDetails?.filter(appointment =>
-    appointment.patientname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.mobile.includes(searchTerm)
-  ) || [];
+  const filteredAppointments =
+    doctor?.appointmentsDetails?.filter(
+      (appointment) => appointment.patientname.toLowerCase().includes(searchTerm.toLowerCase()) || appointment.mobile.includes(searchTerm)
+    ) || [];
 
-  const paginatedAppointments = filteredAppointments.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const paginatedAppointments = filteredAppointments.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -187,15 +171,13 @@ const DoctorDetails = () => {
     }
   };
 
-
-
-  
-
   // Render Hospital Information Tab
   const renderHospitalInfo = () => (
     <Card variant="outlined">
       <CardContent>
-        <Typography variant="h6" gutterBottom>Hospitals List</Typography>
+        <Typography variant="h6" gutterBottom>
+          Hospitals List
+        </Typography>
         <Divider sx={{ mb: 3 }} />
 
         <Grid container spacing={3}>
@@ -213,8 +195,8 @@ const DoctorDetails = () => {
                       borderColor: 'divider',
                       borderRadius: 1,
                       '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
+                        backgroundColor: 'action.hover'
+                      }
                     }}
                   >
                     <Box display="flex" alignItems="flex-start">
@@ -232,54 +214,35 @@ const DoctorDetails = () => {
                           mt: 0.5,
                           flexShrink: 0,
                           fontWeight: 'bold',
-                          fontSize: '0.875rem',
+                          fontSize: '0.875rem'
                         }}
                       >
                         {index + 1}
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Box mb={1}>
-                          <Typography
-                            variant="subtitle2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}
-                          >
+                          <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}>
                             Hospital Name
                           </Typography>
-                          <Typography
-                            variant="body1"
-                            sx={{ fontWeight: 500 }}
-                          >
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             {hospital.name || 'N/A'}
                           </Typography>
                         </Box>
 
                         <Box>
-                          <Typography
-                            variant="subtitle2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}
-                          >
+                          <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}>
                             Address
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            {[
-                              hospital.address,
-                              hospital.city,
-                              hospital.state,
-                              hospital.pincode,
-                              hospital.country
-                            ].filter(Boolean).join(', ') || 'Address not available'}
+                            {[hospital.address, hospital.city, hospital.state, hospital.pincode, hospital.country]
+                              .filter(Boolean)
+                              .join(', ') || 'Address not available'}
                           </Typography>
                         </Box>
 
                         {hospital.phone && (
                           <Box mt={1}>
-                            <Typography
-                              variant="subtitle2"
-                              color="text.secondary"
-                              sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}
-                            >
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '0.75rem', lineHeight: 1.2, mb: 0.5 }}>
                               Contact
                             </Typography>
                             <Typography variant="body2" color="primary">
@@ -300,7 +263,7 @@ const DoctorDetails = () => {
                   textAlign: 'center',
                   border: '1px dashed',
                   borderColor: 'divider',
-                  borderRadius: 1,
+                  borderRadius: 1
                 }}
               >
                 <Typography variant="body1" color="text.secondary">
@@ -316,9 +279,7 @@ const DoctorDetails = () => {
 
   // Render Surgeries with accordion functionality
   const renderSurgeries = () => {
-    const visibleSurgeries = showAllSurgeries
-      ? doctor.surgeriesDetails
-      : doctor.surgeriesDetails.slice(0, 4);
+    const visibleSurgeries = showAllSurgeries ? doctor.surgeriesDetails : doctor.surgeriesDetails.slice(0, 4);
     const hasMoreSurgeries = doctor.surgeriesDetails.length > 4 && !showAllSurgeries;
 
     return (
@@ -333,8 +294,8 @@ const DoctorDetails = () => {
               mb: 2,
               '&:before': { display: 'none' },
               '&.Mui-expanded': {
-                my: 2,
-              },
+                my: 2
+              }
             }}
           >
             <AccordionSummary
@@ -345,10 +306,10 @@ const DoctorDetails = () => {
                 backgroundColor: 'rgba(0, 0, 0, 0.02)',
                 borderRadius: 1,
                 '&.Mui-expanded': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                  backgroundColor: 'rgba(25, 118, 210, 0.04)'
                 },
                 alignItems: 'flex-start',
-                py: 2,
+                py: 2
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%', gap: 2 }}>
@@ -373,30 +334,15 @@ const DoctorDetails = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       {surgery.general_price > 0 && (
-                        <Chip
-                          label={`From ₹${surgery.general_price.toLocaleString()}`}
-                          color="primary"
-                          variant="outlined"
-                          size="small"
-                        />
+                        <Chip label={`From ₹${surgery.general_price.toLocaleString()}`} color="primary" variant="outlined" size="small" />
                       )}
                       {surgery.days && (
-                        <Chip
-                          label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'}`}
-                          size="small"
-                          variant="outlined"
-                        />
+                        <Chip label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'}`} size="small" variant="outlined" />
                       )}
                     </Box>
                   </Box>
                   {surgery.surgerytype && (
-                    <Chip
-                      label={surgery.surgerytype}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      sx={{ mb: 1 }}
-                    />
+                    <Chip label={surgery.surgerytype} size="small" color="primary" variant="outlined" sx={{ mb: 1 }} />
                   )}
                   {surgery.features && (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -431,9 +377,7 @@ const DoctorDetails = () => {
                       <Box component="ul" sx={{ pl: 3, m: 0, '& li': { mb: 0.5 } }}>
                         {surgery.inclusive.split('\n').map((item, i) => (
                           <li key={i}>
-                            <Typography variant="body2">
-                              {item.trim()}
-                            </Typography>
+                            <Typography variant="body2">{item.trim()}</Typography>
                           </li>
                         ))}
                       </Box>
@@ -468,9 +412,7 @@ const DoctorDetails = () => {
                       <Box component="ul" sx={{ pl: 3, m: 0, '& li': { mb: 0.5 } }}>
                         {surgery.exclusive.split('\n').map((item, i) => (
                           <li key={i}>
-                            <Typography variant="body2">
-                              {item.trim()}
-                            </Typography>
+                            <Typography variant="body2">{item.trim()}</Typography>
                           </li>
                         ))}
                       </Box>
@@ -498,9 +440,7 @@ const DoctorDetails = () => {
                       <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, mb: 1 }}>
                         Additional Features
                       </Typography>
-                      <Typography variant="body2">
-                        {surgery.additional_features}
-                      </Typography>
+                      <Typography variant="body2">{surgery.additional_features}</Typography>
                     </Paper>
                   </Grid>
                 )}
@@ -565,7 +505,7 @@ const DoctorDetails = () => {
                 fontWeight: 500,
                 borderRadius: 2,
                 px: 3,
-                py: 1,
+                py: 1
               }}
             >
               {showAllSurgeries ? 'Show Less' : `Show ${doctor.surgeriesDetails.length - 4} More Surgeries`}
@@ -593,7 +533,7 @@ const DoctorDetails = () => {
                 <InputAdornment position="start">
                   <IconSearch size={20} />
                 </InputAdornment>
-              ),
+              )
             }}
             sx={{ width: 300 }}
           />
@@ -633,8 +573,11 @@ const DoctorDetails = () => {
                         label={appointment.status}
                         size="small"
                         color={
-                          appointment.status.toLowerCase() === 'accept' ? 'success' :
-                            appointment.status.toLowerCase() === 'pending' ? 'warning' : 'default'
+                          appointment.status.toLowerCase() === 'accept'
+                            ? 'success'
+                            : appointment.status.toLowerCase() === 'pending'
+                              ? 'warning'
+                              : 'default'
                         }
                         variant="outlined"
                       />
@@ -677,8 +620,7 @@ const DoctorDetails = () => {
       </CardContent>
     </Card>
   );
-  const isPdf = (url = "") =>
-    url.includes("/raw/upload/") || url.toLowerCase().endsWith(".pdf");
+  const isPdf = (url = '') => url.includes('/raw/upload/') || url.toLowerCase().endsWith('.pdf');
 
   // Render Identity Proof Tab
   const renderIdentityProof = (identityProofs) => {
@@ -687,7 +629,9 @@ const DoctorDetails = () => {
     return (
       <Card variant="outlined">
         <CardContent>
-          <Typography variant="h6" gutterBottom>Identity Proof</Typography>
+          <Typography variant="h6" gutterBottom>
+            Identity Proof
+          </Typography>
           <Divider sx={{ mb: 3 }} />
 
           {proofs.length > 0 ? (
@@ -706,7 +650,7 @@ const DoctorDetails = () => {
                           overflow: 'hidden',
                           height: '100%',
                           display: 'flex',
-                          flexDirection: 'column',
+                          flexDirection: 'column'
                         }}
                       >
                         {/* Preview */}
@@ -720,7 +664,7 @@ const DoctorDetails = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            '&:hover img': { transform: 'scale(1.03)' },
+                            '&:hover img': { transform: 'scale(1.03)' }
                           }}
                         >
                           {isPdf(fileUrl) ? (
@@ -731,7 +675,7 @@ const DoctorDetails = () => {
                               style={{
                                 width: '100%',
                                 height: '100%',
-                                border: 'none',
+                                border: 'none'
                               }}
                             />
                           ) : (
@@ -744,11 +688,12 @@ const DoctorDetails = () => {
                                 height: '100%',
                                 objectFit: 'contain',
                                 transition: 'transform 0.3s ease-in-out',
-                                display: 'block',
+                                display: 'block'
                               }}
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
+                                e.target.src =
+                                  "data:image/svg+xml;charset=UTF-8,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='14' text-anchor='middle' alignment-baseline='middle' fill='%23999'%3EImage not available%3C/text%3E%3C/svg%3E";
                               }}
                             />
                           )}
@@ -764,16 +709,10 @@ const DoctorDetails = () => {
                             size="small"
                             onClick={() =>
                               isPdf(fileUrl)
-                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, "_blank")
-                                : window.open(fileUrl, "_blank")
+                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, '_blank')
+                                : window.open(fileUrl, '_blank')
                             }
-                            startIcon={
-                              isPdf(fileUrl) ? (
-                                <IconFileText size={16} />
-                              ) : (
-                                <IconZoomIn size={16} />
-                              )
-                            }
+                            startIcon={isPdf(fileUrl) ? <IconFileText size={16} /> : <IconZoomIn size={16} />}
                           >
                             View
                           </Button>
@@ -802,7 +741,9 @@ const DoctorDetails = () => {
     return (
       <Card variant="outlined">
         <CardContent>
-          <Typography variant="h6" gutterBottom>Certificate Proof</Typography>
+          <Typography variant="h6" gutterBottom>
+            Certificate Proof
+          </Typography>
           <Divider sx={{ mb: 3 }} />
 
           {proofs.length > 0 ? (
@@ -821,7 +762,7 @@ const DoctorDetails = () => {
                           overflow: 'hidden',
                           height: '100%',
                           display: 'flex',
-                          flexDirection: 'column',
+                          flexDirection: 'column'
                         }}
                       >
                         {/* Preview */}
@@ -835,7 +776,7 @@ const DoctorDetails = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            '&:hover img': { transform: 'scale(1.03)' },
+                            '&:hover img': { transform: 'scale(1.03)' }
                           }}
                         >
                           {isPdf(fileUrl) ? (
@@ -846,7 +787,7 @@ const DoctorDetails = () => {
                               style={{
                                 width: '100%',
                                 height: '100%',
-                                border: 'none',
+                                border: 'none'
                               }}
                             />
                           ) : (
@@ -859,11 +800,12 @@ const DoctorDetails = () => {
                                 height: '100%',
                                 objectFit: 'contain',
                                 transition: 'transform 0.3s ease-in-out',
-                                display: 'block',
+                                display: 'block'
                               }}
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg width=\'200\' height=\'200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f5f5f5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' alignment-baseline=\'middle\' fill=\'%23999\'%3EImage not available%3C/text%3E%3C/svg%3E';
+                                e.target.src =
+                                  "data:image/svg+xml;charset=UTF-8,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='14' text-anchor='middle' alignment-baseline='middle' fill='%23999'%3EImage not available%3C/text%3E%3C/svg%3E";
                               }}
                             />
                           )}
@@ -879,16 +821,10 @@ const DoctorDetails = () => {
                             size="small"
                             onClick={() =>
                               isPdf(fileUrl)
-                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, "_blank")
-                                : window.open(fileUrl, "_blank")
+                                ? window.open(`https://docs.google.com/gview?embedded=true&url=${fileUrl}`, '_blank')
+                                : window.open(fileUrl, '_blank')
                             }
-                            startIcon={
-                              isPdf(fileUrl) ? (
-                                <IconFileText size={16} />
-                              ) : (
-                                <IconZoomIn size={16} />
-                              )
-                            }
+                            startIcon={isPdf(fileUrl) ? <IconFileText size={16} /> : <IconZoomIn size={16} />}
                           >
                             View
                           </Button>
@@ -906,20 +842,13 @@ const DoctorDetails = () => {
             </Box>
           )}
         </CardContent>
-
-       
       </Card>
     );
   };
 
   // Render Appointment Details Dialog
   const renderAppointmentDialog = () => (
-    <Dialog
-      open={openDialog}
-      onClose={handleCloseDialog}
-      maxWidth="md"
-      fullWidth
-    >
+    <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
       <DialogTitle>Appointment Details</DialogTitle>
       <DialogContent dividers>
         {selectedAppointment && (
@@ -945,12 +874,16 @@ const DoctorDetails = () => {
                 </Box>
 
                 <Box mb={2}>
-                  <Typography variant="subtitle2" color="textSecondary">Alternate Mobile</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Alternate Mobile
+                  </Typography>
                   <Typography>{selectedAppointment.alt_mobile || 'N/A'}</Typography>
                 </Box>
 
                 <Box mb={2}>
-                  <Typography variant="subtitle2" color="textSecondary">Visit Type</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Visit Type
+                  </Typography>
                   <Chip
                     label={selectedAppointment.visit_types.replace('_', ' ').toUpperCase()}
                     size="small"
@@ -965,15 +898,21 @@ const DoctorDetails = () => {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Date</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Date
+                  </Typography>
                   <Typography>{selectedAppointment.date}</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Time</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Time
+                  </Typography>
                   <Typography>{selectedAppointment.time}</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary">Reason</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Reason
+                  </Typography>
                   <Typography>{selectedAppointment.appointment_reason || 'Not specified'}</Typography>
                 </Grid>
               </Grid>
@@ -1001,13 +940,7 @@ const DoctorDetails = () => {
     return (
       <Box textAlign="center" p={3}>
         <Typography color="error">{error}</Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          startIcon={<IconArrowLeft />}
-          sx={{ mt: 2 }}
-        >
+        <Button variant="outlined" color="primary" onClick={() => navigate(-1)} startIcon={<IconArrowLeft />} sx={{ mt: 2 }}>
           Go Back
         </Button>
       </Box>
@@ -1018,13 +951,7 @@ const DoctorDetails = () => {
     return (
       <Box textAlign="center" p={3}>
         <Typography>No doctor data available</Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          startIcon={<IconArrowLeft />}
-          sx={{ mt: 2 }}
-        >
+        <Button variant="outlined" color="primary" onClick={() => navigate(-1)} startIcon={<IconArrowLeft />} sx={{ mt: 2 }}>
           Go Back
         </Button>
       </Box>
@@ -1033,66 +960,97 @@ const DoctorDetails = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button
-        startIcon={<IconArrowLeft />}
-        onClick={() => navigate(-1)}
-        sx={{ mb: 3 }}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 2,
+          mb: 3
+        }}
       >
-        Back to Doctors
-      </Button>
+        <Button startIcon={<IconArrowLeft />} onClick={() => navigate(-1)}>
+          Back to Doctors
+        </Button>
 
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<IconClipboardText size={16} />}
+          onClick={() => navigate(`/doctors/${id}/history`)}
+        >
+          View History
+        </Button>
+      </Box>
       {/* Contact Information Section */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent>
           <Grid container spacing={3}>
             <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Avatar
-                src={doctor.profile_pic}
-                sx={{ width: 150, height: 150, mb: 2 }}
-              />
-              <Chip
-                label={doctor.approval_status || 'N/A'}
-                color={getStatusColor(doctor.approval_status)}
-                sx={{ mb: 2 }}
-              />
+              <Avatar src={doctor.profile_pic} sx={{ width: 150, height: 150, mb: 2 }} />
+              <Chip label={doctor.approval_status || 'N/A'} color={getStatusColor(doctor.approval_status)} sx={{ mb: 2 }} />
             </Grid>
             <Grid item xs={12} md={8}>
-              <Typography variant="h5" gutterBottom>{doctor.name || 'N/A'}</Typography>
+              <Typography variant="h5" gutterBottom>
+                {doctor.name || 'N/A'}
+              </Typography>
               <Divider sx={{ my: 2 }} />
 
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} >
-                  <Typography variant="subtitle2" color="textSecondary">Email</Typography>
-                  <Typography variant="body1" paragraph>{doctor.email || 'N/A'}</Typography>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Email
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.email || 'N/A'}
+                  </Typography>
 
-                  <Typography variant="subtitle2" color="textSecondary">Mobile</Typography>
-                  <Typography variant="body1" paragraph>{doctor.mobile || 'N/A'}</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Mobile
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.mobile || 'N/A'}
+                  </Typography>
 
-                  <Typography variant="subtitle2" color="textSecondary">Gender</Typography>
-                  <Typography variant="body1" paragraph>{doctor.gender || 'N/A'}</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Gender
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.gender || 'N/A'}
+                  </Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Qualification</Typography>
-                  <Typography variant="body1" paragraph>{doctor.qualification || 'N/A'}</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Qualification
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.qualification || 'N/A'}
+                  </Typography>
 
-                  <Typography variant="subtitle2" color="textSecondary">Experience</Typography>
-                  <Typography variant="body1" paragraph>{doctor.experience || 'N/A'}</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Experience
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.experience || 'N/A'}
+                  </Typography>
 
-                  <Typography variant="subtitle2" color="textSecondary">Specialty</Typography>
-                  <Typography variant="body1" paragraph>{doctor.specialty || 'N/A'}</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Specialty
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.specialty || 'N/A'}
+                  </Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="textSecondary">Address</Typography>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Address
+                  </Typography>
                   <Typography variant="body1" maxWidth={350} overflow="hidden">
-                    {[
-                      doctor.hospital_address,
-                      doctor.city,
-                      doctor.state,
-                      doctor.pincode,
-                      doctor.country
-                    ].filter(Boolean).join(', ') || 'N/A'}
+                    {[doctor.hospital_address, doctor.city, doctor.state, doctor.pincode, doctor.country].filter(Boolean).join(', ') ||
+                      'N/A'}
                   </Typography>
                 </Grid>
               </Grid>
@@ -1103,43 +1061,12 @@ const DoctorDetails = () => {
 
       {/* Tabs */}
       <Box sx={{ width: '100%', mb: 4 }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          aria-label="doctor details tabs"
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          <Tab
-            icon={<IconId size={20} />}
-            iconPosition="start"
-            label="Identity Proof"
-            {...a11yProps(0)}
-          />
-          <Tab
-            icon={<IconCertificate size={20} />}
-            iconPosition="start"
-            label="Certificate Proofs"
-            {...a11yProps(1)}
-          />
-          <Tab
-            icon={<IconBuildingHospital size={20} />}
-            iconPosition="start"
-            label="Hospital Information"
-            {...a11yProps(2)}
-          />
-          <Tab
-            icon={<IconStethoscope size={20} />}
-            iconPosition="start"
-            label="Surgeries"
-            {...a11yProps(3)}
-          />
-          <Tab
-            icon={<IconClipboardText size={20} />}
-            iconPosition="start"
-            label="Consultations Appointments"
-            {...a11yProps(4)}
-          />
+        <Tabs value={tabValue} onChange={handleTabChange} aria-label="doctor details tabs" variant="scrollable" scrollButtons="auto">
+          <Tab icon={<IconId size={20} />} iconPosition="start" label="Identity Proof" {...a11yProps(0)} />
+          <Tab icon={<IconCertificate size={20} />} iconPosition="start" label="Certificate Proofs" {...a11yProps(1)} />
+          <Tab icon={<IconBuildingHospital size={20} />} iconPosition="start" label="Hospital Information" {...a11yProps(2)} />
+          <Tab icon={<IconStethoscope size={20} />} iconPosition="start" label="Surgeries" {...a11yProps(3)} />
+          <Tab icon={<IconClipboardText size={20} />} iconPosition="start" label="Consultations Appointments" {...a11yProps(4)} />
         </Tabs>
       </Box>
 

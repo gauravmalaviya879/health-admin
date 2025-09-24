@@ -19,6 +19,22 @@ const historyService = {
       console.error('Error fetching histories:', error);
       throw error;
     }
+  },
+  listByDoctor: async (doctorId) => {
+    const token = authService.getToken();
+    const payload = { doctorid: doctorId };
+    try {
+      const response = await axios.post(`${API_URL}/admin/histories/list`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching doctor histories:', error);
+      throw error;
+    }
   }
 };
 

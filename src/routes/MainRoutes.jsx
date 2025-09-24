@@ -19,6 +19,7 @@ import Dashboard from '../views/dashboard';
 import Policy from '../views/Policy';
 import AdminUsers from '../views/Admin/Users';
 import AdminHistory from '../views/Admin/History';
+import DoctorHistory from '../views/doctors/DoctorHistory';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -27,8 +28,6 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 const AdminRoute = ({ children }) => {
   return isAdminUser() ? children : <Navigate to="/dashboard" replace />;
 };
-
-// Note: Utility and sample page components removed as they don't exist in this project
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -86,6 +85,10 @@ const MainRoutes = {
         {
           path: ':id',
           element: <DoctorDetails />
+        },
+        {
+          path: ':id/history',
+          element: <DoctorHistory />
         }
       ]
     },
