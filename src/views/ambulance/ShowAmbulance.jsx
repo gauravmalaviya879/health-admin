@@ -283,7 +283,7 @@ const ShowAmbulance = () => {
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Grid container>
-          <Grid item xs={12} md={12} mx={5} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Grid item xs={12} md={12} pt={2} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Avatar src={data?.driver_pic} sx={{ width: 140, height: 140, mb: 1 }} />
             <Typography variant="h6" style={{ fontSize: '1.2rem' }} textAlign="center" gutterBottom>
               {name}
@@ -295,107 +295,106 @@ const ShowAmbulance = () => {
             </Box>
           </Grid>
         </Grid>
-        <Grid container>
-          <Grid item xs={12} md={12}>
-            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons allowScrollButtonsMobile>
-              <Tab icon={<IconUser size={16} />} iconPosition="start" label="Owner Details" />
-              <Tab icon={<IconAmbulance size={16} />} iconPosition="start" label="Ambulance Details" />
-              <Tab icon={<IconShieldCheck size={16} />} iconPosition="start" label="Expiry & Validity" />
-              <Tab icon={<IconMapPin size={16} />} iconPosition="start" label="Address" />
-              <Tab icon={<IconFileText size={16} />} iconPosition="start" label="Documents & Photos" />
-            </Tabs>
-            {/* <Divider sx={{ mt: 1 }} /> */}
 
-            <TabPanel value={tab} index={0}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="Full Name" value={data?.fullname} />
-                  <LabelValue label="Email" value={data?.email} />
-                  <LabelValue label="Mobile" value={data?.mobile} />
-                </Grid>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="Gender" value={data?.gender} />
-                  <LabelValue label="Blood Group" value={data?.blood_group} />
-                  <LabelValue label="Date of Birth" value={data?.dob} />
-                </Grid>
+        <Grid item xs={12} md={12}>
+          <Tabs value={tab} m onChange={(_, v) => setTab(v)} variant="scrollable" >
+            <Tab icon={<IconUser size={16} />} iconPosition="start" label="Owner Details" />
+            <Tab icon={<IconAmbulance size={16} />} iconPosition="start" label="Ambulance Details" />
+            <Tab icon={<IconShieldCheck size={16} />} iconPosition="start" label="Expiry & Validity" />
+            <Tab icon={<IconMapPin size={16} />} iconPosition="start" label="Address" />
+            <Tab icon={<IconFileText size={16} />} iconPosition="start" label="Documents & Photos" />
+          </Tabs>
+          {/* <Divider sx={{ mt: 1 }} /> */}
+
+          <TabPanel value={tab} index={0}>
+            <Grid  spacing={2}  display="flex" flexWrap="wrap" flexDirection={{ xs: 'column', sm: 'row' }}>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="Full Name" value={data?.fullname} />
+                <LabelValue label="Email" value={data?.email} />
+                <LabelValue label="Mobile" value={data?.mobile} />
               </Grid>
-            </TabPanel>
-
-            <TabPanel value={tab} index={1}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="Vehicle No" value={data?.vehicle_no} />
-                  <LabelValue label="Type" value={data?.ambulance_type} />
-                  <LabelValue label="Experience" value={data?.experience} />
-                </Grid>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="RC No" value={data?.rc_no} />
-                  <LabelValue label="Insurance Holder" value={data?.insurance_holder} />
-                </Grid>
-                <Grid item xs={12} lg={8}>
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                    Facilities in Ambulance
-                  </Typography>
-                  <FacilitiesList facilities={data?.ambulance_facilities} />
-                </Grid>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="Gender" value={data?.gender} />
+                <LabelValue label="Blood Group" value={data?.blood_group} />
+                <LabelValue label="Date of Birth" value={data?.dob} />
               </Grid>
-            </TabPanel>
+            </Grid>
+          </TabPanel>
 
-            <TabPanel value={tab} index={2}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="Insurance Expiry" value={data?.insurance_expiry} />
-                  <LabelValue label="Pollution Expiry" value={data?.polution_expiry} />
-                </Grid>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="Fitness Expiry" value={data?.ambulance_fitness_expiry} />
-                </Grid>
+          <TabPanel value={tab} index={1}>
+            <Grid  spacing={2}  display="flex" flexWrap="wrap" flexDirection={{ xs: 'column', sm: 'row' }}>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="Vehicle No" value={data?.vehicle_no} />
+                <LabelValue label="Type" value={data?.ambulance_type} />
+                <LabelValue label="Experience" value={data?.experience} />
               </Grid>
-            </TabPanel>
-
-            <TabPanel value={tab} index={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="Address" value={data?.address} />
-                  <LabelValue label="City" value={data?.city} />
-                </Grid>
-                <Grid item xs={12} md={6} lg={4}>
-                  <LabelValue label="State" value={data?.state} />
-                  <LabelValue label="Channel ID" value={data?.channelid} />
-                </Grid>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="RC No" value={data?.rc_no} />
+                <LabelValue label="Insurance Holder" value={data?.insurance_holder} />
               </Grid>
-            </TabPanel>
-
-            <TabPanel value={tab} index={4}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <DocumentCard width="100%" title="Insurance" url={data?.insurance_pic} />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <DocumentCard width="100%" title="Pollution" url={data?.polution_pic} />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <DocumentCard width="100%" title="RC" url={data?.rc_pic} />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <DocumentCard width="100%" title="Fitness" url={data?.ambulance_fitness_pic} />
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={4}>
-                  <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} />
-                </Grid>
+              <Grid item xs={12} lg={8} paddingRight={{ xs: 0, sm: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                  Facilities in Ambulance
+                </Typography>
+                <FacilitiesList facilities={data?.ambulance_facilities} />
               </Grid>
-            </TabPanel>
-          </Grid>
+            </Grid>
+          </TabPanel>
+
+          <TabPanel value={tab} index={2}>
+            <Grid  spacing={2}  display="flex" flexWrap="wrap" flexDirection={{ xs: 'column', sm: 'row' }}>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="Insurance Expiry" value={data?.insurance_expiry} />
+                <LabelValue label="Pollution Expiry" value={data?.polution_expiry} />
+              </Grid>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="Fitness Expiry" value={data?.ambulance_fitness_expiry} />
+              </Grid>
+            </Grid>
+          </TabPanel>
+
+          <TabPanel value={tab} index={3}>
+            <Grid  spacing={2}  display="flex" flexWrap="wrap"flexDirection={{ xs: 'column', sm: 'row' }}>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="Address" value={data?.address} />
+                <LabelValue label="City" value={data?.city} />
+              </Grid>
+              <Grid item xs={12} md={6} lg={4} paddingRight={{ xs: 0, sm: 2 }}>
+                <LabelValue label="State" value={data?.state} />
+                <LabelValue label="Channel ID" value={data?.channelid} />
+              </Grid>
+            </Grid>
+          </TabPanel>
+
+          <TabPanel value={tab} index={4}>
+            <Grid spacing={2} gap={2} display="flex" flexWrap="wrap" flexDirection={{ xs: 'column', sm: 'row' }}>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <DocumentCard width="100%" title="Insurance" url={data?.insurance_pic} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <DocumentCard width="100%" title="Pollution" url={data?.polution_pic} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <DocumentCard width="100%" title="RC" url={data?.rc_pic} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <DocumentCard width="100%" title="Fitness" url={data?.ambulance_fitness_pic} />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <ImageCard width="100%" title="Driving Licence" url={data?.driving_licence_pic} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <ImageCard width="100%" title="Ambulance Front" url={data?.ambulance_front_pic} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <ImageCard width="100%" title="Ambulance Back" url={data?.ambulance_back_pic} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={4}>
+                <ImageCard width="100%" title="Driver Photo" url={data?.driver_pic} />
+              </Grid>
+            </Grid>
+          </TabPanel>
         </Grid>
       </Paper>
     </Box>
