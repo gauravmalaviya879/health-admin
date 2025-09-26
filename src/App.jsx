@@ -11,8 +11,6 @@ import ThemeCustomization from 'themes';
 // auth provider
 import { AuthProvider } from 'contexts/AuthContext';
 
-// Import the new DoctorDetails component
-import DoctorDetails from './views/doctors/DoctorDetails';
 
 // ==============================|| APP ||============================== //
 

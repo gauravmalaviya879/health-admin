@@ -627,7 +627,7 @@ const DoctorDetails = () => {
     const proofs = Array.isArray(identityProofs) ? identityProofs : [];
 
     return (
-      <Card variant="outlined">
+      <Card variant="outlined" >
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Identity Proof
@@ -724,7 +724,7 @@ const DoctorDetails = () => {
               </Grid>
             </Box>
           ) : (
-            <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+            <Box sx={{ py: 3, textAlign: 'center', color: 'text.secondary' }}>
               <IconId size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
               <Typography>No identity proofs available</Typography>
             </Box>
@@ -959,7 +959,7 @@ const DoctorDetails = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box maxWidth="lg">
       <Box
         sx={{
           display: 'flex',
@@ -1099,7 +1099,7 @@ const DoctorDetails = () => {
       </TabPanel>
 
       {renderAppointmentDialog()}
-    </Container>
+    </Box>
   );
 };
 
