@@ -8,10 +8,6 @@ import {
   Divider,
   Chip,
   Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Stack,
   IconButton,
   Button,
@@ -24,6 +20,8 @@ import {
   TextField,
   InputAdornment
 } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, TableSortLabel, Tooltip } from '@mui/material';
+import { IconSortAscending, IconSortDescending } from '@tabler/icons-react';
 import {
   IconArrowLeft,
   IconEye,
@@ -52,6 +50,8 @@ const chipColorFor = (status) => {
     case 'blog_add':
     case 'surgery_add':
       return 'secondary';
+    case 'appointment_cancel':
+      return 'error';
     default:
       if (s.includes('reject')) return 'error';
       if (s.includes('approved')) return 'success';
@@ -78,8 +78,11 @@ const DoctorHistory = () => {
   const [error, setError] = useState('');
   const [items, setItems] = useState([]);
   const [doctor, setDoctor] = useState(null);
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 6;
+  const [orderBy, setOrderBy] = useState('createdAt');
+  const [order, setOrder] = useState('desc');
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page, setPage] = useState(0);
+
   const [detail, setDetail] = useState({ open: false, item: null });
   // Date filter state (Apply-driven)
   const [filterFrom, setFilterFrom] = useState('');
@@ -99,6 +102,39 @@ const DoctorHistory = () => {
     setFromDate('');
     setToDate('');
     setPage(1);
+  };
+  const chipColorFor = (status) => {
+    const s = String(status || '').toLowerCase();
+
+    // Specific status checks first
+    if (s.includes('appointment_accept') || s.includes('accepted')) {
+      return 'success'; // Green for accepted appointments
+    } else if (s.includes('surgery_delete') || s.includes('deleted')) {
+      return 'error'; // Red for deleted surgeries
+    } else if (s.includes('appointment_reschedual') || s.includes('rescheduled')) {
+      return 'warning'; // Yellow for rescheduled appointments
+    }
+
+    // Existing status checks
+    switch (s) {
+      case 'doctor_register':
+        return 'primary';
+      case 'surgery_appointment_reschedual':
+      case 'appointment_reschedual':
+        return 'warning'; // Changed to warning to match above
+      case 'appointment_compate':
+      case 'completed':
+        return 'success';
+      case 'blog_add':
+      case 'surgery_add':
+        return 'secondary';
+      default:
+        if (s.includes('reject')) return 'error';
+        if (s.includes('approved')) return 'success';
+        if (s.includes('pending')) return 'warning';
+        if (s.includes('update') || s.includes('edit') || s.includes('resched')) return 'info';
+        return 'default';
+    }
   };
 
   useEffect(() => {
@@ -120,7 +156,25 @@ const DoctorHistory = () => {
     };
     load();
   }, [id]);
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+    // Optional: Scroll to top of table on page change
+    const tableContainer = document.querySelector('.MuiTableContainer-root');
+    if (tableContainer) {
+      tableContainer.scrollTop = 0;
+    }
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to first page when changing rows per page
+  };
   // Date-range filtered items (createdAt between From and To)
   const filteredByDate = useMemo(() => {
     if (!fromDate && !toDate) return items;
@@ -141,12 +195,33 @@ const DoctorHistory = () => {
   }, [items, fromDate, toDate]);
 
   const sorted = useMemo(() => {
-    return [...filteredByDate].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [filteredByDate]);
+    return [...filteredByDate].sort((a, b) => {
+      let aValue = a[orderBy] || '';
+      let bValue = b[orderBy] || '';
+
+      if (orderBy === 'createdAt' || orderBy === 'updatedAt') {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      } else {
+        aValue = String(aValue).toLowerCase();
+        bValue = String(bValue).toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return order === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return order === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [filteredByDate, orderBy, order]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage));
   const start = (page - 1) * rowsPerPage;
-  const visible = sorted.slice(start, start + rowsPerPage);
+  const visible = useMemo(() => {
+    return sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [sorted, page, rowsPerPage]);
 
   return (
     <Box>
@@ -181,7 +256,6 @@ const DoctorHistory = () => {
                         Mobile:
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing={0.75}>
-                     
                         <Typography variant="body1">{doctor?.mobile || '—'}</Typography>
                       </Stack>
                     </Stack>
@@ -287,75 +361,95 @@ const DoctorHistory = () => {
               </Box>
             ) : (
               <>
-                <List>
-                  {visible.map((it) => (
-                    <ListItem
-                      key={it._id}
-                      divider
-                      alignItems="flex-start"
-                      secondaryAction={
-                        <IconButton edge="end" aria-label="view" onClick={() => setDetail({ open: true, item: it })}>
-                          <IconEye size={20} />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemAvatar>
-                        <Avatar variant="rounded">
-                          <IconClipboardText size={18} />
-                        </Avatar>
-                      </ListItemAvatar>
-
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, width: '100%' }}>
-                        {/* Left: Description + Status (≈60%) */}
-                        <Box sx={{}}>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              mr: 1,
-                              wordBreak: 'break-word',
-                              overflowWrap: 'anywhere',
-                              width: '80%'
-                            }}
+                <TableContainer component={Paper}>
+                  <Table size="small" stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <TableSortLabel>No</TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={orderBy === 'description'}
+                            direction={orderBy === 'description' ? order : 'asc'}
+                            onClick={() => handleRequestSort('description')}
                           >
-                            {it.description || '—'}
-                          </Typography>
-                          <Chip
-                            size="small"
-                            label={it.status || 'status'}
-                            color={chipColorFor(it.status)}
-                            variant="outlined"
-                            sx={{ mt: 0.5 }}
-                          />
-                        </Box>
+                            Description
+                            {orderBy === 'description' &&
+                              (order === 'desc' ? (
+                                <IconSortDescending size={16} style={{ marginLeft: 4 }} />
+                              ) : (
+                                <IconSortAscending size={16} style={{ marginLeft: 4 }} />
+                              ))}
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={orderBy === 'status'}
+                            direction={orderBy === 'status' ? order : 'asc'}
+                            onClick={() => handleRequestSort('status')}
+                          >
+                            Status
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={orderBy === 'createdAt'}
+                            direction={orderBy === 'createdAt' ? order : 'desc'}
+                            onClick={() => handleRequestSort('createdAt')}
+                          >
+                            Created At
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {visible.map((item, index) => {
+                        const rowNumber = (page * rowsPerPage) + index + 1;
 
-                        {/* Right: Times (≈40%) */}
-                        <Box
-                          sx={{
-                            minWidth: 150
-                          }}
-                        >
-                          <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: { xs: 1, md: 0 } }}>
-                            <Stack direction="row" spacing={0.5} alignItems="center">
-                              <IconClock size={14} style={{ opacity: 0.7 }} />
-                              <Typography variant="caption" color="text.secondary">
-                                Created: {formatWhen(it.createdAt)}
+                        return (
+                          <TableRow key={item._id} hover>
+                          <TableCell>
+                            <Tooltip title={item.description || '—'} arrow>
+                              <Typography variant="body2" noWrap sx={{ maxWidth: 400 }}>
+                              {rowNumber}
                               </Typography>
-                            </Stack>
-                            <Typography variant="caption" color="text.secondary">
-                              •
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              Updated: {formatWhen(it.updatedAt)}
-                            </Typography>
-                          </Stack>
-                        </Box>
-                      </Box>
-                    </ListItem>
-                  ))}
-                </List>
-                <Box display="flex" justifyContent="center" mt={2}>
-                  <Pagination count={totalPages} page={page} onChange={(_, v) => setPage(v)} color="primary" />
-                </Box>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={item.description || '—'} arrow>
+                              <Typography variant="body2" noWrap sx={{ maxWidth: 400 }}>
+                                {item.description || '—'}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Chip size="small" label={item.status || '—'} color={chipColorFor(item.status)} variant="outlined" />
+                          </TableCell>
+                          <TableCell>{formatWhen(item.createdAt)}</TableCell>
+                          <TableCell>
+                            <Tooltip title="View Details">
+                              <IconButton size="small" onClick={() => setDetail({ open: true, item })}>
+                                <IconEye size={18} />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    component="div"
+                    count={sorted.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </TableContainer>
               </>
             )}
           </Paper>
