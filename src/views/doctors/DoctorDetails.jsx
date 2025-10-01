@@ -160,12 +160,16 @@ const DoctorDetails = () => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved':
+      case 'accept':
         return 'success';
       case 'pending':
         return 'warning';
       case 'rejected':
+      case 'cancel':
       case 'cancelled':
         return 'error';
+      case 'completed':
+        return 'primary';
       default:
         return 'default';
     }
@@ -568,26 +572,19 @@ const DoctorDetails = () => {
                     <TableCell>{appointment.mobile}</TableCell>
                     <TableCell>{appointment.date}</TableCell>
                     <TableCell>{appointment.time}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <Chip
                         label={appointment.status}
                         size="small"
-                        color={
-                          appointment.status.toLowerCase() === 'accept'
-                            ? 'success'
-                            : appointment.status.toLowerCase() === 'pending'
-                              ? 'warning'
-                              : 'default'
-                        }
-                        variant="outlined"
+                        color={getStatusColor(appointment.status)}
                       />
                     </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outlined"
+                    <TableCell align="center">
+                      <Button 
+                        variant="outlined" 
                         size="small"
-                        onClick={() => handleOpenDialog(appointment)}
                         startIcon={<IconInfoCircle size={16} />}
+                        onClick={() => handleOpenDialog(appointment)}
                       >
                         View
                       </Button>
