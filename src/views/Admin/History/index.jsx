@@ -9,22 +9,52 @@ import {
   Tab,
   Chip,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  Avatar,
-  ListItemText,
-  Stack,
   Button,
   IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   Grid,
-  Pagination
+  Tooltip,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TablePagination,
+  TableSortLabel,
+  Avatar,
+  Stack,
+  TextField,
+  InputAdornment
 } from '@mui/material';
-import { IconArrowLeft, IconClock, IconUserHeart, IconAmbulance, IconArticle, IconListDetails, IconEye, IconX } from '@tabler/icons-react';
+
+import { 
+  IconArrowLeft, 
+  IconUserHeart, 
+  IconAmbulance, 
+  IconArticle, 
+  IconListDetails, 
+  IconEye,
+  IconX, 
+  IconSortAscending,
+  IconSortDescending,
+  IconSearch
+} from '@tabler/icons-react';
 import historyService from 'services/historyService';
+
+// Styled Table Components
+const StyledTableCell = (props) => (
+  <TableCell 
+    {...props} 
+    sx={{ 
+      fontWeight: props.head ? 600 : 'normal',
+      whiteSpace: 'nowrap',
+      ...props.sx 
+    }} 
+  />
+);
 
 const categoryOf = (item) => {
   const s = String(item?.status || '').toLowerCase();
@@ -156,8 +186,11 @@ const AdminHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [items, setItems] = useState([]);
-  const [page, setPage] = useState(1); // 1-based for Pagination component
-  const rowsPerPage = 5;
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [orderBy, setOrderBy] = useState('createdAt');
+  const [order, setOrder] = useState('desc');
+  const [searchTerm, setSearchTerm] = useState('');
   const [detail, setDetail] = useState({ open: false, item: null });
 
   useEffect(() => {
@@ -181,18 +214,63 @@ const AdminHistory = () => {
   const tabs = ['All', 'Doctors', 'Ambulances'];
 
   useEffect(() => {
-    setPage(1);
+    setPage(0);
   }, [tab]);
 
   const filtered = useMemo(() => {
-    if (tab === 0) return items;
-    const cat = tabs[tab];
-    return items.filter((it) => categoryOf(it) === cat);
-  }, [items, tab]);
+    let result = [...items];
+    
+    // Filter by tab
+    if (tab > 0) {
+      const cat = tabs[tab];
+      result = result.filter((it) => categoryOf(it) === cat);
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(item => 
+        (item.description?.toLowerCase().includes(term)) ||
+        (item.status?.toLowerCase().includes(term)) ||
+        (item.request_doctorid?.name?.toLowerCase().includes(term)) ||
+        (item.request_ambulanceid?.fullname?.toLowerCase().includes(term))
+      );
+    }
+    
+    return result;
+  }, [items, tab, searchTerm]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
-  const start = (page - 1) * rowsPerPage;
-  const visible = filtered.slice(start, start + rowsPerPage);
+  const sortedItems = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (orderBy === 'createdAt') {
+        return order === 'asc' 
+          ? new Date(a.createdAt) - new Date(b.createdAt)
+          : new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      // Add more sorting logic for other fields if needed
+      return 0;
+    });
+  }, [filtered, orderBy, order]);
+
+  const visible = useMemo(() => {
+    const start = page * rowsPerPage;
+    return sortedItems.slice(start, start + rowsPerPage);
+  }, [sortedItems, page, rowsPerPage]);
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <Box>
@@ -201,12 +279,34 @@ const AdminHistory = () => {
       </Button>
 
       <Paper sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          Admin History
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Actions performed by Admin : {items[0]?.adminid?.name}
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2} mb={2}>
+          <Box>
+            <Typography variant="h5" gutterBottom>
+              Admin History
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Actions performed by Admin: {items[0]?.adminid?.name}
+            </Typography>
+          </Box>
+          <TextField
+            size="small"
+            placeholder="Search history..."
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(0); // Reset to first page when searching
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconSearch size={20} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 250 }}
+          />
+        </Box>
         <Divider sx={{ my: 2 }} />
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" allowScrollButtonsMobile>
           {tabs.map((t) => (
@@ -223,96 +323,133 @@ const AdminHistory = () => {
         <Paper sx={{ p: 3 }}>
           <Typography color="error">{error}</Typography>
         </Paper>
-      ) : visible.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <Paper sx={{ p: 3 }}>
           <Typography>No history found.</Typography>
         </Paper>
       ) : (
-        <>
-          <Paper>
-            <List>
-              {visible.map((it) => {
-                const cat = categoryOf(it);
-                const left = iconFor(cat);
-                const canView = !!it?.request_doctorid || !!it?.request_ambulanceid;
-                return (
-                  <ListItem
-                    key={it._id}
-                    alignItems="flex-start"
-                    divider
-                    secondaryAction={
-                      canView ? (
-                        <IconButton
-                          edge="end"
-                          aria-label="view"
-                          onClick={() => setDetail({ open: true, item: it })}
-                        >
-                          <IconEye size={20} />
-                        </IconButton>
-                      ) : undefined
-                    }
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 300px)' }}>
+            <Table stickyHeader aria-label="history table">
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell>History user</StyledTableCell>
+                  <StyledTableCell 
+                    sortDirection={orderBy === 'createdAt' ? order : false}
+                    sx={{ minWidth: 180 }}
                   >
-                    {/* Avatar / Left side */}
-                    <ListItemAvatar>
-                      <Avatar variant="rounded">{left}</Avatar>
-                    </ListItemAvatar>
-
-                    {/* Main content */}
-                    <ListItemText
-                      disableTypography
-                      primary={
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                          <Typography variant="subtitle1" sx={{ mr: 1 }}>
-                            {it.description || '—'}
-                          </Typography>
-                          <Chip
-                            size="small"
-                            label={it.status || 'status'}
-                            color={chipColorFor(it.status)}
-                            variant="outlined"
-                          />
-                        </Stack>
-                      }
-                      secondary={
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 0.5 }}>
-                          {/* Time with Icon */}
-                          <Stack direction="row" spacing={0.5} alignItems="center">
-                            <IconClock size={14} style={{ opacity: 0.7 }} />
-                            <Typography variant="caption" color="text.secondary">
-                              {formatWhen(it.createdAt)}
+                    <TableSortLabel
+                      active={orderBy === 'createdAt'}
+                      direction={orderBy === 'createdAt' ? order : 'desc'}
+                      onClick={() => handleRequestSort('createdAt')}
+                      IconComponent={order === 'asc' ? IconSortAscending : IconSortDescending}
+                    >
+                      Date & Time
+                    </TableSortLabel>
+                  </StyledTableCell>
+                  <StyledTableCell>Status</StyledTableCell>
+                  <StyledTableCell>Details</StyledTableCell>
+                  <StyledTableCell>Actions</StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {visible.map((item) => {
+                  const category = categoryOf(item);
+                  const icon = iconFor(category);
+                  const canView = !!item?.request_doctorid || !!item?.request_ambulanceid;
+                  
+                  return (
+                    <TableRow hover key={item._id}>
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Avatar variant="rounded" sx={{ bgcolor: 'primary.light' }}>
+                            {icon}
+                          </Avatar>
+                          <Tooltip title={item.description || ''} arrow>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '300px'
+                              }}
+                            >
+                              {item.description ? 
+                                item.description.split(' ').slice(0, 10).join(' ') + 
+                                (item.description.split(' ').length > 10 ? '...' : '')
+                                : '—'
+                              }
                             </Typography>
-                          </Stack>
-
-                          {/* Doctor Info */}
-                          {it?.request_doctorid && (
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="textSecondary">
+                          {formatWhen(item.createdAt)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={item.status || '—'}
+                          size="small"
+                          color={chipColorFor(item.status)}
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Stack spacing={0.5}>
+                          {item?.request_doctorid && (
                             <Chip
                               size="small"
-                              
-                              label={`Doctor: ${it.request_doctorid?.name}`}
+                              label={`Doctor: ${item.request_doctorid?.name}`}
+                              variant="outlined"
                             />
                           )}
-
-                          {/* Ambulance Owner Info */}
-                          {it?.request_ambulanceid && (
+                          {item?.request_ambulanceid && (
                             <Chip
                               size="small"
-                              label={`Ambulance Owner: ${it.request_ambulanceid?.fullname}`}
+                              label={`Ambulance: ${item.request_ambulanceid?.fullname}`}
+                              variant="outlined"
                             />
                           )}
                         </Stack>
-                      }
-                    />
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Paper>
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination count={totalPages} page={page} onChange={(_, value) => setPage(value)} color="primary" />
-          </Box>
+                      </TableCell>
+                      <TableCell>
+                        {canView && (
+                          <Tooltip title="View Details">
+                            <IconButton
+                              size="small"
+                              onClick={() => setDetail({ open: true, item })}
+                              color="primary"
+                            >
+                              <IconEye size={20} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={filtered.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{ borderTop: '1px solid rgba(224, 224, 224, 1)' }}
+          />
 
           <DetailDialog open={detail.open} onClose={() => setDetail({ open: false, item: null })} item={detail.item} />
-        </>
+        </Paper>
       )}
     </Box>
   );
