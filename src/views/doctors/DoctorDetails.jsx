@@ -52,7 +52,8 @@ import {
   IconCertificate,
   IconZoomIn,
   IconFileText,
-  IconEdit
+  IconEdit,
+  IconTrash
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -98,6 +99,9 @@ const DoctorDetails = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [editSurgeryModalOpen, setEditSurgeryModalOpen] = useState(false);
   const [selectedSurgery, setSelectedSurgery] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [surgeryToDelete, setSurgeryToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -115,6 +119,41 @@ const DoctorDetails = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleDeleteClick = (surgery, event) => {
+    event.stopPropagation();
+    setSurgeryToDelete(surgery);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+    setSurgeryToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!surgeryToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await newDoctorsService.removeSurgery(surgeryToDelete._id);
+
+      // Update the doctor's surgeries list
+      const updatedSurgeries = doctor.surgeriesDetails.filter((surgery) => surgery._id !== surgeryToDelete._id);
+
+      setDoctor({
+        ...doctor,
+        surgeriesDetails: updatedSurgeries
+      });
+
+      console.log('Surgery deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete surgery:', error);
+    } finally {
+      setIsDeleting(false);
+      handleDeleteClose();
+    }
   };
 
   const filteredAppointments =
@@ -148,8 +187,7 @@ const DoctorDetails = () => {
       inclusive: surgery.inclusive || '',
       exclusive: surgery.exclusive || ''
     };
-    
-  
+
     setSelectedSurgery(formattedSurgery);
     setEditSurgeryModalOpen(true);
   };
@@ -387,49 +425,22 @@ const DoctorDetails = () => {
                         <Typography variant="subtitle1" fontWeight={600}>
                           {surgery.name}
                         </Typography>
-                        <Box 
-                          component="span"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditSurgery(surgery);
-                          }}
-                          sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 24,
-                            height: 24,
-                            borderRadius: '50%',
-                            ml: 0.5,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease-in-out',
-                            color: 'text.secondary',
-                            '&:hover': {
-                              color: 'primary.main',
-                              backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                              transform: 'scale(1.1)'
-                            }
-                          }}
-                        >
-                          <IconEdit size={18} />
+                        <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+                          <IconButton size="small" onClick={(e) => handleEditSurgery(surgery, e)} sx={{ color: 'text.secondary' }}>
+                            <IconEdit size={18} />
+                          </IconButton>
+                          <IconButton size="small" onClick={(e) => handleDeleteClick(surgery, e)} sx={{ color: 'error.main' }}>
+                            <IconTrash size={18} />
+                          </IconButton>
                         </Box>
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', ml: 1 }}>
                       {surgery.general_price > 0 && (
-                        <Chip 
-                          label={`From ₹${surgery.general_price.toLocaleString()}`} 
-                          color="primary" 
-                          variant="outlined" 
-                          size="small" 
-                        />
+                        <Chip label={`From ₹${surgery.general_price.toLocaleString()}`} color="primary" variant="outlined" size="small" />
                       )}
                       {surgery.days && (
-                        <Chip 
-                          label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'}`} 
-                          size="small" 
-                          variant="outlined" 
-                        />
+                        <Chip label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'}`} size="small" variant="outlined" />
                       )}
                     </Box>
                   </Box>
@@ -609,7 +620,7 @@ const DoctorDetails = () => {
   };
 
   // Add EditSurgeryModal component
-  const renderEditSurgeryModal = () => (
+  const renderEditSurgeryModal = () =>
     selectedSurgery && (
       <EditSurgeryModal
         key={selectedSurgery._id || 'edit-modal'}
@@ -619,8 +630,7 @@ const DoctorDetails = () => {
         onSave={handleSurgeryUpdated}
         doctorId={id}
       />
-    )
-  );
+    );
 
   // Render Appointments Tab
   const renderAppointments = () => (
@@ -675,15 +685,11 @@ const DoctorDetails = () => {
                     <TableCell>{appointment.date}</TableCell>
                     <TableCell>{appointment.time}</TableCell>
                     <TableCell align="center">
-                      <Chip
-                        label={appointment.status}
-                        size="small"
-                        color={getStatusColor(appointment.status)}
-                      />
+                      <Chip label={appointment.status} size="small" color={getStatusColor(appointment.status)} />
                     </TableCell>
                     <TableCell align="center">
-                      <Button 
-                        variant="outlined" 
+                      <Button
+                        variant="outlined"
                         size="small"
                         startIcon={<IconInfoCircle size={16} />}
                         onClick={() => handleOpenDialog(appointment)}
@@ -726,7 +732,7 @@ const DoctorDetails = () => {
     const proofs = Array.isArray(identityProofs) ? identityProofs : [];
 
     return (
-      <Card variant="outlined" >
+      <Card variant="outlined">
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Identity Proof
@@ -1199,6 +1205,26 @@ const DoctorDetails = () => {
 
       {renderAppointmentDialog()}
       {renderEditSurgeryModal()}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Delete Surgery</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete the surgery "{surgeryToDelete?.name}"? This action cannot be undone.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose} disabled={isDeleting} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

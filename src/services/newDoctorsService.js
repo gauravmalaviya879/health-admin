@@ -1,5 +1,5 @@
 import axios from 'axios';
-import authService from "./authService";
+import authService from './authService';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -8,12 +8,16 @@ const newDoctorsService = {
   getDoctorsList: async () => {
     const token = authService.getToken();
     try {
-      const response = await axios.post(`${BASE_URL}/admin/doctors/list`, {}, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await axios.post(
+        `${BASE_URL}/admin/doctors/list`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
         }
-      });
+      );
 
       return { data: response.data };
     } catch (error) {
@@ -26,15 +30,19 @@ const newDoctorsService = {
   approveDoctor: async (doctorId) => {
     const token = authService.getToken();
     try {
-      const response = await axios.post(`${BASE_URL}/admin/doctors/approved`, {
-        doctorid: doctorId,
-        status: "Approved"
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await axios.post(
+        `${BASE_URL}/admin/doctors/approved`,
+        {
+          doctorid: doctorId,
+          status: 'Approved'
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
         }
-      });
+      );
 
       return { status: response.status, data: response.data };
     } catch (error) {
@@ -47,15 +55,19 @@ const newDoctorsService = {
   rejectDoctor: async (doctorId) => {
     const token = authService.getToken();
     try {
-      const response = await axios.post(`${BASE_URL}/admin/doctors/approved`, {
-        doctorid: doctorId,
-        status: "Rejected"
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await axios.post(
+        `${BASE_URL}/admin/doctors/approved`,
+        {
+          doctorid: doctorId,
+          status: 'Rejected'
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
         }
-      });
+      );
 
       return { status: response.status, data: response.data };
     } catch (error) {
@@ -74,7 +86,7 @@ const newDoctorsService = {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -90,16 +102,12 @@ const newDoctorsService = {
   editSurgery: async (surgeryData) => {
     const token = authService.getToken();
     try {
-      const response = await axios.post(
-        `${BASE_URL}/admin/surgeries/edit`,
-        surgeryData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+      const response = await axios.post(`${BASE_URL}/admin/surgeries/edit`, surgeryData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
       return { data: response.data };
     } catch (error) {
       console.error('Error updating surgery:', error);
@@ -117,13 +125,33 @@ const newDoctorsService = {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
       return { data: response.data };
     } catch (error) {
       console.error('Error fetching surgery types:', error);
+      throw error;
+    }
+  },
+  // In src/services/newDoctorsService.js
+  removeSurgery: async (surgeryId) => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/admin/surgeries/remove`,
+        { surgeryid: surgeryId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      return { status: response.status, data: response.data };
+    } catch (error) {
+      console.error('Error removing surgery:', error);
       throw error;
     }
   }
