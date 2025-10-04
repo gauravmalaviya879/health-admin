@@ -85,6 +85,48 @@ const newDoctorsService = {
       throw error;
     }
   },
+
+  // Edit surgery details
+  editSurgery: async (surgeryData) => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/admin/surgeries/edit`,
+        surgeryData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      return { data: response.data };
+    } catch (error) {
+      console.error('Error updating surgery:', error);
+      throw error;
+    }
+  },
+
+  // Get surgery types
+  getSurgeryTypes: async () => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/admin/surgerytypes/list`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      return { data: response.data };
+    } catch (error) {
+      console.error('Error fetching surgery types:', error);
+      throw error;
+    }
+  }
 };
 
 export default newDoctorsService;

@@ -51,9 +51,11 @@ import {
   IconId,
   IconCertificate,
   IconZoomIn,
-  IconFileText
+  IconFileText,
+  IconEdit
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
+import EditSurgeryModal from './EditSurgeryModal';
 
 // TabPanel component
 function TabPanel(props) {
@@ -94,6 +96,8 @@ const DoctorDetails = () => {
 
   // Add state for lightbox
   const [selectedImage, setSelectedImage] = useState(null);
+  const [editSurgeryModalOpen, setEditSurgeryModalOpen] = useState(false);
+  const [selectedSurgery, setSelectedSurgery] = useState(null);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -122,6 +126,51 @@ const DoctorDetails = () => {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+  };
+
+  const handleEditSurgery = (surgery) => {
+    console.log('Opening edit modal for surgery:', surgery);
+    // Transform the surgery data to match the expected format
+    const formattedSurgery = {
+      ...surgery,
+      surgerytypeid: surgery.surgerytypeid?._id || surgery.surgerytypeid,
+      // Ensure all required fields have default values
+      general_price: surgery.general_price || '',
+      semiprivate_price: surgery.semiprivate_price || '',
+      private_price: surgery.private_price || '',
+      delux_price: surgery.delux_price || '',
+      days: surgery.days || '',
+      yearsof_experience: surgery.yearsof_experience || '',
+      completed_surgery: surgery.completed_surgery || '',
+      description: surgery.description || '',
+      features: surgery.features || '',
+      additional_features: surgery.additional_features || '',
+      inclusive: surgery.inclusive || '',
+      exclusive: surgery.exclusive || ''
+    };
+    
+  
+    setSelectedSurgery(formattedSurgery);
+    setEditSurgeryModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditSurgeryModalOpen(false);
+    setSelectedSurgery(null);
+  };
+
+  const handleSurgeryUpdated = async () => {
+    try {
+      setLoading(true);
+      const response = await newDoctorsService.getDoctorById(id);
+      if (response.data && response.data.Data) {
+        setDoctor(response.data.Data);
+      }
+    } catch (err) {
+      console.error('Error refreshing doctor details:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -332,16 +381,55 @@ const DoctorDetails = () => {
                   />
                 )}
                 <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      {surgery.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          {surgery.name}
+                        </Typography>
+                        <Box 
+                          component="span"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditSurgery(surgery);
+                          }}
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            ml: 0.5,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            color: 'text.secondary',
+                            '&:hover': {
+                              color: 'primary.main',
+                              backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                              transform: 'scale(1.1)'
+                            }
+                          }}
+                        >
+                          <IconEdit size={18} />
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', ml: 1 }}>
                       {surgery.general_price > 0 && (
-                        <Chip label={`From ₹${surgery.general_price.toLocaleString()}`} color="primary" variant="outlined" size="small" />
+                        <Chip 
+                          label={`From ₹${surgery.general_price.toLocaleString()}`} 
+                          color="primary" 
+                          variant="outlined" 
+                          size="small" 
+                        />
                       )}
                       {surgery.days && (
-                        <Chip label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'}`} size="small" variant="outlined" />
+                        <Chip 
+                          label={`${surgery.days} ${surgery.days === '1' ? 'Day' : 'Days'}`} 
+                          size="small" 
+                          variant="outlined" 
+                        />
                       )}
                     </Box>
                   </Box>
@@ -519,6 +607,20 @@ const DoctorDetails = () => {
       </>
     );
   };
+
+  // Add EditSurgeryModal component
+  const renderEditSurgeryModal = () => (
+    selectedSurgery && (
+      <EditSurgeryModal
+        key={selectedSurgery._id || 'edit-modal'}
+        open={editSurgeryModalOpen}
+        onClose={handleCloseEditModal}
+        surgery={selectedSurgery}
+        onSave={handleSurgeryUpdated}
+        doctorId={id}
+      />
+    )
+  );
 
   // Render Appointments Tab
   const renderAppointments = () => (
@@ -1096,6 +1198,7 @@ const DoctorDetails = () => {
       </TabPanel>
 
       {renderAppointmentDialog()}
+      {renderEditSurgeryModal()}
     </Box>
   );
 };
