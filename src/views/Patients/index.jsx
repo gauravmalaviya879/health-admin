@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -29,26 +30,27 @@ import {
   DialogActions,
   Grid
 } from '@mui/material';
-import { 
-  IconEye, 
-  IconSearch, 
-  IconPlus, 
+import {
+  IconEye,
+  IconSearch,
+  IconPlus,
   IconUser,
   IconMail,
   IconPhone,
   IconDropletFilled,
   IconMapPin,
-  IconX
+  IconX,
+  IconHistory
 } from '@tabler/icons-react';
 import patientService from '../../services/patientService';
 
 const DetailItem = ({ icon, label, value }) => (
   <Grid item xs={12} sm={6}>
     <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', p: 1.5, bgcolor: 'grey.50', borderRadius: 1, height: '100%' }}>
-      <Box sx={{ 
-        width: 36, 
-        height: 36, 
-        borderRadius: '50%', 
+      <Box sx={{
+        width: 36,
+        height: 36,
+        borderRadius: '50%',
         bgcolor: 'primary.lighter',
         display: 'flex',
         alignItems: 'center',
@@ -70,6 +72,7 @@ const DetailItem = ({ icon, label, value }) => (
 );
 
 const Patients = () => {
+  const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +87,7 @@ const Patients = () => {
   });
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-
+ 
   // Show snackbar notification
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -100,7 +103,7 @@ const Patients = () => {
     try {
       setLoading(true);
       const response = await patientService.getPatients();
-      
+
       if (response.success) {
         setPatients(response.data);
         setFilteredPatients(response.data);
@@ -193,10 +196,10 @@ const Patients = () => {
                     <IconSearch size={20} />
                   </InputAdornment>
                 ),
-                sx: { 
+                sx: {
                   backgroundColor: 'background.paper',
                   borderRadius: 1,
-                  minWidth: 250 
+                  minWidth: 250
                 }
               }}
             />
@@ -247,10 +250,10 @@ const Patients = () => {
                     </TableRow>
                   ) : (
                     currentPatients.map((patient, index) => (
-                      <TableRow 
-                        key={patient.id} 
-                        hover 
-                        sx={{ 
+                      <TableRow
+                        key={patient.id}
+                        hover
+                        sx={{
                           '&:last-child td, &:last-child th': { border: 0 },
                           '&:hover': { backgroundColor: 'action.hover' }
                         }}
@@ -281,8 +284,8 @@ const Patients = () => {
                         </TableCell>
                         <TableCell align="right" sx={{ pr: 3 }}>
                           <Tooltip title="View Details">
-                            <IconButton 
-                              color="primary" 
+                            <IconButton
+                              color="primary"
                               size="small"
                               onClick={() => handleViewDetails(patient)}
                               sx={{
@@ -295,6 +298,17 @@ const Patients = () => {
                               <IconEye size={18} />
                             </IconButton>
                           </Tooltip>
+                          <Tooltip title="View History">
+                            <IconButton
+                              color="secondary"
+                              size="small"
+                              onClick={() => navigate(`/patients/${patient._id}/history`)}
+                              sx={{ ml: 1 }}
+                            >
+                              <IconHistory size={18} />
+                            </IconButton>
+                          </Tooltip>
+
                         </TableCell>
                       </TableRow>
                     ))
@@ -313,7 +327,7 @@ const Patients = () => {
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{ 
+                sx={{
                   '& .MuiTablePagination-toolbar': {
                     px: 0,
                     minHeight: '52px'
@@ -326,10 +340,10 @@ const Patients = () => {
       </Box>
 
       {/* Patient Details Dialog */}
-      <Dialog 
-        open={detailsOpen} 
-        onClose={handleCloseDetails} 
-        maxWidth="sm" 
+      <Dialog
+        open={detailsOpen}
+        onClose={handleCloseDetails}
+        maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
@@ -339,7 +353,7 @@ const Patients = () => {
           }
         }}
       >
-        <DialogTitle 
+        <DialogTitle
           sx={{
             bgcolor: 'primary.main',
             color: 'white',
@@ -358,10 +372,10 @@ const Patients = () => {
         <DialogContent sx={{ p: 0 }}>
           {selectedPatient && (
             <Box sx={{ p: 3 }}>
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 2,
                   mb: 3,
                   p: 2,
@@ -370,7 +384,7 @@ const Patients = () => {
                 }}
               >
                 {selectedPatient.profile_pic ? (
-                  <Box 
+                  <Box
                     component="img"
                     src={selectedPatient.profile_pic}
                     alt={selectedPatient.name || 'Patient'}
@@ -384,7 +398,7 @@ const Patients = () => {
                     }}
                   />
                 ) : (
-                  <Box 
+                  <Box
                     sx={{
                       width: 64,
                       height: 64,
@@ -405,8 +419,8 @@ const Patients = () => {
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                     {selectedPatient.name || 'N/A'}
                   </Typography>
-                  <Chip 
-                    label={selectedPatient.gender || 'N/A'} 
+                  <Chip
+                    label={selectedPatient.gender || 'N/A'}
                     size="small"
                     sx={{
                       bgcolor: selectedPatient.gender?.toLowerCase() === 'male' ? 'primary.main' : 'secondary.main',
@@ -418,32 +432,32 @@ const Patients = () => {
               </Box>
 
               <Grid container spacing={2}>
-                <DetailItem 
-                  icon={<IconMail size={20} />} 
-                  label="Email" 
-                  value={selectedPatient.email} 
+                <DetailItem
+                  icon={<IconMail size={20} />}
+                  label="Email"
+                  value={selectedPatient.email}
                 />
-                <DetailItem 
-                  icon={<IconPhone size={20} />} 
-                  label="Mobile" 
-                  value={selectedPatient.mobile} 
+                <DetailItem
+                  icon={<IconPhone size={20} />}
+                  label="Mobile"
+                  value={selectedPatient.mobile}
                 />
-                <DetailItem 
-                  icon={<IconDropletFilled size={20} />} 
-                  label="Blood Group" 
-                  value={selectedPatient.blood_group} 
+                <DetailItem
+                  icon={<IconDropletFilled size={20} />}
+                  label="Blood Group"
+                  value={selectedPatient.blood_group}
                 />
-                <DetailItem 
-                  icon={<IconMapPin size={20} />} 
-                  label="Pincode" 
-                  value={selectedPatient.pincode} 
+                <DetailItem
+                  icon={<IconMapPin size={20} />}
+                  label="Pincode"
+                  value={selectedPatient.pincode}
                 />
               </Grid>
             </Box>
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Button 
+          <Button
             onClick={handleCloseDetails}
             variant="outlined"
             startIcon={<IconX size={18} />}

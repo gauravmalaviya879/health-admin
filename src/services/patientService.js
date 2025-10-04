@@ -62,6 +62,37 @@ class PatientService {
       };
     }
   }
+
+  // Add this method inside the PatientService class in patientService.js
+
+async getPatientHistory(patientId) {
+  try {
+    const token = authService.getToken();
+    const response = await axios({
+      method: 'post',
+      url: `${API_BASE_URL}/admin/histories/list`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        patientid: patientId,
+      }
+    });
+
+    return {
+      success: true,
+      data: response.data.Data || [],
+      totalCount: response.data.totalCount || 0
+    };
+  } catch (error) {
+    console.error('Error fetching patient history:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch patient history'
+    };
+  }
+}
 }
 
 export default new PatientService();

@@ -20,7 +20,7 @@ import Policy from '../views/Policy';
 import AdminUsers from '../views/Admin/Users';
 import AdminHistory from '../views/Admin/History';
 import DoctorHistory from '../views/doctors/DoctorHistory';
-
+import PatientHistory from 'views/Patients/PatientHistory';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
@@ -112,6 +112,10 @@ const MainRoutes = {
     {
       path: 'patients',
       element: <Patients />
+    },
+    {
+      path: '/patients/:patientId/history',
+      element: <PatientHistory />
     },
     {
       path: 'policy',
