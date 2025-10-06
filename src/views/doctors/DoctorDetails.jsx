@@ -53,7 +53,8 @@ import {
   IconZoomIn,
   IconFileText,
   IconEdit,
-  IconTrash
+  IconTrash,
+  IconRosetteDiscountCheck
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -259,6 +260,23 @@ const DoctorDetails = () => {
         return 'primary';
       default:
         return 'default';
+    }
+  };
+  const getStatusIconColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+      case 'accept':
+        return 'green';
+      case 'pending':
+        return '#ebc934';
+      case 'rejected':
+      case 'cancel':
+      case 'cancelled':
+        return 'red';
+      case 'completed':
+        return '#3480eb';
+      default:
+        return '#5e5753';
     }
   };
 
@@ -1092,14 +1110,16 @@ const DoctorDetails = () => {
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
               <Avatar src={doctor.profile_pic} sx={{ width: 150, height: 150, mb: 2 }} />
-              <Chip label={doctor.approval_status || 'N/A'} color={getStatusColor(doctor.approval_status)} sx={{ mb: 2 }} />
             </Grid>
             <Grid item xs={12} md={8}>
-              <Typography variant="h5" gutterBottom>
-                {doctor.name || 'N/A'}
+              <Box style={{ display: 'flex', alignItems: 'center'}}>
+              <Typography variant="h5" style={{ display: 'flex', alignItems: 'center'}} gutterBottom>
+               <IconRosetteDiscountCheck style={{ marginRight: 8 ,color: getStatusIconColor(doctor.approval_status) }} size={20}></IconRosetteDiscountCheck> {doctor.name || 'N/A'}
               </Typography>
+              
+              </Box>
               <Divider sx={{ my: 2 }} />
 
               <Grid container spacing={2}>
