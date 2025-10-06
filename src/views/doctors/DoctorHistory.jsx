@@ -231,7 +231,7 @@ const DoctorHistory = () => {
 
       <Grid container spacing={2}>
         {/* Right: Doctor Details */}
-        <Grid item xs={12} lg={12}>
+        <Grid item style={{ width: '100%' }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Doctor Details
@@ -240,7 +240,7 @@ const DoctorHistory = () => {
             {doctor ? (
               <>
                 <Box display="flex" alignItems="center" gap={2} mb={2}>
-                  <Avatar src={doctor?.profile_pic} sx={{ width: 64, height: 64 }} />
+                  <Avatar src={doctor?.profile_pic} sx={{ width: 100, height:  100 }} />
                   <Stack spacing={0.75}>
                     <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
                       <Typography variant="subtitle2" color="text.secondary">
@@ -271,7 +271,7 @@ const DoctorHistory = () => {
                   </Stack>
                 </Box>
 
-                <Box>
+                <Box maxWidth={'50%'} display={'flex'} flexWrap={'wrap'}>
                   <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <IconFilter size={18} />
@@ -339,7 +339,7 @@ const DoctorHistory = () => {
           </Paper>
         </Grid>
         {/* Left: History List */}
-        <Grid item xs={12} lg={12}>
+        <Grid item style={{ width: '100%' }} >
           <Paper sx={{ p: 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
               <Typography variant="h5">Doctor History</Typography>
