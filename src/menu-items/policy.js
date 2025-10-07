@@ -5,18 +5,18 @@ import { IconFileDescription } from '@tabler/icons-react';
 
 const policy = {
   id: 'policy',
-  title: 'Policy',
+  // title: 'Policy',
   type: 'group',
-  children: [
-    {
-      id: 'policy-management',
-      title: 'Policy Management',
-      type: 'item',
-      url: '/policy',
-      icon: IconFileDescription,
-      breadcrumbs: false
-    }
-  ]
+  // children: [
+  //   {
+  //     id: 'policy-management',
+  //     title: 'Policy Management',
+  //     type: 'item',
+  //     url: '/policy',
+  //     icon: IconFileDescription,
+  //     breadcrumbs: false
+  //   }
+  // ]
 };
 
 export default policy;
