@@ -54,7 +54,7 @@ import {
   IconFileText,
   IconEdit,
   IconTrash,
-  IconRosetteDiscountCheck
+  IconRosetteDiscountCheckFilled
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -1116,7 +1116,7 @@ const DoctorDetails = () => {
             <Grid item xs={12} md={8}>
               <Box style={{ display: 'flex', alignItems: 'center'}}>
               <Typography variant="h5" style={{ display: 'flex', alignItems: 'center'}} gutterBottom>
-               <IconRosetteDiscountCheck style={{ marginRight: 8 ,color: getStatusIconColor(doctor.approval_status) }} size={20}></IconRosetteDiscountCheck> {doctor.name || 'N/A'}
+              {doctor.name || 'N/A'} <IconRosetteDiscountCheckFilled style={{ marginRight: 8 ,margin:'0px 5px', color: getStatusIconColor(doctor.approval_status) }} size={20}></IconRosetteDiscountCheckFilled> 
               </Typography>
               
               </Box>

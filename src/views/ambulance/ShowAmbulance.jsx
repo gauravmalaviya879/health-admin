@@ -28,7 +28,8 @@ import {
   IconAmbulance,
   IconFileText,
   IconCircleCheck,
-  IconEye
+  IconEye,
+  IconRosetteDiscountCheckFilled
 } from '@tabler/icons-react';
 import { ambulanceService } from '../../services/ambulanceService';
 
@@ -224,6 +225,26 @@ const getStatusColor = (status) => {
   }
 };
 
+const getStatusIconColor = (status) => {
+  console.log(status)
+  switch (String(status).toLowerCase()) {
+    case 'approved':
+    case 'true':
+      return 'green';
+    case 'pending':
+      return '#ebc934';
+    case 'rejected':
+    case 'cancel':
+    case 'cancelled':
+      return 'red';
+    case 'completed':
+      return '#3480eb';
+    default:
+      return '#5e5753';
+  }
+};
+
+
 const ShowAmbulance = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -285,11 +306,11 @@ const ShowAmbulance = () => {
         <Grid container>
           <Grid item xs={12} md={12} pt={2} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Avatar src={data?.driver_pic} sx={{ width: 140, height: 140, mb: 1 }} />
-            <Typography variant="h6" style={{ fontSize: '1.2rem' }} textAlign="center" gutterBottom>
-              {name}
+            <Typography variant="h6" style={{ fontSize: '1.2rem' ,display: 'flex', alignItems: 'center' }} textAlign="center" gutterBottom>
+              {name} <IconRosetteDiscountCheckFilled style={{ marginRight: 8 ,margin:'0px 5px', color: getStatusIconColor(data?.approval_status) }} size={20}></IconRosetteDiscountCheckFilled>
             </Typography>
             <Box display="flex" gap={1} flexWrap="wrap" justifyContent="center">
-              <Chip label={data?.approval_status || 'N/A'} color={getStatusColor(data?.approval_status)} />
+             
               <Chip label={data?.status ? 'Active' : 'Inactive'} color={getStatusColor(data?.status)} variant="outlined" />
               <Chip label={data?.profile_completed ? 'Profile Completed' : 'Profile Pending'} variant="outlined" />
             </Box>
