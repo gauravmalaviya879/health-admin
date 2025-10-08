@@ -284,7 +284,7 @@ const EditSurgeryModal = ({ open, onClose, surgery, onSave, doctorId }) => {
                   rows={2}
                 />
                 
-                <TextField
+                {/* <TextField
                   fullWidth
                   label="Surgery Photo URL"
                   name="surgery_photo"
@@ -293,7 +293,7 @@ const EditSurgeryModal = ({ open, onClose, surgery, onSave, doctorId }) => {
                   margin="normal"
                   variant="outlined"
                   placeholder="https://example.com/image.jpg"
-                />
+                /> */}
                 
                 {formData.surgery_photo && (
                   <Box mt={2} mb={2}>
@@ -317,7 +317,7 @@ const EditSurgeryModal = ({ open, onClose, surgery, onSave, doctorId }) => {
                 )}
               </Grid>
               
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 'medium' }}>
                   Pricing
                 </Typography>
@@ -384,7 +384,7 @@ const EditSurgeryModal = ({ open, onClose, surgery, onSave, doctorId }) => {
                     />
                   </Grid>
                 </Grid>
-              </Grid>
+              </Grid> */}
               
               <Grid item xs={12}>
                 <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 'medium' }}>
