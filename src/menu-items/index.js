@@ -4,6 +4,7 @@ import dashboard from './dashboard';
 import doctors from './doctors';
 import patients from './patients';
 import policy from './policy';
+import banners from './banners';
 import { isAdminUser } from '../utils/authUtils';
 
 // Helper function to filter menu items based on admin status
@@ -28,7 +29,7 @@ const getMenuItems = () => {
   }
   
   // Add other menu items
-  items.push(doctors, ambulance, patients, policy);
+  items.push(doctors, ambulance, patients, banners, policy);
   
   return { items };
 };
