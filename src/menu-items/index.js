@@ -9,7 +9,7 @@ import { isAdminUser } from '../utils/authUtils';
 
 // Helper function to filter menu items based on admin status
 const filterMenuItems = (items, isAdmin) => {
-  return items.filter(item => {
+  return items.filter((item) => {
     // If item has adminOnly flag, check if user is admin
     if (item.adminOnly !== undefined) {
       return item.adminOnly ? isAdmin : true;
@@ -21,19 +21,24 @@ const filterMenuItems = (items, isAdmin) => {
 // Create menu items with admin check
 const getMenuItems = () => {
   const isAdmin = isAdminUser();
-  const items = [dashboard];
-  
-  // Only include admin menu if user is admin
-  if (isAdmin) {
-    items.push(admin);
-  }
-  
-  // Add other menu items
-  items.push(doctors, ambulance, patients, banners, policy);
-  
-  return { items };
-};
+  let items = [dashboard];
 
+  // Add admin menu items
+  if (isAdmin) {
+    // Clone the admin menu and add banners to it
+    const adminMenu = {
+      ...admin,
+      children: [...(admin.children || [])]
+    };
+    items.push(adminMenu);
+  }
+
+  // Add other menu items
+  items = [...items, doctors, ambulance, patients, banners, policy];
+
+  // Filter items based on admin status
+  return { items: filterMenuItems(items, isAdmin) };
+};
 const menuItems = getMenuItems();
 
 export default menuItems;
