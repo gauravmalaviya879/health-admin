@@ -26,6 +26,11 @@ import {
   Box as MuiBox,
   Snackbar,
   Alert,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material';
 import { IconPlus, IconEye, IconEdit, IconTrash, IconPhoto, IconLayoutGrid, IconArrowsMaximize } from '@tabler/icons-react';
 import bannerService from '../../services/bannerService';
@@ -42,14 +47,16 @@ const Banners = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedFiles, setSelectedFiles] = useState([]);
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-const [snackbar, setSnackbar] = useState({
-  open: false,
-  message: '',
-  severity: 'success' // 'success', 'error', 'warning', 'info'
-});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' // 'success', 'error', 'warning', 'info'
+  });
   // Fetch banners
   const fetchBanners = async () => {
     try {
@@ -69,63 +76,86 @@ const [snackbar, setSnackbar] = useState({
     }
   };
   const handleSnackbarClose = (event, reason) => {
-  if (reason === 'clickaway') {
-    return;
-  }
-  setSnackbar(prev => ({ ...prev, open: false }));
-};
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
-const showSnackbar = (message, severity = 'success') => {
-  setSnackbar({ open: true, message, severity });
-};
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
-  // Handle upload process
-const handleUpload = async () => {
-  if (selectedFiles.length === 0) return;
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
 
-  try {
-    setIsUploading(true);
-    setError('');
+    try {
+      setIsUploading(true);
+      setError('');
 
-    // Step 1: Upload files to get paths
-    const uploadedBanners = await bannerService.uploadBannerImages(selectedFiles);
+      // Step 1: Upload files to get paths
+      const uploadedBanners = await bannerService.uploadBannerImages(selectedFiles);
 
-    // Step 2: Format existing banners to match the required structure
-    const existingBanners = banners.map(banner => ({
-      path: banner.path,
-      type: banner.type || 'IMG'
-    }));
+      // Step 2: Format existing banners to match the required structure
+      const existingBanners = banners.map((banner) => ({
+        path: banner.path,
+        type: banner.type || 'IMG'
+      }));
 
-    // Step 3: Combine with existing banners
-    const updatedBanners = [
-      ...existingBanners,
-      ...uploadedBanners
-    ];
+      // Step 3: Combine with existing banners
+      const updatedBanners = [...existingBanners, ...uploadedBanners];
 
-    // Save all banners with the correct payload structure
-    await bannerService.saveBanners({ banners: updatedBanners });
+      // Save all banners with the correct payload structure
+      await bannerService.saveBanners({ banners: updatedBanners });
 
-    // Update local state
-    setBanners(updatedBanners);
-    setSelectedFiles([]);
-    setUploadModalOpen(false);
-    fetchBanners(); // Refresh the banners list
+      // Update local state
+      setBanners(updatedBanners);
+      setSelectedFiles([]);
+      setUploadModalOpen(false);
+      fetchBanners(); // Refresh the banners list
 
-    // Show success message
-    showSnackbar('Banners uploaded successfully!', 'success');
-  } catch (error) {
-    console.error('Upload failed:', error);
-    showSnackbar('Failed to upload banners. Please try again.', 'error');
-  } finally {
-    setIsUploading(false);
-  }
-};
+      // Show success message
+      showSnackbar('Banners uploaded successfully!', 'success');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      showSnackbar('Failed to upload banners. Please try again.', 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Add this function inside your component
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: 'image/*',
+  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
+    accept: {
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png']
+    },
     multiple: true,
-    onDrop: (acceptedFiles) => {
-      setSelectedFiles((prev) => [...prev, ...acceptedFiles]);
+    maxSize: 5 * 1024 * 1024, // 5MB
+    onDrop: (acceptedFiles, rejectedFiles) => {
+      if (rejectedFiles.length > 0) {
+        const rejectedTypes = new Set();
+        rejectedFiles.forEach(({ file, errors }) => {
+          errors.forEach((error) => {
+            if (error.code === 'file-invalid-type') {
+              rejectedTypes.add(file.type || file.name.split('.').pop().toLowerCase());
+            }
+          });
+        });
+        
+        if (rejectedTypes.size > 0) {
+          showSnackbar(`Invalid file type. Only JPG and PNG images are allowed.`, 'error');
+          return;
+        }
+      }
+      
+      const validFiles = acceptedFiles.filter(file => 
+        ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)
+      );
+      
+      if (validFiles.length > 0) {
+        setSelectedFiles((prev) => [...prev, ...validFiles]);
+      }
     }
   });
 
@@ -133,6 +163,39 @@ const handleUpload = async () => {
   const removeFile = (index) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
+
+  // Add this function to handle the delete confirmation
+  const handleDeleteClick = (banner) => {
+    setBannerToDelete(banner);
+    setDeleteDialogOpen(true);
+  };
+
+  // Add this function to handle the actual deletion
+  const confirmDelete = async () => {
+    if (!bannerToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await bannerService.removeBannerImage(bannerToDelete.path);
+      const updatedBanners = banners.filter((b) => b.path !== bannerToDelete.path);
+      await bannerService.saveBanners({
+        banners: updatedBanners.map((b) => ({
+          path: b.path,
+          type: b.type || 'IMG'
+        }))
+      });
+      setBanners(updatedBanners);
+      showSnackbar('Banner deleted successfully!', 'success');
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      showSnackbar('Failed to delete banner. Please try again.', 'error');
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setBannerToDelete(null);
+    }
+  };
+
   useEffect(() => {
     fetchBanners();
   }, []);
@@ -299,15 +362,15 @@ const handleUpload = async () => {
                           <IconEye size={18} />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Edit">
-                        <IconButton size="small" sx={{ color: 'text.secondary' }}>
-                          <IconEdit size={18} />
-                        </IconButton>
-                      </Tooltip>
                     </Stack>
                     <Tooltip title="Delete">
-                      <IconButton size="small" sx={{ color: 'error.main' }}>
-                        <IconTrash size={18} />
+                      <IconButton
+                        size="small"
+                        sx={{ color: 'error.main' }}
+                        onClick={() => handleDeleteClick(banner)}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? <CircularProgress size={18} /> : <IconTrash size={18} />}
                       </IconButton>
                     </Tooltip>
                   </CardActions>
@@ -521,62 +584,104 @@ const handleUpload = async () => {
           </Box>
         </DialogTitle>
         <DialogContent>
+          <Typography variant="h5" gutterBottom>Upload New Banners</Typography>
           <Box
             {...getRootProps()}
             sx={{
               border: '2px dashed',
-              borderColor: 'primary.main',
+              borderColor: 'divider',
               borderRadius: 2,
               p: 4,
               textAlign: 'center',
-              mb: 3,
-              backgroundColor: isDragActive ? 'action.hover' : 'background.paper',
               cursor: 'pointer',
-              transition: 'background-color 0.2s'
+              '&:hover': {
+                borderColor: 'primary.main',
+                backgroundColor: 'action.hover'
+              },
+              mb: 2
             }}
           >
-            <input {...getInputProps()} />
-            <CloudUpload fontSize="large" color="primary" sx={{ mb: 1 }} />
-            <Typography>{isDragActive ? 'Drop the files here...' : 'Drag and drop some files here, or click to select files'}</Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-              (Only *.jpeg, *.jpg, *.png images will be accepted)
+            <input {...getInputProps()} accept="image/jpeg, image/png" />
+            <CloudUpload fontSize="large" color="action" sx={{ mb: 1 }} />
+            <Typography>
+              {isDragActive
+                ? 'Drop the images here...'
+                : 'Drag & drop JPG/PNG images here, or click to select files'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Supported formats: JPG, PNG (Max 5MB per file)
             </Typography>
           </Box>
 
           {selectedFiles.length > 0 && (
-            <Box>
+            <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Selected Files ({selectedFiles.length}):
+                Selected images: {selectedFiles.length}
               </Typography>
-              <Box sx={{ maxHeight: 200, overflow: 'auto', mb: 2 }}>
-                {selectedFiles.map((file, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      p: 1,
-                      bgcolor: 'background.default',
-                      borderRadius: 1,
-                      mb: 1
-                    }}
-                  >
-                    <Typography variant="body2" noWrap>
-                      {file.name}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFile(index);
+              <List dense>
+                {selectedFiles.map((file, index) => {
+                  const isImage = file.type.startsWith('image/');
+                  const previewUrl = isImage ? URL.createObjectURL(file) : null;
+
+                  return (
+                    <ListItem
+                      key={index}
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          aria-label="remove"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(index);
+                          }}
+                          size="small"
+                        >
+                          <Close />
+                        </IconButton>
+                      }
+                      sx={{
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        mb: 1,
+                        bgcolor: 'background.paper',
+                        '&:hover': {
+                          bgcolor: 'action.hover'
+                        }
                       }}
                     >
-                      <Close fontSize="small" />
-                    </IconButton>
-                  </Box>
-                ))}
-              </Box>
+                      {isImage && (
+                        <Box
+                          component="img"
+                          src={previewUrl}
+                          alt={file.name}
+                          sx={{
+                            width: 50,
+                            height: 50,
+                            objectFit: 'cover',
+                            borderRadius: 1,
+                            mr: 2
+                          }}
+                          onLoad={() => URL.revokeObjectURL(previewUrl)}
+                        />
+                      )}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography noWrap sx={{ mb: 0.5 }}>
+                          {file.name}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {file.type || 'Unknown type'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </ListItem>
+                  );
+                })}
+              </List>
             </Box>
           )}
 
@@ -613,6 +718,28 @@ const handleUpload = async () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      {/* Add this Dialog  remove banner*/}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Delete Banner</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this banner?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => !isDeleting && setDeleteDialogOpen(false)} color="primary" variant="outlined" disabled={isDeleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            autoFocus
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

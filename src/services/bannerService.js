@@ -39,8 +39,26 @@ class BannerService {
     }
   }
 
+  // Remove banner image
+  async removeBannerImage(imagePath) {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/user/upload/removeimage`,
+        { path: imagePath },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error removing banner image:', error);
+      throw error;
+    }
+  }
+
   // Save banners
-  // In bannerService.js
   async saveBanners(bannersData) {
     try {
       const token = authService.getToken();
