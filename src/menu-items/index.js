@@ -6,6 +6,7 @@ import patients from './patients';
 import policy from './policy';
 import banners from './banners';
 import { isAdminUser } from '../utils/authUtils';
+import { IconSettings } from '@tabler/icons-react';
 
 // Helper function to filter menu items based on admin status
 const filterMenuItems = (items, isAdmin) => {
@@ -34,7 +35,41 @@ const getMenuItems = () => {
   }
 
   // Add other menu items
-  items = [...items, doctors, ambulance, patients, banners, policy];
+  items = [...items, doctors, ambulance, patients];
+
+  // Add Settings dropdown with Policy and Banners
+  const settings = {
+    id: 'settings',
+    title: 'Settings',
+    type: 'group',
+    children: [
+      {
+        id: 'settings-dropdown',
+        title: 'Settings',
+        type: 'collapse',
+        icon: IconSettings,
+        children: [
+          {
+            id: 'banners-management',
+            title: 'Banners',
+            type: 'item',
+            url: '/banners',
+            icon: banners.children[0].icon,
+            breadcrumbs: false
+          },
+          {
+            id: 'policy-management',
+            title: 'Policy',
+            type: 'item',
+            url: '/policy',
+            breadcrumbs: false
+          }
+        ]
+      }
+    ]
+  };
+  
+  items.push(settings);
 
   // Filter items based on admin status
   return { items: filterMenuItems(items, isAdmin) };

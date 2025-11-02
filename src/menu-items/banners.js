@@ -13,7 +13,7 @@ const banners = {
       title: 'Banners',
       type: 'item',
       url: '/banners',
-      icon: IconPhoto,
+      icon: '',
       breadcrumbs: false
     }
   ]

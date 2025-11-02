@@ -8,7 +8,7 @@ const icons = { IconUserShield };
 
 const admin =  {
   id: 'admin',
-  title: 'Admin',
+  title: '',
   type: 'group',
   children: [
     {
