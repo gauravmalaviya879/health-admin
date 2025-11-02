@@ -22,6 +22,7 @@ import AdminHistory from '../views/Admin/History';
 import DoctorHistory from '../views/doctors/DoctorHistory';
 import PatientHistory from 'views/Patients/PatientHistory';
 import Banners from '../views/Banners';
+import Charges from '../views/Charges';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -118,6 +119,10 @@ const MainRoutes = {
     {
       path: '/patients/:patientId/history',
       element: <PatientHistory />
+    },
+    {
+      path: 'charges',
+      element: <Charges />
     },
     {
       path: 'banners',

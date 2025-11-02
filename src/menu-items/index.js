@@ -6,7 +6,7 @@ import patients from './patients';
 import policy from './policy';
 import banners from './banners';
 import { isAdminUser } from '../utils/authUtils';
-import { IconSettings } from '@tabler/icons-react';
+import { IconAmbulance, IconSettings } from '@tabler/icons-react';
 
 // Helper function to filter menu items based on admin status
 const filterMenuItems = (items, isAdmin) => {
@@ -37,7 +37,7 @@ const getMenuItems = () => {
   // Add other menu items
   items = [...items, doctors, ambulance, patients];
 
-  // Add Settings dropdown with Policy and Banners
+  // Add Settings dropdown with Charges, Policy and Banners
   const settings = {
     id: 'settings',
     title: 'Settings',
@@ -49,6 +49,14 @@ const getMenuItems = () => {
         type: 'collapse',
         icon: IconSettings,
         children: [
+          {
+            id: 'charges-management',
+            title: 'Charges',
+            type: 'item',
+            url: '/charges',
+            // icon: <IconAmbulance size={20} />,
+            breadcrumbs: false
+          },
           {
             id: 'banners-management',
             title: 'Banners',

@@ -106,6 +106,34 @@ const settingsService = {
         error: error.response?.data?.Message || 'Failed to save settings'
       };
     }
+  },
+  
+
+  // Save ambulance charges
+  saveAmbulanceCharges: async (chargesData) => {
+    try {
+      const token = authService.getToken();
+      const response = await axios({
+        method: 'post',
+        url: `${API_BASE_URL}/admin/settings/save-ambulance-price`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: chargesData
+      });
+
+      return {
+        success: true,
+        data: response.data.Data || {}
+      };
+    } catch (error) {
+      console.error('Save ambulance charges error:', error);
+      return {
+        success: false,
+        error: error.response?.data?.Message || 'Failed to save ambulance charges'
+      };
+    }
   }
 };
 
