@@ -19,7 +19,7 @@ import settingsService from 'services/settingsService';
 
 const Charges = () => {
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState({
     open: false,
@@ -27,8 +27,8 @@ const Charges = () => {
     severity: 'success'
   });
   const [formData, setFormData] = useState({
-    gst: 18,
-    platform_fee: 20,
+    gst: 0,
+    platform_fee: 0,
     ambulance_price_per_km: 0,
     bike_price_per_km: 0,
     rickshaw_price_per_km: 0,
@@ -71,6 +71,33 @@ const Charges = () => {
     }));
   };
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await settingsService.getSettings();
+        if (response.success && response.data) {
+          setFormData({
+            gst: response.data.gst || 0,
+            platform_fee: response.data.platform_fee || 0,
+            ambulance_price_per_km: response.data.ambulance_price_per_km || 0,
+            bike_price_per_km: response.data.bike_price_per_km || 0,
+            rickshaw_price_per_km: response.data.rickshaw_price_per_km || 0,
+            cab_price_per_km: response.data.cab_price_per_km || 0
+          });
+        } else {
+          showNotification(response.error || 'Failed to load settings', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        showNotification('Failed to load settings', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -81,7 +108,15 @@ const Charges = () => {
 
     try {
       setSaving(true);
-      const response = await settingsService.saveAmbulanceCharges(formData);
+      const response = await settingsService.saveAmbulanceCharges({
+        gst: parseFloat(formData.gst),
+        platform_fee: parseFloat(formData.platform_fee),
+        ambulance_price_per_km: parseFloat(formData.ambulance_price_per_km),
+        bike_price_per_km: parseFloat(formData.bike_price_per_km),
+        rickshaw_price_per_km: parseFloat(formData.rickshaw_price_per_km),
+        cab_price_per_km: parseFloat(formData.cab_price_per_km)
+      });
+      
       if (response.success) {
         showNotification('Charges updated successfully');
       } else {
@@ -136,6 +171,14 @@ const Charges = () => {
       </Paper>
     </Grid>
   );
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Card elevation={0}>
