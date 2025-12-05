@@ -787,7 +787,7 @@ const DoctorDetails = () => {
                     />
                   </Box>
                 } 
-                value="cancelled" 
+                value="cancel" 
                 sx={{ textTransform: 'none' }} 
               />
             </Tabs>
