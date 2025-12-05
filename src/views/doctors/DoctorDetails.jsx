@@ -738,12 +738,12 @@ const DoctorDetails = () => {
                   accepted
                     <Chip 
                       size="small" 
-                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'accepted').length || 0} 
+                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'accept').length || 0} 
                       sx={{ ml: 1 }}
                     />
                   </Box>
                 } 
-                value="accepted" 
+                value="accept" 
                 sx={{ textTransform: 'none' }} 
               />
               <Tab 
