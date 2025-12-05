@@ -95,6 +95,7 @@ const DoctorDetails = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('pending'); // Default to 'pending'
 
   // Add state for lightbox
   const [selectedImage, setSelectedImage] = useState(null);
@@ -158,9 +159,21 @@ const DoctorDetails = () => {
   };
 
   const filteredAppointments =
-    doctor?.appointmentsDetails?.filter(
-      (appointment) => appointment.patientname.toLowerCase().includes(searchTerm.toLowerCase()) || appointment.mobile.includes(searchTerm)
-    ) || [];
+  doctor?.appointmentsDetails?.filter((appointment) => {
+    const matchesSearch = appointment.patientname?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                        appointment.mobile?.includes(searchTerm);
+    
+    // Normalize the status for comparison
+    const normalizedStatus = appointment.status?.toLowerCase().trim();
+    const normalizedFilter = statusFilter.toLowerCase().trim();
+    
+    const matchesStatus = statusFilter === 'all' || 
+                        (normalizedStatus === normalizedFilter) 
+    
+    return matchesSearch && matchesStatus;
+  }) || [];
+
+    
 
   const paginatedAppointments = filteredAppointments.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -249,6 +262,7 @@ const DoctorDetails = () => {
     switch (status?.toLowerCase()) {
       case 'approved':
       case 'accept':
+      case 'accepted':
         return 'success';
       case 'pending':
         return 'warning';
@@ -266,6 +280,7 @@ const DoctorDetails = () => {
     switch (status?.toLowerCase()) {
       case 'approved':
       case 'accept':
+      case 'accepted':
         return 'green';
       case 'pending':
         return '#ebc934';
@@ -654,23 +669,129 @@ const DoctorDetails = () => {
   const renderAppointments = () => (
     <Card variant="outlined">
       <CardContent>
-        <Box mb={3} display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Appointments</Typography>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search appointments..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <IconSearch size={20} />
-                </InputAdornment>
-              )
-            }}
-            sx={{ width: 300 }}
-          />
+        <Box mb={3}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Appointments</Typography>
+            <TextField
+              variant="outlined"
+              size="small"
+              placeholder="Search appointments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconSearch size={20} />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ width: 300 }}
+            />
+          </Box>
+          
+          {/* Status Filter Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs 
+              value={statusFilter} 
+              onChange={(e, newValue) => {
+                setStatusFilter(newValue);
+                setPage(0); // Reset to first page when changing status
+              }}
+              variant="scrollable"
+              scrollButtons="auto"
+              textColor="primary"
+              indicatorColor="primary"
+            >
+              <Tab 
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box 
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: 'warning.main'
+                      }}
+                    />
+                    Pending
+                    <Chip 
+                      size="small" 
+                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'pending').length || 0} 
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                } 
+                value="pending" 
+                sx={{ textTransform: 'none' }} 
+              />
+              <Tab 
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box 
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: 'info.main'
+                      }}
+                    />
+                  accepted
+                    <Chip 
+                      size="small" 
+                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'accepted').length || 0} 
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                } 
+                value="accepted" 
+                sx={{ textTransform: 'none' }} 
+              />
+              <Tab 
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box 
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: 'success.main'
+                      }}
+                    />
+                    Completed
+                    <Chip 
+                      size="small" 
+                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'completed').length || 0} 
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                } 
+                value="completed" 
+                sx={{ textTransform: 'none' }} 
+              />
+              <Tab 
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box 
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        bgcolor: 'error.main'
+                      }}
+                    />
+                    Cancelled
+                    <Chip 
+                      size="small" 
+                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'cancel').length || 0} 
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                } 
+                value="cancelled" 
+                sx={{ textTransform: 'none' }} 
+              />
+            </Tabs>
+          </Box>
         </Box>
 
         <TableContainer component={Paper} variant="outlined">
