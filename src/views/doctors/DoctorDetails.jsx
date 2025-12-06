@@ -54,7 +54,10 @@ import {
   IconFileText,
   IconEdit,
   IconTrash,
-  IconRosetteDiscountCheckFilled
+  IconRosetteDiscountCheckFilled,
+  IconDeviceLaptop,
+  IconVideo,
+  IconBuilding
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -94,6 +97,37 @@ const DoctorDetails = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const renderVisitTypeIcon = (visitType) => {
+    if (!visitType) return 'N/A';
+    
+    const visitTypeLower = visitType.toLowerCase();
+    
+    if (visitTypeLower.includes('eopd')) {
+      return (
+        <Box display="flex" alignItems="center" title="E-OPD">
+          <IconDeviceLaptop size={20} color="#1976d2" style={{ marginRight: 4 }} />
+          <span>E-OPD</span>
+        </Box>
+      );
+    } else if (visitTypeLower.includes('video') || visitTypeLower.includes('call')) {
+      return (
+        <Box display="flex" alignItems="center" title="Video Call">
+          <IconVideo size={20} color="#d32f2f" style={{ marginRight: 4 }} />
+          <span>Video Call</span>
+        </Box>
+      );
+    } else if (visitTypeLower.includes('clinic') || visitTypeLower.includes('visit')) {
+      return (
+        <Box display="flex" alignItems="center" title="Clinic Visit">
+          <IconBuilding size={20} color="#388e3c" style={{ marginRight: 4 }} />
+          <span>Clinic Visit</span>
+        </Box>
+      );
+    }
+    
+    return visitType;
+  };
   const [openDialog, setOpenDialog] = useState(false);
   const [statusFilter, setStatusFilter] = useState('pending'); // Default to 'pending'
 
@@ -159,21 +193,18 @@ const DoctorDetails = () => {
   };
 
   const filteredAppointments =
-  doctor?.appointmentsDetails?.filter((appointment) => {
-    const matchesSearch = appointment.patientname?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                        appointment.mobile?.includes(searchTerm);
-    
-    // Normalize the status for comparison
-    const normalizedStatus = appointment.status?.toLowerCase().trim();
-    const normalizedFilter = statusFilter.toLowerCase().trim();
-    
-    const matchesStatus = statusFilter === 'all' || 
-                        (normalizedStatus === normalizedFilter) 
-    
-    return matchesSearch && matchesStatus;
-  }) || [];
+    doctor?.appointmentsDetails?.filter((appointment) => {
+      const matchesSearch =
+        appointment.patientname?.toLowerCase().includes(searchTerm.toLowerCase()) || appointment.mobile?.includes(searchTerm);
 
-    
+      // Normalize the status for comparison
+      const normalizedStatus = appointment.status?.toLowerCase().trim();
+      const normalizedFilter = statusFilter.toLowerCase().trim();
+
+      const matchesStatus = statusFilter === 'all' || normalizedStatus === normalizedFilter;
+
+      return matchesSearch && matchesStatus;
+    }) || [];
 
   const paginatedAppointments = filteredAppointments.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -688,11 +719,11 @@ const DoctorDetails = () => {
               sx={{ width: 300 }}
             />
           </Box>
-          
+
           {/* Status Filter Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-            <Tabs 
-              value={statusFilter} 
+            <Tabs
+              value={statusFilter}
               onChange={(e, newValue) => {
                 setStatusFilter(newValue);
                 setPage(0); // Reset to first page when changing status
@@ -702,10 +733,10 @@ const DoctorDetails = () => {
               textColor="primary"
               indicatorColor="primary"
             >
-              <Tab 
+              <Tab
                 label={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Box 
+                    <Box
                       sx={{
                         width: 10,
                         height: 10,
@@ -714,20 +745,20 @@ const DoctorDetails = () => {
                       }}
                     />
                     Pending
-                    <Chip 
-                      size="small" 
-                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'pending').length || 0} 
+                    <Chip
+                      size="small"
+                      label={doctor?.appointmentsDetails?.filter((a) => a.status?.toLowerCase() === 'pending').length || 0}
                       sx={{ ml: 1 }}
                     />
                   </Box>
-                } 
-                value="pending" 
-                sx={{ textTransform: 'none' }} 
+                }
+                value="pending"
+                sx={{ textTransform: 'none' }}
               />
-              <Tab 
+              <Tab
                 label={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Box 
+                    <Box
                       sx={{
                         width: 10,
                         height: 10,
@@ -735,21 +766,21 @@ const DoctorDetails = () => {
                         bgcolor: 'info.main'
                       }}
                     />
-                  accepted
-                    <Chip 
-                      size="small" 
-                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'accept').length || 0} 
+                    accepted
+                    <Chip
+                      size="small"
+                      label={doctor?.appointmentsDetails?.filter((a) => a.status?.toLowerCase() === 'accept').length || 0}
                       sx={{ ml: 1 }}
                     />
                   </Box>
-                } 
-                value="accept" 
-                sx={{ textTransform: 'none' }} 
+                }
+                value="accept"
+                sx={{ textTransform: 'none' }}
               />
-              <Tab 
+              <Tab
                 label={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Box 
+                    <Box
                       sx={{
                         width: 10,
                         height: 10,
@@ -758,20 +789,20 @@ const DoctorDetails = () => {
                       }}
                     />
                     Completed
-                    <Chip 
-                      size="small" 
-                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'completed').length || 0} 
+                    <Chip
+                      size="small"
+                      label={doctor?.appointmentsDetails?.filter((a) => a.status?.toLowerCase() === 'completed').length || 0}
                       sx={{ ml: 1 }}
                     />
                   </Box>
-                } 
-                value="completed" 
-                sx={{ textTransform: 'none' }} 
+                }
+                value="completed"
+                sx={{ textTransform: 'none' }}
               />
-              <Tab 
+              <Tab
                 label={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Box 
+                    <Box
                       sx={{
                         width: 10,
                         height: 10,
@@ -780,15 +811,15 @@ const DoctorDetails = () => {
                       }}
                     />
                     Cancelled
-                    <Chip 
-                      size="small" 
-                      label={doctor?.appointmentsDetails?.filter(a => a.status?.toLowerCase() === 'cancel').length || 0} 
+                    <Chip
+                      size="small"
+                      label={doctor?.appointmentsDetails?.filter((a) => a.status?.toLowerCase() === 'cancel').length || 0}
                       sx={{ ml: 1 }}
                     />
                   </Box>
-                } 
-                value="cancel" 
-                sx={{ textTransform: 'none' }} 
+                }
+                value="cancel"
+                sx={{ textTransform: 'none' }}
               />
             </Tabs>
           </Box>
@@ -800,11 +831,11 @@ const DoctorDetails = () => {
               <TableRow>
                 <TableCell>#</TableCell>
                 <TableCell>Patient Name</TableCell>
-                <TableCell>Mobile</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Time</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell>Date & Time</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell> Type</TableCell>
                 <TableCell>Actions</TableCell>
+                <TableCell>View</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -820,9 +851,13 @@ const DoctorDetails = () => {
                         {appointment.patientname}
                       </Box>
                     </TableCell>
-                    <TableCell>{appointment.mobile}</TableCell>
-                    <TableCell>{appointment.date}</TableCell>
-                    <TableCell>{appointment.time}</TableCell>
+                    <TableCell>
+                      {appointment.date} {appointment.time}
+                    </TableCell>
+                    <TableCell>₹{appointment.totalamount || '0'}</TableCell>
+                    <TableCell>
+                      {renderVisitTypeIcon(appointment.visit_types)}
+                    </TableCell>
                     <TableCell align="center">
                       <Chip label={appointment.status} size="small" color={getStatusColor(appointment.status)} />
                     </TableCell>
@@ -1235,11 +1270,14 @@ const DoctorDetails = () => {
               <Avatar src={doctor.profile_pic} sx={{ width: 150, height: 150, mb: 2 }} />
             </Grid>
             <Grid item xs={12} md={8}>
-              <Box style={{ display: 'flex', alignItems: 'center'}}>
-              <Typography variant="h5" style={{ display: 'flex', alignItems: 'center'}} gutterBottom>
-              {doctor.name || 'N/A'} <IconRosetteDiscountCheckFilled style={{ marginRight: 8 ,margin:'0px 5px', color: getStatusIconColor(doctor.approval_status) }} size={20}></IconRosetteDiscountCheckFilled> 
-              </Typography>
-              
+              <Box style={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h5" style={{ display: 'flex', alignItems: 'center' }} gutterBottom>
+                  {doctor.name || 'N/A'}{' '}
+                  <IconRosetteDiscountCheckFilled
+                    style={{ marginRight: 8, margin: '0px 5px', color: getStatusIconColor(doctor.approval_status) }}
+                    size={20}
+                  ></IconRosetteDiscountCheckFilled>
+                </Typography>
               </Box>
               <Divider sx={{ my: 2 }} />
 
