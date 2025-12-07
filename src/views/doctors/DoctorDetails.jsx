@@ -33,7 +33,10 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  Paper as MuiPaper
+  Paper as MuiPaper,
+  ListItemIcon,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import {
   IconArrowLeft,
@@ -46,7 +49,7 @@ import {
   IconSearch,
   IconCalendar,
   IconPhone,
-  IconInfoCircle,
+  IconEye,
   IconClipboardText,
   IconId,
   IconCertificate,
@@ -57,7 +60,16 @@ import {
   IconRosetteDiscountCheckFilled,
   IconDeviceLaptop,
   IconVideo,
-  IconBuilding
+  IconBuilding,
+  IconClock,
+  IconMail,
+  IconFiles,
+  IconFile,
+  IconMapPin,
+  IconFileTypePdf,
+  IconCurrencyRupee,
+  IconPrescription,
+  IconPhoto
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -100,9 +112,9 @@ const DoctorDetails = () => {
 
   const renderVisitTypeIcon = (visitType) => {
     if (!visitType) return 'N/A';
-    
+
     const visitTypeLower = visitType.toLowerCase();
-    
+
     if (visitTypeLower.includes('eopd')) {
       return (
         <Box display="flex" alignItems="center" title="E-OPD">
@@ -125,7 +137,7 @@ const DoctorDetails = () => {
         </Box>
       );
     }
-    
+
     return visitType;
   };
   const [openDialog, setOpenDialog] = useState(false);
@@ -834,7 +846,6 @@ const DoctorDetails = () => {
                 <TableCell>Date & Time</TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell> Type</TableCell>
-                <TableCell>Actions</TableCell>
                 <TableCell>View</TableCell>
               </TableRow>
             </TableHead>
@@ -854,22 +865,26 @@ const DoctorDetails = () => {
                     <TableCell>
                       {appointment.date} {appointment.time}
                     </TableCell>
-                    <TableCell>₹{appointment.totalamount || '0'}</TableCell>
-                    <TableCell>
-                      {renderVisitTypeIcon(appointment.visit_types)}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Chip label={appointment.status} size="small" color={getStatusColor(appointment.status)} />
-                    </TableCell>
+                    <TableCell>₹{appointment.price || '0'}</TableCell>
+                    <TableCell>{renderVisitTypeIcon(appointment.visit_types)}</TableCell>
+
                     <TableCell align="center">
                       <Button
                         variant="outlined"
                         size="small"
-                        startIcon={<IconInfoCircle size={16} />}
+                        sx={{
+                          minWidth: 40,
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          p: 0,
+                          '& .MuiButton-startIcon': {
+                            m: 0
+                          }
+                        }}
+                        startIcon={<IconEye size={20} />}
                         onClick={() => handleOpenDialog(appointment)}
-                      >
-                        View
-                      </Button>
+                      />
                     </TableCell>
                   </TableRow>
                 ))
@@ -899,7 +914,7 @@ const DoctorDetails = () => {
       </CardContent>
     </Card>
   );
-  const isPdf = (url = '') => url.includes('/raw/upload/') || url.toLowerCase().endsWith('.pdf');
+  const isPdf = (url = '') => url.includes('/raw/upload/') || url.endsWith('.pdf');
 
   // Render Identity Proof Tab
   const renderIdentityProof = (identityProofs) => {
@@ -1126,87 +1141,366 @@ const DoctorDetails = () => {
   };
 
   // Render Appointment Details Dialog
-  const renderAppointmentDialog = () => (
-    <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-      <DialogTitle>Appointment Details</DialogTitle>
-      <DialogContent dividers>
-        {selectedAppointment && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                PATIENT INFORMATION
+
+  const renderAppointmentDialog = () => {
+    if (!selectedAppointment) return null;
+
+    const {
+      patientname,
+      mobile,
+      appointment_reason,
+      date,
+      time,
+      visit_types,
+      status,
+      doctor_remark,
+      report = [],
+      surgerydetails,
+      hospital_name
+    } = selectedAppointment;
+
+    const isPdf = (url) => url?.toLowerCase().endsWith('.pdf');
+    const consultationFee = surgerydetails?.general_price || '2000';
+
+    return (
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            maxWidth: 900
+          }
+        }}
+      >
+        {/* Header */}
+        <DialogTitle
+          sx={{
+            bgcolor: '#f8f9fa',
+            p: 3,
+            borderBottom: '1px solid #e9ecef'
+          }}
+        >
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h5" fontWeight="600">
+                {patientname}
               </Typography>
-              <Box mb={3}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Avatar sx={{ width: 56, height: 56, mr: 2, bgcolor: 'primary.main' }}>
-                    {selectedAppointment.patientname.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h6">{selectedAppointment.patientname}</Typography>
-                    <Box display="flex" alignItems="center" mt={0.5}>
-                      <IconPhone size={16} style={{ marginRight: 8, opacity: 0.7 }} />
-                      <Typography variant="body2" color="textSecondary">
-                        {selectedAppointment.mobile}
-                      </Typography>
+              <Box display="flex" gap={3} mt={1}>
+               
+                <Box display="flex" alignItems="center">
+                  <IconPhone size={18} style={{ marginRight: 8, color: '#6c757d' }} />
+                  <Typography variant="body2" color="textSecondary">
+                    {mobile ? `+91 ${mobile}` : 'No phone provided'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+            <IconX size={24} style={{ cursor: 'pointer', color: '#6c757d' }} onClick={handleCloseDialog} />
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ p: 3 }}>
+            {/* Consultation Details Chips */}
+            <Box display="flex" gap={2} mb={3} flexWrap="wrap">
+              <Chip
+                icon={<IconStethoscope size={16} />}
+                label={`Consultation Type: ${visit_types?.replace('_', ' ')}`}
+                variant="outlined"
+                sx={{
+                  borderRadius: 1,
+                  bgcolor: '#e9f5ff',
+                  color: '#0d6efd',
+                  borderColor: '#b6d4fe'
+                }}
+              />
+              <Chip
+                icon={<IconCheck size={16} />}
+                label={`Consultation Status: ${status}`}
+                variant="outlined"
+                sx={{
+                  borderRadius: 1,
+                  bgcolor: status === 'Completed' ? '#e8f5e9' : '#fff3cd',
+                  color: status === 'Completed' ? '#2e7d32' : '#856404',
+                  borderColor: status === 'Completed' ? '#c8e6c9' : '#ffeeba'
+                }}
+              />
+              <Chip
+                icon={<IconCurrencyRupee size={16} />}
+                label={`Consultation Fee: ₹${consultationFee}`}
+                variant="outlined"
+                sx={{
+                  borderRadius: 1,
+                  bgcolor: '#e2e3e5',
+                  color: '#383d41',
+                  borderColor: '#d6d8db'
+                }}
+              />
+            </Box>
+
+            <Grid container spacing={3}>
+              {/* Left Column */}
+              <Grid item xs={12} md={6}>
+                {/* Appointment Date & Time */}
+                <Box mb={3}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    <Box display="flex" alignItems="center">
+                      <IconClock size={18} style={{ marginRight: 8 }} />
+                      Appointment Date & Time
                     </Box>
+                  </Typography>
+                  <Typography>
+                    {date}, {time}
+                  </Typography>
+                </Box>
+
+                {/* Clinic Name */}
+                <Box mb={3}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    <Box display="flex" alignItems="center">
+                      <IconBuilding size={18} style={{ marginRight: 8 }} />
+                      Clinic Name
+                    </Box>
+                  </Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: '#f8f9fa',
+                      borderRadius: 1,
+                      border: '1px solid #e9ecef'
+                    }}
+                  >
+                    <Typography fontWeight="500">{hospital_name?.name || 'No clinic name available'}</Typography>
                   </Box>
                 </Box>
 
-                <Box mb={2}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Alternate Mobile
+                {/* Clinic Location */}
+                <Box mb={3}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    <Box display="flex" alignItems="center">
+                      <IconMapPin size={18} style={{ marginRight: 8 }} />
+                      Clinic Location
+                    </Box>
                   </Typography>
-                  <Typography>{selectedAppointment.alt_mobile || 'N/A'}</Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: '#f8f9fa',
+                      borderRadius: 1,
+                      border: '1px solid #e9ecef'
+                    }}
+                  >
+                    {hospital_name?.address || 'Not Yet'}
+                  </Box>
                 </Box>
 
-                <Box mb={2}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Visit Type
+                {/* Reason for Visit */}
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    <Box display="flex" alignItems="center">
+                      <IconClipboardText size={18} style={{ marginRight: 8 }} />
+                      Reason
+                    </Box>
                   </Typography>
-                  <Chip
-                    label={selectedAppointment.visit_types.replace('_', ' ').toUpperCase()}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
+                  <Box>{appointment_reason || 'No reason provided'}</Box>
                 </Box>
-              </Box>
+              </Grid>
 
-              <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                APPOINTMENT DETAILS
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Date
+              {/* Right Column */}
+              <Grid item xs={12} md={6}>
+                {/* Reports Section */}
+                <Box mb={3}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    <Box display="flex" alignItems="center">
+                      <IconFiles size={18} style={{ marginRight: 8 }} />
+                      Reports
+                    </Box>
                   </Typography>
-                  <Typography>{selectedAppointment.date}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Time
+                  {report && report.length > 0 ? (
+                    <List disablePadding>
+                      {report.map((item, index) => {
+                        const fileUrl = item?.path || item?.url || item;
+                        const fileType = item?.type?.toLowerCase() || '';
+                        const isPdfFile = isPdf(fileUrl) || fileType === 'pdf';
+                        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileType);
+                        const isVideo = ['mp4', 'webm', 'ogg'].includes(fileType);
+                        const isDocument = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(fileType);
+
+                        const getFileIcon = () => {
+                          if (isPdfFile) return <IconFileTypePdf size={20} color="#f44336" />;
+                          if (isImage) return <IconPhoto size={20} color="#4caf50" />;
+                          if (isVideo) return <IconVideo size={20} color="#9c27b0" />;
+                          if (isDocument) return <IconFileText size={20} color="#2196f3" />;
+                          return <IconFile size={20} color="#757575" />;
+                        };
+
+                        return (
+                          <ListItem
+                            key={index}
+                            
+                            sx={{
+                              px: 2,
+                              py: 1.5,
+                              borderRadius: 1,
+                              border: '1px solid #e9ecef',
+                              mb: 1,
+                              '&:hover': { bgcolor: '#f8f9fa' }
+                            }}
+                          >
+                            <Box display="flex" alignItems="center" width="100%">
+                              {/* Thumbnail for images, icon for others */}
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  mr: 2,
+                                  overflow: 'hidden',
+                                  borderRadius: 1,
+                                  bgcolor: 'background.paper',
+                                  border: '1px solid #e0e0e0'
+                                }}
+                              >
+                                {isImage ? (
+                                  <img
+                                    src={fileUrl}
+                                    alt="Thumbnail"
+                                    style={{
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'cover'
+                                    }}
+                                  />
+                                ) : (
+                                  getFileIcon()
+                                )}
+                              </Box>
+
+                              {/* File info */}
+                              <Box flex={1} minWidth={0}>
+                                <Typography
+                                  variant="body2"
+                                  noWrap
+                                  sx={{
+                                    fontWeight: 500,
+                                    color: 'text.primary'
+                                  }}
+                                >
+                                  {`Report ${index + 1}${fileType ? `.${fileType}` : ''}`}
+                                </Typography>
+                                <Box display="flex" alignItems="center" mt={0.5}>
+                                  <Typography
+                                    variant="caption"
+                                    color="textSecondary"
+                                    sx={{
+                                      textTransform: 'uppercase',
+                                      fontSize: '0.65rem',
+                                      letterSpacing: '0.5px'
+                                    }}
+                                  >
+                                    {fileType || 'file'}
+                                  </Typography>
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      mx: 1,
+                                      color: 'divider'
+                                    }}
+                                  >
+                                    •
+                                  </Box>
+                                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                                    {new Date().toLocaleDateString()}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                             <Button
+                                size="small"
+                                href={fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                startIcon={<IconEye size={16} />}
+                                sx={{ textTransform: 'none' }}
+                              >
+                                View
+                              </Button>
+                          </ListItem>
+                        );
+                      })}
+                    </List>
+                  ) : (
+                    <Box
+                      sx={{
+                        p: 3,
+                        bgcolor: 'background.paper',
+                        borderRadius: 1,
+                        border: '1px dashed #e0e0e0',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <IconFiles size={32} style={{ color: '#9e9e9e', marginBottom: 8 }} />
+                      <Typography variant="body2" color="textSecondary">
+                        No reports uploaded
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Prescription Section */}
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    <Box display="flex" alignItems="center">
+                      <IconPrescription size={18} style={{ marginRight: 8 }} />
+                      Doctor's Remark
+                    </Box>
                   </Typography>
-                  <Typography>{selectedAppointment.time}</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Reason
-                  </Typography>
-                  <Typography>{selectedAppointment.appointment_reason || 'Not specified'}</Typography>
-                </Grid>
+                  {doctor_remark ? (
+                    <Box
+                      sx={{
+                        border: '1px dashed #e9ecef',
+                        borderRadius: 1,
+                        p: 2,
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        '&:hover': { bgcolor: '#f8f9fa' }
+                      }}
+                      onClick={() => window.open(doctor_remark, '_blank')}
+                    >
+                      <Box display="flex" flexDirection="column" alignItems="center">
+                        <IconFileTypePdf size={48} color="#f44336" />
+                        <Typography variant="body2" mt={1} color="textSecondary">
+                          {isPdf(doctor_remark) ? 'View Prescription (PDF)' : 'View Prescription'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value="No prescription available."
+                      disabled
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: '#f8f9fa',
+                          '& fieldset': { borderColor: '#e9ecef' }
+                        }
+                      }}
+                    />
+                  )}
+                </Box>
               </Grid>
             </Grid>
-          </Grid>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseDialog} color="primary">
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
+          </Box>
+        </DialogContent>
+      </Dialog>
+    );
+  };
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
