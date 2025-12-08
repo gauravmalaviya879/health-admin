@@ -845,6 +845,8 @@ const DoctorDetails = () => {
                 <TableCell>Patient Name</TableCell>
                 <TableCell>Date & Time</TableCell>
                 <TableCell>Amount</TableCell>
+                <TableCell>Platform fees</TableCell>
+                <TableCell>Payable fees</TableCell>
                 <TableCell> Type</TableCell>
                 <TableCell>View</TableCell>
               </TableRow>
@@ -866,6 +868,8 @@ const DoctorDetails = () => {
                       {appointment.date} {appointment.time}
                     </TableCell>
                     <TableCell>₹{appointment.price || '0'}</TableCell>
+                     <TableCell>₹{appointment.price*10/100  || '0'}</TableCell>
+                     <TableCell>₹{appointment.price - appointment.price*10/100   || '0'}</TableCell>
                     <TableCell>{renderVisitTypeIcon(appointment.visit_types)}</TableCell>
 
                     <TableCell align="center">
