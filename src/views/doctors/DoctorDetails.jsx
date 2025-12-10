@@ -70,7 +70,10 @@ import {
   IconCurrencyRupee,
   IconPrescription,
   IconPhoto,
-  IconScissors
+  IconScissors,
+  IconCreditCard,
+  IconNote,
+  IconDownload,
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -115,8 +118,253 @@ const DoctorDetails = () => {
   const [surgeryRowsPerPage, setSurgeryRowsPerPage] = useState(5);
   const [surgerySearchTerm, setSurgerySearchTerm] = useState('');
   const [surgeryStatusFilter, setSurgeryStatusFilter] = useState('pending');
- 
-  
+  const [surgeryViewModalOpen, setSurgeryViewModalOpen] = useState(false);
+  const [selectedSurgeryAppointment, setSelectedSurgeryAppointment] = useState(null);
+  const renderSurgeryViewModal = () => (
+    <Dialog
+      open={surgeryViewModalOpen}
+      onClose={() => setSurgeryViewModalOpen(false)}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }
+      }}
+    >
+      {/* Header */}
+      <DialogTitle
+        sx={{
+          bgcolor: 'primary.main',
+          color: 'white',
+          py: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconScissors size={24} />
+          <Typography variant="h6" component="div">
+            Surgery Appointment Details
+          </Typography>
+        </Box>
+        <IconButton onClick={() => setSurgeryViewModalOpen(false)} size="small" sx={{ color: 'white' }}>
+          <IconX size={20} />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent dividers sx={{ p: 0, '&:first-of-type': { pt: 0 } }}>
+        {selectedSurgeryAppointment && (
+          <Box>
+            {/* Patient Info Header */}
+            <Box
+              sx={{
+                p: 3,
+                bgcolor: 'grey.50',
+                borderBottom: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={2} mb={2}>
+                <Avatar
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    bgcolor: 'primary.main',
+                    fontSize: '1.5rem',
+                    color: 'white'
+                  }}
+                >
+                  {selectedSurgeryAppointment.patientname?.charAt(0) || 'P'}
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" fontWeight={600}>
+                    {selectedSurgeryAppointment.patientname}
+                  </Typography>
+                  <Box display="flex" gap={2} flexWrap="wrap" mt={0.5}>
+                    <Chip size="small" label={`Mobile: ${selectedSurgeryAppointment.mobile}`} variant="outlined" />
+                    {selectedSurgeryAppointment.alt_mobile && (
+                      <Chip size="small" label={`Alt: ${selectedSurgeryAppointment.alt_mobile}`} variant="outlined" />
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Main Content */}
+            <Box p={3}>
+              <Grid container spacing={3}>
+                {/* Surgery Details */}
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: 'grey.50',
+                      borderRadius: 1,
+                      borderLeft: '3px solid',
+                      borderColor: 'primary.main'
+                    }}
+                  >
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      <IconScissors size={20} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                      Surgery Information
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <DetailItem label="Surgery Name" value={selectedSurgeryAppointment.surgerydetails?.name} />
+                        <DetailItem
+                          label="Date & Time"
+                          value={`${selectedSurgeryAppointment.date} at ${selectedSurgeryAppointment.time}`}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <DetailItem label="Room Type" value={selectedSurgeryAppointment.roomtype} />
+                        <DetailItem label="Amount" value={`₹${selectedSurgeryAppointment.price?.toLocaleString() || '0'}`} />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Grid>
+
+                {/* Status Cards */}
+                <Grid item xs={12} md={6}>
+                 <DetailCard title="Appointment Status" icon={<IconNote size={20} />}>
+                    <Chip
+                      label={selectedSurgeryAppointment.status || 'N/A'}
+                      size="medium"
+                      color={
+                        selectedSurgeryAppointment.status?.toLowerCase() === 'pending'
+                          ? 'warning'
+                          : selectedSurgeryAppointment.status?.toLowerCase() === 'accept'
+                            ? 'success'
+                            : selectedSurgeryAppointment.status?.toLowerCase() === 'completed'
+                              ? 'info'
+                              : 'error'
+                      }
+                      sx={{
+                        textTransform: 'capitalize',
+                        fontWeight: 500
+                      }}
+                    />
+                  </DetailCard>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <DetailCard title="Payment Status" icon={<IconCreditCard size={20} />}>
+                    <Chip
+                      label={selectedSurgeryAppointment.payment_status || 'N/A'}
+                      size="medium"
+                      color={
+                        selectedSurgeryAppointment.payment_status?.toLowerCase() === 'pending'
+                          ? 'warning'
+                          : selectedSurgeryAppointment.payment_status?.toLowerCase() === 'paid'
+                            ? 'success'
+                            : 'default'
+                      }
+                      sx={{
+                        textTransform: 'capitalize',
+                        fontWeight: 500
+                      }}
+                    />
+                  </DetailCard>
+                </Grid>
+
+                {/* Appointment Reason */}
+                <Grid item xs={12}>
+                  <DetailCard title="Appointment Reason" icon={<IconNote size={20} />}>
+                    <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                      {selectedSurgeryAppointment.appointment_reason || 'No reason provided'}
+                    </Typography>
+                  </DetailCard>
+                </Grid>
+
+                {/* Reports Section */}
+                {selectedSurgeryAppointment.report?.length > 0 && (
+                  <Grid item xs={12}>
+                    <DetailCard title={`Reports (${selectedSurgeryAppointment.report.length})`} icon={<IconFiles size={20} />}>
+                      <List disablePadding>
+                        {selectedSurgeryAppointment.report.map((file, index) => (
+                          <ListItem
+                            key={index}
+                            disableGutters
+                            secondaryAction={
+                              <IconButton edge="end" size="small">
+                                <IconDownload size={18} />
+                              </IconButton>
+                            }
+                            sx={{
+                              '&:hover': {
+                                bgcolor: 'action.hover',
+                                borderRadius: 1
+                              }
+                            }}
+                          >
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              <IconFileText size={20} color="#4A5568" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={file.filename || `Report ${index + 1}`}
+                              primaryTypographyProps={{
+                                variant: 'body2',
+                                sx: {
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }
+                              }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </DetailCard>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+          </Box>
+        )}
+      </DialogContent>
+
+   
+    </Dialog>
+  );
+
+  // Reusable DetailCard component
+  const DetailCard = ({ title, icon, children, sx = {} }) => (
+    <Box
+      sx={{
+        p: 2,
+        height: '100%',
+        borderRadius: 1,
+        border: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: 'background.paper',
+        ...sx
+      }}
+    >
+      <Box display="flex" alignItems="center" mb={1.5} gap={1}>
+        {icon && <Box sx={{ color: 'primary.main' }}>{icon}</Box>}
+        <Typography variant="subtitle2" color="textSecondary" fontWeight={500}>
+          {title}
+        </Typography>
+      </Box>
+      {children}
+    </Box>
+  );
+
+  // Reusable DetailItem component
+  const DetailItem = ({ label, value, icon }) => (
+    <Box mb={1.5}>
+      <Typography variant="caption" color="textSecondary" display="block" mb={0.5}>
+        {label}
+      </Typography>
+      <Typography variant="body2" fontWeight={500}>
+        {value || 'N/A'}
+      </Typography>
+    </Box>
+  );
+
   const handleSurgeryChangePage = (event, newPage) => {
     setSurgeryPage(newPage);
   };
@@ -743,7 +991,7 @@ const DoctorDetails = () => {
       <CardContent>
         <Box mb={3}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6">Appointments</Typography>
+            <Typography variant="h6">Consutation Appointments</Typography>
             <TextField
               variant="outlined"
               size="small"
@@ -1641,9 +1889,25 @@ const DoctorDetails = () => {
                       </TableCell>
 
                       <TableCell>
-                        <Button variant="outlined" size="small" onClick={() => setSelectedSurgeryAppointment(appointment)}>
-                          View
-                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            minWidth: 40,
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            p: 0,
+                            '& .MuiButton-startIcon': {
+                              m: 0
+                            }
+                          }}
+                          startIcon={<IconEye size={20} />}
+                          onClick={() => {
+                            setSelectedSurgeryAppointment(appointment);
+                            setSurgeryViewModalOpen(true);
+                          }}
+                        ></Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -1857,6 +2121,7 @@ const DoctorDetails = () => {
 
       {renderAppointmentDialog()}
       {renderEditSurgeryModal()}
+      {renderSurgeryViewModal()}
       <Dialog open={deleteDialogOpen} onClose={handleDeleteClose} maxWidth="sm" fullWidth>
         <DialogTitle>Delete Surgery</DialogTitle>
         <DialogContent>
