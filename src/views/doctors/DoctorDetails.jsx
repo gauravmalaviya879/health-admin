@@ -69,7 +69,8 @@ import {
   IconFileTypePdf,
   IconCurrencyRupee,
   IconPrescription,
-  IconPhoto
+  IconPhoto,
+  IconScissors
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
@@ -109,6 +110,52 @@ const DoctorDetails = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const [surgeryPage, setSurgeryPage] = useState(0);
+  const [surgeryRowsPerPage, setSurgeryRowsPerPage] = useState(5);
+  const [surgerySearchTerm, setSurgerySearchTerm] = useState('');
+  const [surgeryStatusFilter, setSurgeryStatusFilter] = useState('pending');
+ 
+  
+  const handleSurgeryChangePage = (event, newPage) => {
+    setSurgeryPage(newPage);
+  };
+
+  const handleSurgeryChangeRowsPerPage = (event) => {
+    setSurgeryRowsPerPage(parseInt(event.target.value, 10));
+    setSurgeryPage(0);
+  };
+
+  // Update the filteredSurgeryAppointments logic to match the status values
+  const filteredSurgeryAppointments =
+    doctor?.surgeryappointmentsDetails?.filter((appointment) => {
+      // Search functionality
+      const matchesSearch =
+        appointment.patientname?.toLowerCase().includes(surgerySearchTerm.toLowerCase()) ||
+        appointment.mobile?.includes(surgerySearchTerm) ||
+        appointment.surgerydetails?.name?.toLowerCase().includes(surgerySearchTerm.toLowerCase());
+
+      // Normalize the status for comparison
+      const normalizedStatus = appointment.status?.toLowerCase().trim();
+      const normalizedFilter = surgeryStatusFilter.toLowerCase().trim();
+
+      // Map filter values to match your data
+      const statusMap = {
+        pending: ['pending'],
+        accept: ['accept'],
+        completed: ['completed', 'complete'],
+        cancel: ['cancel']
+      };
+
+      const matchesStatus = surgeryStatusFilter === 'all' || statusMap[normalizedFilter]?.includes(normalizedStatus) || false;
+
+      return matchesSearch && matchesStatus;
+    }) || [];
+
+  const paginatedSurgeryAppointments = filteredSurgeryAppointments.slice(
+    surgeryPage * surgeryRowsPerPage,
+    surgeryPage * surgeryRowsPerPage + surgeryRowsPerPage
+  );
 
   const renderVisitTypeIcon = (visitType) => {
     if (!visitType) return 'N/A';
@@ -301,24 +348,6 @@ const DoctorDetails = () => {
     }
   }, [doctor, initialLoad]);
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'approved':
-      case 'accept':
-      case 'accepted':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'rejected':
-      case 'cancel':
-      case 'cancelled':
-        return 'error';
-      case 'completed':
-        return 'primary';
-      default:
-        return 'default';
-    }
-  };
   const getStatusIconColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved':
@@ -868,8 +897,8 @@ const DoctorDetails = () => {
                       {appointment.date} {appointment.time}
                     </TableCell>
                     <TableCell>₹{appointment.price || '0'}</TableCell>
-                     <TableCell>₹{appointment.price*10/100  || '0'}</TableCell>
-                     <TableCell>₹{appointment.price - appointment.price*10/100   || '0'}</TableCell>
+                    <TableCell>₹{(appointment.price * 10) / 100 || '0'}</TableCell>
+                    <TableCell>₹{appointment.price - (appointment.price * 10) / 100 || '0'}</TableCell>
                     <TableCell>{renderVisitTypeIcon(appointment.visit_types)}</TableCell>
 
                     <TableCell align="center">
@@ -1193,7 +1222,6 @@ const DoctorDetails = () => {
                 {patientname}
               </Typography>
               <Box display="flex" gap={3} mt={1}>
-               
                 <Box display="flex" alignItems="center">
                   <IconPhone size={18} style={{ marginRight: 8, color: '#6c757d' }} />
                   <Typography variant="body2" color="textSecondary">
@@ -1344,7 +1372,6 @@ const DoctorDetails = () => {
                         return (
                           <ListItem
                             key={index}
-                            
                             sx={{
                               px: 2,
                               py: 1.5,
@@ -1424,16 +1451,16 @@ const DoctorDetails = () => {
                                 </Box>
                               </Box>
                             </Box>
-                             <Button
-                                size="small"
-                                href={fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                startIcon={<IconEye size={16} />}
-                                sx={{ textTransform: 'none' }}
-                              >
-                                View
-                              </Button>
+                            <Button
+                              size="small"
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              startIcon={<IconEye size={16} />}
+                              sx={{ textTransform: 'none' }}
+                            >
+                              View
+                            </Button>
                           </ListItem>
                         );
                       })}
@@ -1505,6 +1532,149 @@ const DoctorDetails = () => {
       </Dialog>
     );
   };
+
+  const renderSurgeryAppointments = () => (
+    <Card variant="outlined">
+      <CardContent>
+        <Box mb={3}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Surgery Appointments</Typography>
+            <TextField
+              variant="outlined"
+              size="small"
+              placeholder="Search surgery appointments..."
+              value={surgerySearchTerm}
+              onChange={(e) => setSurgerySearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconSearch size={20} />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ width: 300 }}
+            />
+          </Box>
+
+          {/* Status Filter Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs
+              value={surgeryStatusFilter}
+              onChange={(e, newValue) => {
+                setSurgeryStatusFilter(newValue);
+                setSurgeryPage(0);
+              }}
+              variant="scrollable"
+              scrollButtons="auto"
+              textColor="primary"
+              indicatorColor="primary"
+            >
+              {['pending', 'accept', 'completed', 'cancel'].map((status) => (
+                <Tab
+                  key={status}
+                  label={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Box
+                        sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          bgcolor:
+                            status === 'pending'
+                              ? 'warning.main'
+                              : status === 'accept'
+                                ? 'success.main'
+                                : status === 'completed'
+                                  ? 'info.main'
+                                  : 'error.main'
+                        }}
+                      />
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                      <Chip
+                        size="small"
+                        label={doctor?.surgeryappointmentsDetails?.filter((a) => a.status?.toLowerCase() === status).length || 0}
+                        sx={{ ml: 1 }}
+                      />
+                    </Box>
+                  }
+                  value={status}
+                />
+              ))}
+            </Tabs>
+          </Box>
+
+          {/* Data Table */}
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>No.</TableCell>
+                  <TableCell>Patient Name</TableCell>
+                  <TableCell>Surgery Name</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Date & Time</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedSurgeryAppointments.length > 0 ? (
+                  paginatedSurgeryAppointments.map((appointment, index) => (
+                    <TableRow key={appointment._id}>
+                      <TableCell>{surgeryPage * surgeryRowsPerPage + index + 1}</TableCell>
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Avatar sx={{ width: 32, height: 32, fontSize: '0.75rem' }}>{appointment.patientname?.charAt(0) || 'P'}</Avatar>
+                          <Box>
+                            <Typography variant="body2" noWrap>
+                              {appointment.patientname}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary">
+                              {appointment.mobile}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{appointment.surgerydetails?.name || 'N/A'}</TableCell>
+                      <TableCell>₹{appointment.price?.toLocaleString() || '0'}</TableCell>
+                      <TableCell>
+                        {appointment.date} at {appointment.time}
+                      </TableCell>
+
+                      <TableCell>
+                        <Button variant="outlined" size="small" onClick={() => setSelectedSurgeryAppointment(appointment)}>
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                      <Box sx={{ color: 'text.secondary' }}>
+                        <IconStethoscope size={48} style={{ opacity: 0.5, marginBottom: 8 }} />
+                        <Typography>No surgery appointments found</Typography>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={filteredSurgeryAppointments.length}
+            rowsPerPage={surgeryRowsPerPage}
+            page={surgeryPage}
+            onPageChange={handleSurgeryChangePage}
+            onRowsPerPageChange={handleSurgeryChangeRowsPerPage}
+          />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -1649,6 +1819,7 @@ const DoctorDetails = () => {
           <Tab icon={<IconBuildingHospital size={20} />} iconPosition="start" label="Hospital Information" {...a11yProps(2)} />
           <Tab icon={<IconStethoscope size={20} />} iconPosition="start" label="Surgeries" {...a11yProps(3)} />
           <Tab icon={<IconClipboardText size={20} />} iconPosition="start" label="Consultations Appointments" {...a11yProps(4)} />
+          <Tab icon={<IconScissors size={20} />} iconPosition="start" label="Surgery Appointments" {...a11yProps(5)} />
         </Tabs>
       </Box>
 
@@ -1678,6 +1849,10 @@ const DoctorDetails = () => {
 
       <TabPanel value={tabValue} index={4}>
         {renderAppointments()}
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={5}>
+        {renderSurgeryAppointments()}
       </TabPanel>
 
       {renderAppointmentDialog()}
