@@ -14,8 +14,10 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
+import { GiAmbulance } from "react-icons/gi";
 import { IconAmbulance, IconBike, IconCar, IconMotorbike, IconCurrencyRupee, IconDeviceFloppy } from '@tabler/icons-react';
 import settingsService from 'services/settingsService';
+
 
 const Charges = () => {
   const theme = useTheme();
@@ -80,6 +82,7 @@ const Charges = () => {
             gst: response.data.gst || 0,
             platform_fee: response.data.platform_fee || 0,
             ambulance_price_per_km: response.data.ambulance_price_per_km || 0,
+            advance_ambulance_price_per_km: response.data.advance_ambulance_price_per_km || 0,
             bike_price_per_km: response.data.bike_price_per_km || 0,
             rickshaw_price_per_km: response.data.rickshaw_price_per_km || 0,
             cab_price_per_km: response.data.cab_price_per_km || 0
@@ -112,6 +115,7 @@ const Charges = () => {
         gst: parseFloat(formData.gst),
         platform_fee: parseFloat(formData.platform_fee),
         ambulance_price_per_km: parseFloat(formData.ambulance_price_per_km),
+        advance_ambulance_price_per_km: parseFloat(formData.advance_ambulance_price_per_km),
         bike_price_per_km: parseFloat(formData.bike_price_per_km),
         rickshaw_price_per_km: parseFloat(formData.rickshaw_price_per_km),
         cab_price_per_km: parseFloat(formData.cab_price_per_km)
@@ -248,16 +252,21 @@ const Charges = () => {
             </Box>
             <Box display={'flex'} flexWrap={'wrap'} gap={1}>
               <PriceInput
-                icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
+                icon={<IconAmbulance size={30} color={theme.palette.primary.main} />}
                 label="Ambulance"
                 name="ambulance_price_per_km"
               />
 
+               <PriceInput icon={<GiAmbulance size={30} color={theme.palette.secondary.main}/>} label="Advance Ambulance" name="advance_ambulance_price_per_km" />
+
               <PriceInput icon={<IconMotorbike size={24} color={theme.palette.secondary.main} />} label="Bike" name="bike_price_per_km" />
+                
 
               <PriceInput icon={<IconCar size={24} color={theme.palette.info.main} />} label="Rickshaw" name="rickshaw_price_per_km" />
 
               <PriceInput icon={<IconCar size={24} color={theme.palette.success.main} />} label="Cab" name="cab_price_per_km" />
+
+           
             </Box>
 
             <Box display="flex" my={2} justifyContent="flex-end" gap={2}>
