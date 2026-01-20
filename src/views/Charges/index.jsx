@@ -300,13 +300,13 @@ const Charges = () => {
             <Box display={'flex'} flexWrap={'wrap'} gap={1}>
               <PriceInput
                 icon={<IconAmbulance size={30} color={theme.palette.primary.main} />}
-                label="Ambulance"
+                label="Outer Ambulance"
                 name="ambulance_price_per_km"
               />
 
               <PriceInput
                 icon={<GiAmbulance size={30} color={theme.palette.secondary.main} />}
-                label="Advance Ambulance"
+                label="Outer Advance Ambulance"
                 name="advance_ambulance_price_per_km"
               />
 
