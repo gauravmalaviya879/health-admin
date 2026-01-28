@@ -15,7 +15,7 @@ import {
   Alert
 } from '@mui/material';
 import { GiAmbulance } from 'react-icons/gi';
-import { IconAmbulance, IconBike, IconCar, IconMotorbike, IconCurrencyRupee, IconDeviceFloppy } from '@tabler/icons-react';
+import { IconAmbulance, IconCar, IconMotorbike, IconCurrencyRupee, IconDeviceFloppy } from '@tabler/icons-react';
 import settingsService from 'services/settingsService';
 
 const Charges = () => {
