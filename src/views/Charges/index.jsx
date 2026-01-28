@@ -14,7 +14,6 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
-import { GiAmbulance } from 'react-icons/gi';
 import { IconAmbulance, IconCar, IconMotorbike, IconCurrencyRupee, IconDeviceFloppy } from '@tabler/icons-react';
 import settingsService from 'services/settingsService';
 
@@ -305,7 +304,7 @@ const Charges = () => {
               />
 
               <PriceInput
-                icon={<GiAmbulance size={30} color={theme.palette.secondary.main} />}
+                icon={<IconAmbulance size={30} color={theme.palette.secondary.main} />}
                 label="Outer Advance Ambulance"
                 name="advance_ambulance_price_per_km"
               />
@@ -334,12 +333,12 @@ const Charges = () => {
                   name="outer_ambulance_flat_price"
                 />
                 <PriceInput
-                  icon={<GiAmbulance size={24} color={theme.palette.primary.main} />}
+                  icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
                   label="Inner Advance Ambulance Flat Price"
                   name="inner_advance_ambulance_flat_price"
                 />
                 <PriceInput
-                  icon={<GiAmbulance size={24} color={theme.palette.secondary.main} />}
+                  icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
                   label="Outer Advance Ambulance Flat Price"
                   name="outer_advance_ambulance_flat_price"
                 />
@@ -369,7 +368,7 @@ const Charges = () => {
                   name="inner_ambulance_price_per_km"
                 />
                 <PriceInput
-                  icon={<GiAmbulance size={24} color={theme.palette.secondary.main} />}
+                  icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
                   label="Inner Advance Ambulance (per km)"
                   name="inner_advance_ambulance_price_per_km"
                 />
