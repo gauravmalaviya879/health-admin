@@ -289,89 +289,92 @@ const Charges = () => {
               />
             </Box>
 
-            {/* Service Charges */}
+            {/* Intercity Ambulance Charges Section*/}
 
             <Box my={2}>
               <Typography variant="h6" gutterBottom>
-                Service Charges (per km)
+                Intercity Ambulance Charges
               </Typography>
             </Box>
             <Box display={'flex'} flexWrap={'wrap'} gap={1}>
               <PriceInput
-                icon={<IconAmbulance size={30} color={theme.palette.primary.main} />}
-                label="Outer Ambulance"
-                name="ambulance_price_per_km"
+                icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
+                label="Intercity Basic Ambulance Flat Price"
+                name="inner_ambulance_flat_price"
               />
-
               <PriceInput
-                icon={<IconAmbulance size={30} color={theme.palette.secondary.main} />}
-                label="Outer Advance Ambulance"
-                name="advance_ambulance_price_per_km"
+                icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
+                label="Intercity Advance Ambulance Flat Price"
+                name="inner_advance_ambulance_flat_price"
               />
-
-              <PriceInput icon={<IconMotorbike size={24} color={theme.palette.secondary.main} />} label="Bike" name="bike_price_per_km" />
-
-              <PriceInput icon={<IconCar size={24} color={theme.palette.info.main} />} label="Rickshaw" name="rickshaw_price_per_km" />
-
-              <PriceInput icon={<IconCar size={24} color={theme.palette.success.main} />} label="Cab" name="cab_price_per_km" />
+              <PriceInput
+                icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
+                label="Intercity Basic Ambulance (per km)"
+                name="inner_ambulance_price_per_km"
+              />
+              <PriceInput
+                icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
+                label="Intercity Advance Ambulance (per km)"
+                name="inner_advance_ambulance_price_per_km"
+              />
             </Box>
 
-            {/* Flat Charges Section */}
+            {/* Outercity Ambulance Charges Section */}
             <Box my={4}>
               <Typography variant="h6" gutterBottom>
-                Flat Charges
+                Outercity Ambulance Charges
               </Typography>
               <Box display={'flex'} flexWrap={'wrap'} gap={1}>
                 <PriceInput
-                  icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
-                  label="Inner Ambulance Flat Price"
-                  name="inner_ambulance_flat_price"
-                />
-                <PriceInput
-                  icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
-                  label="Outer Ambulance Flat Price"
+                  icon={<IconAmbulance size={30} color={theme.palette.primary.main} />}
+                  label="Outercity Basic Ambulance Flat Price"
                   name="outer_ambulance_flat_price"
                 />
                 <PriceInput
-                  icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
-                  label="Inner Advance Ambulance Flat Price"
-                  name="inner_advance_ambulance_flat_price"
-                />
-                <PriceInput
-                  icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
+                  icon={<IconAmbulance size={30} color={theme.palette.secondary.main} />}
                   label="Outer Advance Ambulance Flat Price"
                   name="outer_advance_ambulance_flat_price"
                 />
                 <PriceInput
-                  icon={<IconMotorbike size={24} color={theme.palette.secondary.main} />}
-                  label="Bike Flat Price"
-                  name="bike_flat_price"
-                />
-                <PriceInput
-                  icon={<IconCar size={24} color={theme.palette.info.main} />}
-                  label="Rickshaw Flat Price"
-                  name="rickshaw_flat_price"
-                />
-                <PriceInput icon={<IconCar size={24} color={theme.palette.success.main} />} label="Cab Flat Price" name="cab_flat_price" />
-              </Box>
-            </Box>
-
-            {/* Inner Ambulance Charges per km Section */}
-            <Box my={4}>
-              <Typography variant="h6" gutterBottom>
-                Inner Ambulance Charges (per km)
-              </Typography>
-              <Box display={'flex'} flexWrap={'wrap'} gap={1}>
-                <PriceInput
-                  icon={<IconAmbulance size={24} color={theme.palette.primary.main} />}
-                  label="Inner Ambulance (per km)"
-                  name="inner_ambulance_price_per_km"
+                  icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
+                  label="Outer Basic Ambulance (per km)"
+                  name="ambulance_price_per_km"
                 />
                 <PriceInput
                   icon={<IconAmbulance size={24} color={theme.palette.secondary.main} />}
-                  label="Inner Advance Ambulance (per km)"
-                  name="inner_advance_ambulance_price_per_km"
+                  label="Outer Advance Ambulance (per km)"
+                  name="advance_ambulance_price_per_km"
                 />
+              </Box>
+            </Box>
+
+            {/* Rickshaw Ambulance Charges Section */}
+            <Box my={4}>
+              <Typography variant="h6" gutterBottom>
+                Rickshaw Ambulance Charges
+              </Typography>
+              <Box display={'flex'} flexWrap={'wrap'} gap={1}>
+
+              </Box>
+            </Box>
+
+            {/* Bike Ambulance Charges Section */}
+            <Box my={4}>
+              <Typography variant="h6" gutterBottom>
+                Bike Ambulance Charges
+              </Typography>
+              <Box display={'flex'} flexWrap={'wrap'} gap={1}>
+
+              </Box>
+            </Box>
+
+            {/* Cab Ambulance Charges Section */}
+            <Box my={4}>
+              <Typography variant="h6" gutterBottom>
+                Cab Ambulance Charges
+              </Typography>
+              <Box display={'flex'} flexWrap={'wrap'} gap={1}>
+
               </Box>
             </Box>
             <Box display="flex" my={2} justifyContent="flex-end" gap={2}>
