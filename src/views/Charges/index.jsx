@@ -354,7 +354,16 @@ const Charges = () => {
                 Rickshaw Ambulance Charges
               </Typography>
               <Box display={'flex'} flexWrap={'wrap'} gap={1}>
-
+                <PriceInput
+                  icon={<IconCar size={24} color={theme.palette.primary.main} />}
+                  label="Rickshaw Ambulance Flat Price"
+                  name="rickshaw_flat_price"
+                />
+                <PriceInput
+                  icon={<IconCar size={24} color={theme.palette.secondary.main} />}
+                  label="Rickshaw Ambulance (per km)"
+                  name="rickshaw_price_per_km"
+                />
               </Box>
             </Box>
 
@@ -364,7 +373,16 @@ const Charges = () => {
                 Bike Ambulance Charges
               </Typography>
               <Box display={'flex'} flexWrap={'wrap'} gap={1}>
-
+                <PriceInput
+                  icon={<IconMotorbike size={24} color={theme.palette.primary.main} />}
+                  label="Bike Ambulance Flat Price"
+                  name="bike_flat_price"
+                />
+                <PriceInput
+                  icon={<IconMotorbike size={24} color={theme.palette.secondary.main} />}
+                  label="Bike Ambulance (per km)"
+                  name="bike_price_per_km"
+                />
               </Box>
             </Box>
 
@@ -374,7 +392,16 @@ const Charges = () => {
                 Cab Ambulance Charges
               </Typography>
               <Box display={'flex'} flexWrap={'wrap'} gap={1}>
-
+                <PriceInput
+                  icon={<IconCar size={24} color={theme.palette.primary.main} />}
+                  label="Cab Ambulance Flat Price"
+                  name="cab_flat_price"
+                />
+                <PriceInput
+                  icon={<IconCar size={24} color={theme.palette.secondary.main} />}
+                  label="Cab Ambulance (per km)"
+                  name="cab_price_per_km"
+                />
               </Box>
             </Box>
             <Box display="flex" my={2} justifyContent="flex-end" gap={2}>
