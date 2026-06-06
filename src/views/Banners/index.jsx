@@ -23,6 +23,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  TextField,
   Box as MuiBox,
   Snackbar,
   Alert,
@@ -46,7 +47,7 @@ const Banners = () => {
   const [imageError, setImageError] = useState(false);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]); // { file, url }
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bannerToDelete, setBannerToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -94,16 +95,25 @@ const Banners = () => {
       setError('');
 
       // Step 1: Upload files to get paths
-      const uploadedBanners = await bannerService.uploadBannerImages(selectedFiles);
+      const filesToUpload = selectedFiles.map((item) => item.file);
+      const uploadedBanners = await bannerService.uploadBannerImages(filesToUpload);
 
-      // Step 2: Format existing banners to match the required structure
-      const existingBanners = banners.map((banner) => ({
+      // Step 2: Map uploaded file metadata to the URL entered by the user
+      const uploadedBannersWithUrl = uploadedBanners.map((banner, index) => ({
         path: banner.path,
-        type: banner.type || 'IMG'
+        type: banner.type || 'IMG',
+        url: selectedFiles[index]?.url?.trim() || ''
       }));
 
-      // Step 3: Combine with existing banners
-      const updatedBanners = [...existingBanners, ...uploadedBanners];
+      // Step 3: Preserve existing banners including any existing URLs
+      const existingBanners = banners.map((banner) => ({
+        path: banner.path,
+        type: banner.type || 'IMG',
+        url: banner.url || ''
+      }));
+
+      // Step 4: Combine with existing banners
+      const updatedBanners = [...existingBanners, ...uploadedBannersWithUrl];
 
       // Save all banners with the correct payload structure
       await bannerService.saveBanners({ banners: updatedBanners });
@@ -154,7 +164,8 @@ const Banners = () => {
       );
       
       if (validFiles.length > 0) {
-        setSelectedFiles((prev) => [...prev, ...validFiles]);
+        const filesWithUrls = validFiles.map((file) => ({ file, url: '' }));
+        setSelectedFiles((prev) => [...prev, ...filesWithUrls]);
       }
     }
   });
@@ -162,6 +173,12 @@ const Banners = () => {
   // Add this function to handle file removal
   const removeFile = (index) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUrlChange = (index, url) => {
+    setSelectedFiles((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, url } : item))
+    );
   };
 
   // Add this function to handle the delete confirmation
@@ -619,7 +636,8 @@ const Banners = () => {
                 Selected images: {selectedFiles.length}
               </Typography>
               <List dense>
-                {selectedFiles.map((file, index) => {
+                {selectedFiles.map((item, index) => {
+                  const { file, url } = item;
                   const isImage = file.type.startsWith('image/');
                   const previewUrl = isImage ? URL.createObjectURL(file) : null;
 
@@ -669,7 +687,7 @@ const Banners = () => {
                         <Typography noWrap sx={{ mb: 0.5 }}>
                           {file.name}
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 1 }}>
                           <Typography variant="caption" color="text.secondary">
                             {(file.size / 1024).toFixed(1)} KB
                           </Typography>
@@ -677,6 +695,15 @@ const Banners = () => {
                             {file.type || 'Unknown type'}
                           </Typography>
                         </Box>
+                        <TextField
+                          label="Banner URL"
+                          placeholder="https://example.com"
+                          value={url}
+                          fullWidth
+                          size="small"
+                          onChange={(e) => handleUrlChange(index, e.target.value)}
+                          InputProps={{ type: 'url' }}
+                        />
                       </Box>
                     </ListItem>
                   );
