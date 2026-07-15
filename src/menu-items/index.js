@@ -5,6 +5,7 @@ import doctors from './doctors';
 import patients from './patients';
 import policy from './policy';
 import banners from './banners';
+import hospitals from './hospitals';
 import { isAdminUser } from '../utils/authUtils';
 import { IconAmbulance, IconSettings } from '@tabler/icons-react';
 
@@ -35,7 +36,7 @@ const getMenuItems = () => {
   }
 
   // Add other menu items
-  items = [...items, doctors, ambulance, patients];
+  items = [...items, doctors, ambulance, patients, hospitals];
 
   // Add Settings dropdown with Charges, Policy and Banners
   const settings = {

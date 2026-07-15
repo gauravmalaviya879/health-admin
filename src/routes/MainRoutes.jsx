@@ -23,6 +23,8 @@ import DoctorHistory from '../views/doctors/DoctorHistory';
 import PatientHistory from 'views/Patients/PatientHistory';
 import Banners from '../views/Banners';
 import Charges from '../views/Charges';
+import NewHospital from '../views/hospital/NewHospital';
+import ShowHospital from '../views/hospital/ShowHospital';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -109,6 +111,23 @@ const MainRoutes = {
         {
           path: ':id',
           element: <ShowAmbulance />
+        }
+      ]
+    },
+    {
+      path: 'hospital',
+      children: [
+        {
+          path: 'new',
+          element: <NewHospital />
+        },
+        // {
+        //   path: 'approved',
+        //   element: <ApprovedAmbu />
+        // },
+        {
+          path: ':id',
+          element: <ShowHospital />
         }
       ]
     },
