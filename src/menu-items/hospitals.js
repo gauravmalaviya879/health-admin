@@ -23,18 +23,18 @@ const hospitals = {
       children: [
         {
           id: 'new',
-          title: 'New',
+          title: 'Hospitals',
           type: 'item',
           url: '/hospital/new',
           target: false
         },
-        {
-          id: 'approved',
-          title: 'Approved',
-          type: 'item',
-          url: '/hospital/approved',
-          target: false
-        }
+        // {
+        //   id: 'approved',
+        //   title: 'Approved',
+        //   type: 'item',
+        //   url: '/hospital/approved',
+        //   target: false
+        // }
       ]
     }
   ]
