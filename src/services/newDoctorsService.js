@@ -27,14 +27,15 @@ const newDoctorsService = {
   },
 
   // Approve a doctor
-  approveDoctor: async (doctorId) => {
+  approveDoctor: async (doctorId, reason = '') => {
     const token = authService.getToken();
     try {
       const response = await axios.post(
         `${BASE_URL}/admin/doctors/approved`,
         {
           doctorid: doctorId,
-          status: 'Approved'
+          status: 'Approved',
+          reason: reason || ''
         },
         {
           headers: {
@@ -52,14 +53,15 @@ const newDoctorsService = {
   },
 
   // Reject/Cancel a doctor
-  rejectDoctor: async (doctorId) => {
+  rejectDoctor: async (doctorId, reason = '') => {
     const token = authService.getToken();
     try {
       const response = await axios.post(
         `${BASE_URL}/admin/doctors/approved`,
         {
           doctorid: doctorId,
-          status: 'Rejected'
+          status: 'Rejected',
+          reason: reason || ''
         },
         {
           headers: {
@@ -72,6 +74,32 @@ const newDoctorsService = {
       return { status: response.status, data: response.data };
     } catch (error) {
       console.error('Error rejecting doctor:', error);
+      throw error;
+    }
+  },
+
+  // Approve or reject pending profile update
+  approveProfileUpdate: async (doctorId, status = 'Approved', reason = '') => {
+    const token = authService.getToken();
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/admin/doctors/approve-profile-update`,
+        {
+          doctorid: doctorId,
+          status: status,
+          reason: reason || ''
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      return { status: response.status, data: response.data };
+    } catch (error) {
+      console.error('Error approving/rejecting doctor profile update:', error);
       throw error;
     }
   },

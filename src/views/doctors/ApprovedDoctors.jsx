@@ -23,10 +23,14 @@ import {
   DialogTitle,
   Avatar,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Tabs,
+  Tab,
+  Tooltip
 } from '@mui/material';
-import { IconX, IconSearch } from '@tabler/icons-react';
+import { IconX, IconSearch, IconClock, IconAlertTriangle, IconEdit } from '@tabler/icons-react';
 import approvedService from '../../services/approvedService';
+import ReviewProfileUpdateModal from './ReviewProfileUpdateModal';
 
 const ApprovedDoctors = () => {
   const navigate = useNavigate();
@@ -34,17 +38,40 @@ const ApprovedDoctors = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [tabValue, setTabValue] = useState(0); // 0: All Approved, 1: Pending Profile Updates
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, doctorId: null, doctorName: '' });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, doctorId: null, doctorName: '', reason: '' });
   const [actionLoading, setActionLoading] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [reviewDoctor, setReviewDoctor] = useState(null);
 
-  // Filter doctors to show only approved ones and apply search filter
-  const filteredDoctors = doctors.filter(doctor => {
-    const matchesStatus = doctor.approval_status?.toLowerCase() === 'approved';
-    const matchesSearch = doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         doctor.specialty?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && (searchTerm === '' || matchesSearch);
+  // Helper to get doctor specialty from specialty field or professional_details array
+  const getDoctorSpecialty = (doctor) => {
+    if (doctor.specialty) return doctor.specialty;
+    if (Array.isArray(doctor.professional_details) && doctor.professional_details.length > 0) {
+      const specs = doctor.professional_details.map((p) => p.specialty).filter(Boolean);
+      if (specs.length > 0) return specs.join(', ');
+    }
+    return 'N/A';
+  };
+
+  // Counts for tabs
+  const approvedDoctorsList = doctors.filter((d) => d.approval_status?.toLowerCase() === 'approved');
+  const pendingUpdatesList = approvedDoctorsList.filter((d) => d.is_profile_updated === true);
+
+  // Filter doctors to show only approved ones and apply search + tab filter
+  const filteredDoctors = approvedDoctorsList.filter((doctor) => {
+    if (tabValue === 1 && !doctor.is_profile_updated) {
+      return false;
+    }
+
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = doctor.name?.toLowerCase().includes(searchLower);
+    const specMatch = getDoctorSpecialty(doctor).toLowerCase().includes(searchLower);
+    const mobileMatch = doctor.mobile?.toLowerCase().includes(searchLower);
+    const emailMatch = doctor.email?.toLowerCase().includes(searchLower);
+
+    return searchTerm === '' || nameMatch || specMatch || mobileMatch || emailMatch;
   });
 
   useEffect(() => {
@@ -72,10 +99,10 @@ const ApprovedDoctors = () => {
     navigate(`/doctors/${doctorId}`);
   };
 
-  const handleReject = async (doctorId) => {
+  const handleReject = async (doctorId, reason = '') => {
     try {
       setActionLoading(doctorId);
-      const response = await approvedService.rejectDoctor(doctorId);
+      const response = await approvedService.rejectDoctor(doctorId, reason);
 
       if (response.status === 200 || response.status === 201) {
         showSnackbar('Doctor rejected successfully', 'success');
@@ -85,10 +112,10 @@ const ApprovedDoctors = () => {
       }
     } catch (error) {
       console.error('Error rejecting doctor:', error);
-      showSnackbar('Error rejecting doctor', 'error');
+      showSnackbar(error.response?.data?.message || 'Error rejecting doctor', 'error');
     } finally {
       setActionLoading(null);
-      setConfirmDialog({ open: false, doctorId: null, doctorName: '' });
+      setConfirmDialog({ open: false, doctorId: null, doctorName: '', reason: '' });
     }
   };
 
@@ -96,12 +123,13 @@ const ApprovedDoctors = () => {
     setConfirmDialog({
       open: true,
       doctorId,
-      doctorName
+      doctorName,
+      reason: ''
     });
   };
 
   const handleConfirmAction = () => {
-    handleReject(confirmDialog.doctorId);
+    handleReject(confirmDialog.doctorId, confirmDialog.reason);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -135,12 +163,12 @@ const ApprovedDoctors = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Approved Doctors</Typography>
         <TextField
           variant="outlined"
           size="small"
-          placeholder="Search doctors..."
+          placeholder="Search by name, specialty, mobile..."
           value={searchTerm}
           onChange={handleSearch}
           InputProps={{
@@ -150,7 +178,42 @@ const ApprovedDoctors = () => {
               </InputAdornment>
             ),
           }}
+          sx={{ width: 320 }}
         />
+      </Box>
+
+      {/* Tabs: All Approved vs Profile Updates Pending Review */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs
+          value={tabValue}
+          onChange={(e, val) => {
+            setTabValue(val);
+            setPage(0);
+          }}
+          aria-label="approved doctors tabs"
+        >
+          <Tab
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                <span>All Approved</span>
+                <Chip label={approvedDoctorsList.length} size="small" color="success" sx={{ height: 20 }} />
+              </Box>
+            }
+          />
+          <Tab
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                <span>Profile Updates Pending Approval</span>
+                <Chip
+                  label={pendingUpdatesList.length}
+                  size="small"
+                  color={pendingUpdatesList.length > 0 ? 'warning' : 'default'}
+                  sx={{ height: 20 }}
+                />
+              </Box>
+            }
+          />
+        </Tabs>
       </Box>
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -161,6 +224,7 @@ const ApprovedDoctors = () => {
                 <TableCell>No</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Specialty</TableCell>
+                <TableCell>Profile Status</TableCell>
                 <TableCell>Updated At</TableCell>
                 <TableCell>View</TableCell>
                 <TableCell>Action</TableCell>
@@ -169,14 +233,18 @@ const ApprovedDoctors = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : filteredDoctors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    <Typography>No approved doctors found</Typography>
+                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                    <Typography>
+                      {tabValue === 1
+                        ? 'No approved doctors have pending profile updates'
+                        : 'No approved doctors found'}
+                    </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -192,13 +260,39 @@ const ApprovedDoctors = () => {
                       })
                     : 'N/A';
                   
+                  const hasPendingUpdate = doctor.is_profile_updated === true;
+
                   return (
                     <TableRow hover key={doctor._id}>
                       <TableCell>
                         <Chip label={page * rowsPerPage + index + 1} size="small" variant="outlined" />
                       </TableCell>
-                      <TableCell>{doctor.name || 'N/A'}</TableCell>
-                      <TableCell>{doctor.specialty || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Typography variant="subtitle2" fontWeight={600}>
+                          {doctor.name || 'N/A'}
+                        </Typography>
+                        {doctor.mobile && (
+                          <Typography variant="caption" color="textSecondary">
+                            {doctor.mobile}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>{getDoctorSpecialty(doctor)}</TableCell>
+                      <TableCell>
+                        {hasPendingUpdate ? (
+                          <Tooltip title="Doctor has submitted profile updates awaiting admin approval">
+                            <Chip
+                              icon={<IconClock size={14} />}
+                              label="Update Pending Approval"
+                              color="warning"
+                              size="small"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </Tooltip>
+                        ) : (
+                          <Chip label="Approved" color="success" size="small" variant="outlined" />
+                        )}
+                      </TableCell>
                       <TableCell>{approvedAt}</TableCell>
                       <TableCell>
                         <Button
@@ -211,16 +305,30 @@ const ApprovedDoctors = () => {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          size="small"
-                          startIcon={<IconX size={16} />}
-                          onClick={() => handleActionClick(doctor._id, doctor.name)}
-                          disabled={actionLoading === doctor._id}
-                        >
-                          Reject
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {hasPendingUpdate && (
+                            <Button
+                              variant="contained"
+                              color="warning"
+                              size="small"
+                              startIcon={<IconEdit size={16} />}
+                              onClick={() => setReviewDoctor(doctor)}
+                              sx={{ textTransform: 'none' }}
+                            >
+                              Review Update
+                            </Button>
+                          )}
+                          <Button
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            startIcon={<IconX size={16} />}
+                            onClick={() => handleActionClick(doctor._id, doctor.name)}
+                            disabled={actionLoading === doctor._id}
+                          >
+                            Reject
+                          </Button>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   );
@@ -228,7 +336,7 @@ const ApprovedDoctors = () => {
               )}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={7} />
                 </TableRow>
               )}
             </TableBody>
@@ -245,28 +353,57 @@ const ApprovedDoctors = () => {
         />
       </Paper>
 
-      {/* Confirmation Dialog */}
+      {/* Review Profile Update Modal */}
+      {reviewDoctor && (
+        <ReviewProfileUpdateModal
+          open={Boolean(reviewDoctor)}
+          doctor={reviewDoctor}
+          onClose={() => setReviewDoctor(null)}
+          onSuccess={(msg) => {
+            showSnackbar(msg, 'success');
+            fetchDoctors();
+          }}
+        />
+      )}
+
+      {/* Confirmation Dialog for Reject */}
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog({ ...confirmDialog, open: false })}
+        onClose={() => setConfirmDialog({ open: false, doctorId: null, doctorName: '', reason: '' })}
+        maxWidth="xs"
+        fullWidth
       >
-        <DialogTitle>Confirm Action</DialogTitle>
+        <DialogTitle>Reject Approved Doctor</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Are you sure you want to reject {confirmDialog.doctorName}? This action cannot be undone.
+          <DialogContentText sx={{ mb: 2 }}>
+            Are you sure you want to reject Dr. {confirmDialog.doctorName}? This action will revoke their approved status.
           </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Rejection Reason (Required)"
+            type="text"
+            fullWidth
+            variant="outlined"
+            size="small"
+            multiline
+            rows={2}
+            value={confirmDialog.reason}
+            onChange={(e) => setConfirmDialog({ ...confirmDialog, reason: e.target.value })}
+            placeholder="Enter reason for rejecting this doctor..."
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}>
+          <Button onClick={() => setConfirmDialog({ open: false, doctorId: null, doctorName: '', reason: '' })}>
             Cancel
           </Button>
           <Button
             onClick={handleConfirmAction}
             color="error"
             variant="contained"
-            disabled={actionLoading === confirmDialog.doctorId}
+            disabled={actionLoading === confirmDialog.doctorId || !confirmDialog.reason.trim()}
           >
-            {actionLoading === confirmDialog.doctorId ? 'Processing...' : 'Reject'}
+            {actionLoading === confirmDialog.doctorId ? <CircularProgress size={20} color="inherit" /> : 'Confirm Reject'}
           </Button>
         </DialogActions>
       </Dialog>

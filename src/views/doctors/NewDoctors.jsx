@@ -19,11 +19,16 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Tooltip,
+  Tabs,
+  Tab,
+  Badge,
+  TextField,
+  InputAdornment
 } from '@mui/material';
-import { IconCheck, IconX, IconSearch } from '@tabler/icons-react';
+import { IconCheck, IconX, IconSearch, IconAlertCircle, IconClock } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
-import { TextField, InputAdornment } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const NewDoctors = () => {
@@ -32,17 +37,47 @@ const NewDoctors = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [statusTab, setStatusTab] = useState(0); // 0: Pending, 1: Draft, 2: All
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, action: '', doctorId: null, doctorName: '' });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, action: '', doctorId: null, doctorName: '', reason: '' });
   const [actionLoading, setActionLoading] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filter doctors to show only pending ones and apply search filter
-  const filteredDoctors = doctors.filter(doctor => {
-    const matchesStatus = doctor.approval_status?.toLowerCase() === 'pending';
-    const matchesSearch = doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         doctor.specialty?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && (searchTerm === '' || matchesSearch);
+  // Helper to extract specialty / professional details
+  const getDoctorSpecialty = (doctor) => {
+    if (doctor.specialty) return doctor.specialty;
+    if (Array.isArray(doctor.professional_details) && doctor.professional_details.length > 0) {
+      const specs = doctor.professional_details.map((p) => p.specialty).filter(Boolean);
+      if (specs.length > 0) return specs.join(', ');
+    }
+    return 'N/A';
+  };
+
+  // Counts for tabs
+  const pendingCount = doctors.filter((d) => d.approval_status?.toLowerCase() === 'pending').length;
+  const draftCount = doctors.filter((d) => d.approval_status?.toLowerCase() === 'draft').length;
+  const nonApprovedCount = doctors.filter((d) => d.approval_status?.toLowerCase() !== 'approved').length;
+
+  // Filter doctors to show based on selected status tab and apply search filter
+  const filteredDoctors = doctors.filter((doctor) => {
+    const status = doctor.approval_status?.toLowerCase();
+    let matchesStatus = true;
+    if (statusTab === 0) {
+      matchesStatus = status === 'pending';
+    } else if (statusTab === 1) {
+      matchesStatus = status === 'draft';
+    } else {
+      matchesStatus = status !== 'approved';
+    }
+
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = doctor.name?.toLowerCase().includes(searchLower);
+    const specMatch = getDoctorSpecialty(doctor).toLowerCase().includes(searchLower);
+    const mobileMatch = doctor.mobile?.toLowerCase().includes(searchLower);
+    const emailMatch = doctor.email?.toLowerCase().includes(searchLower);
+    const matchesSearch = searchTerm === '' || nameMatch || specMatch || mobileMatch || emailMatch;
+
+    return matchesStatus && matchesSearch;
   });
 
   useEffect(() => {
@@ -53,7 +88,6 @@ const NewDoctors = () => {
     try {
       setLoading(true);
       const response = await newDoctorsService.getDoctorsList();
-    
       setDoctors(response.data.Data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -63,66 +97,61 @@ const NewDoctors = () => {
     }
   };
 
-  const handleApprove = async (doctorId) => {
+  const handleApprove = async (doctorId, reason = '') => {
     try {
       setActionLoading(doctorId);
-      // API call to approve doctor
-      const response = await newDoctorsService.approveDoctor(doctorId);
+      const response = await newDoctorsService.approveDoctor(doctorId, reason);
 
       if (response.status === 200 || response.status === 201) {
         showSnackbar('Doctor approved successfully', 'success');
-        // Refresh the data after approval
         await fetchDoctors();
       } else {
         throw new Error('Failed to approve doctor');
       }
     } catch (error) {
       console.error('Error approving doctor:', error);
-      showSnackbar('Error approving doctor', 'error');
+      showSnackbar(error.response?.data?.message || 'Error approving doctor', 'error');
     } finally {
       setActionLoading(null);
-      setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '' });
+      setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '', reason: '' });
     }
   };
 
-  const handleReject = async (doctorId) => {
+  const handleReject = async (doctorId, reason = '') => {
     try {
       setActionLoading(doctorId);
-      // API call to reject/cancel doctor
-      const response = await newDoctorsService.rejectDoctor(doctorId);
+      const response = await newDoctorsService.rejectDoctor(doctorId, reason);
 
       if (response.status === 200 || response.status === 201) {
-        showSnackbar('Doctor cancelled successfully', 'success');
-        // Refresh the data after cancellation
+        showSnackbar('Doctor rejected successfully', 'success');
         await fetchDoctors();
       } else {
-        throw new Error('Failed to cancel doctor');
+        throw new Error('Failed to reject doctor');
       }
     } catch (error) {
-      console.error('Error cancelling doctor:', error);
-      showSnackbar('Error cancelling doctor', 'error');
+      console.error('Error rejecting doctor:', error);
+      showSnackbar(error.response?.data?.message || 'Error rejecting doctor', 'error');
     } finally {
       setActionLoading(null);
-      setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '' });
+      setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '', reason: '' });
     }
   };
 
   const handleActionClick = (action, doctorId, doctorName) => {
-    
     setConfirmDialog({
       open: true,
       action,
       doctorId,
-      doctorName
+      doctorName,
+      reason: ''
     });
   };
 
   const handleConfirmAction = () => {
-
     if (confirmDialog.action === 'approve') {
-      handleApprove(confirmDialog.doctorId);
+      handleApprove(confirmDialog.doctorId, confirmDialog.reason);
     } else if (confirmDialog.action === 'reject') {
-      handleReject(confirmDialog.doctorId);
+      handleReject(confirmDialog.doctorId, confirmDialog.reason);
     }
   };
 
@@ -153,6 +182,8 @@ const NewDoctors = () => {
         return 'success';
       case 'pending':
         return 'warning';
+      case 'draft':
+        return 'default';
       case 'rejected':
       case 'cancelled':
         return 'error';
@@ -161,6 +192,28 @@ const NewDoctors = () => {
       default:
         return 'default';
     }
+  };
+
+  const renderStatusChip = (status) => {
+    const s = status?.toLowerCase();
+    if (s === 'draft') {
+      return (
+        <Tooltip title="Doctor has registered but has not verified OTP yet">
+          <Chip
+            icon={<IconClock size={14} />}
+            label="Draft (OTP Unverified)"
+            size="small"
+            variant="outlined"
+            color="default"
+            sx={{ fontWeight: 500 }}
+          />
+        </Tooltip>
+      );
+    }
+    if (s === 'pending') {
+      return <Chip label="Pending Approval" color="warning" size="small" sx={{ fontWeight: 500 }} />;
+    }
+    return <Chip label={status || 'Pending'} color={getStatusColor(status)} size="small" />;
   };
 
   if (loading) {
@@ -173,12 +226,12 @@ const NewDoctors = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5">New Doctors</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5">New Doctor Registrations</Typography>
         <TextField
           variant="outlined"
           size="small"
-          placeholder="Search by name or specialty..."
+          placeholder="Search by name, specialty, mobile..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
@@ -186,10 +239,47 @@ const NewDoctors = () => {
               <InputAdornment position="start">
                 <IconSearch size={20} />
               </InputAdornment>
-            ),
+            )
           }}
-          sx={{ width: 300 }}
+          sx={{ width: 320 }}
         />
+      </Box>
+
+      {/* Tabs for Pending vs Draft vs All */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs
+          value={statusTab}
+          onChange={(e, val) => {
+            setStatusTab(val);
+            setPage(0);
+          }}
+          aria-label="doctor status filter tabs"
+        >
+          <Tab
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                <span>Pending Approval</span>
+                <Chip label={pendingCount} size="small" color="warning" sx={{ height: 20 }} />
+              </Box>
+            }
+          />
+          <Tab
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                <span>Draft (OTP Unverified)</span>
+                <Chip label={draftCount} size="small" color="default" sx={{ height: 20 }} />
+              </Box>
+            }
+          />
+          <Tab
+            label={
+              <Box display="flex" alignItems="center" gap={1}>
+                <span>All Registrations</span>
+                <Chip label={nonApprovedCount} size="small" variant="outlined" sx={{ height: 20 }} />
+              </Box>
+            }
+          />
+        </Tabs>
       </Box>
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -216,15 +306,20 @@ const NewDoctors = () => {
               ) : filteredDoctors.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    <Typography variant="body1" color="textSecondary">
-                      No pending doctors found
+                    <Typography variant="body1" color="textSecondary" sx={{ py: 3 }}>
+                      {statusTab === 0
+                        ? 'No pending doctors awaiting approval'
+                        : statusTab === 1
+                        ? 'No draft (OTP unverified) doctors found'
+                        : 'No doctors found'}
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredDoctors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((doctor, index) => {
-                  const isActionLoading = actionLoading === doctor.id;
-                  const registrationDate = doctor.createdAt 
+                  const isActionLoading = actionLoading === doctor._id;
+                  const isDraft = doctor.approval_status?.toLowerCase() === 'draft';
+                  const registrationDate = doctor.createdAt
                     ? new Date(doctor.createdAt).toLocaleString('en-GB', {
                         day: '2-digit',
                         month: 'short',
@@ -236,16 +331,23 @@ const NewDoctors = () => {
                     : 'N/A';
 
                   return (
-                    <TableRow key={doctor.id || index} hover>
+                    <TableRow key={doctor._id || index} hover>
                       <TableCell>
                         <Chip label={page * rowsPerPage + index + 1} size="small" variant="outlined" />
                       </TableCell>
-                      <TableCell>{doctor.name || 'N/A'}</TableCell>
                       <TableCell>
-                        <Chip label={doctor.approval_status || 'Pending'} color={getStatusColor(doctor.approval_status)} size="small" />
+                        <Typography variant="subtitle2" fontWeight={600}>
+                          {doctor.name || 'N/A'}
+                        </Typography>
+                        {doctor.mobile && (
+                          <Typography variant="caption" color="textSecondary">
+                            {doctor.mobile}
+                          </Typography>
+                        )}
                       </TableCell>
+                      <TableCell>{renderStatusChip(doctor.approval_status)}</TableCell>
                       <TableCell>{registrationDate}</TableCell>
-                      <TableCell>{doctor.specialty || 'N/A'}</TableCell>
+                      <TableCell>{getDoctorSpecialty(doctor)}</TableCell>
                       <TableCell>
                         <Button
                           variant="outlined"
@@ -258,16 +360,32 @@ const NewDoctors = () => {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            startIcon={<IconCheck size={18} />}
-                            onClick={() => handleActionClick('approve', doctor._id, doctor.name)}
-                            disabled={isActionLoading}
-                          >
-                            {isActionLoading && actionLoading === doctor._id ? 'Approving...' : 'Approve'}
-                          </Button>
+                          {isDraft ? (
+                            <Tooltip title="Doctor has not verified OTP yet (Status: Draft). Approval is disabled until OTP is verified.">
+                              <span>
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  startIcon={<IconCheck size={18} />}
+                                  disabled
+                                >
+                                  Approve
+                                </Button>
+                              </span>
+                            </Tooltip>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              startIcon={<IconCheck size={18} />}
+                              onClick={() => handleActionClick('approve', doctor._id, doctor.name)}
+                              disabled={isActionLoading || doctor.approval_status?.toLowerCase() === 'approved'}
+                            >
+                              {isActionLoading && actionLoading === doctor._id ? 'Approving...' : 'Approve'}
+                            </Button>
+                          )}
                           <Button
                             variant="contained"
                             color="error"
@@ -280,7 +398,7 @@ const NewDoctors = () => {
                               isActionLoading
                             }
                           >
-                            reject
+                            Reject
                           </Button>
                         </Box>
                       </TableCell>
@@ -306,27 +424,53 @@ const NewDoctors = () => {
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '' })}
+        onClose={() => setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '', reason: '' })}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        maxWidth="xs"
+        fullWidth
       >
-        <DialogTitle id="alert-dialog-title">{confirmDialog.action === 'approve' ? 'Approve Doctor' : 'Cancel Doctor'}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {confirmDialog.action === 'approve' ? 'Approve Doctor' : 'Reject Doctor'}
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText id="alert-dialog-description" sx={{ mb: 2 }}>
             Are you sure you want to {confirmDialog.action} Dr. {confirmDialog.doctorName}?
-            {confirmDialog.action === 'approve' ? ' This will grant them access to the system.' : ' This will reject their application.'}
+            {confirmDialog.action === 'approve'
+              ? ' This will grant them access to the platform.'
+              : ' This will reject their application.'}
           </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label={confirmDialog.action === 'reject' ? 'Rejection Reason (Required)' : 'Reason / Note (Optional)'}
+            type="text"
+            fullWidth
+            variant="outlined"
+            size="small"
+            multiline
+            rows={2}
+            value={confirmDialog.reason}
+            onChange={(e) => setConfirmDialog({ ...confirmDialog, reason: e.target.value })}
+            placeholder={
+              confirmDialog.action === 'reject'
+                ? 'Enter reason for rejection...'
+                : 'Enter optional note...'
+            }
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '' })} disabled={actionLoading}>
+          <Button
+            onClick={() => setConfirmDialog({ open: false, action: '', doctorId: null, doctorName: '', reason: '' })}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleConfirmAction}
             color={confirmDialog.action === 'approve' ? 'success' : 'error'}
             variant="contained"
-            disabled={actionLoading}
-            autoFocus
+            disabled={actionLoading || (confirmDialog.action === 'reject' && !confirmDialog.reason.trim())}
           >
             {actionLoading ? <CircularProgress size={20} color="inherit" /> : 'Confirm'}
           </Button>

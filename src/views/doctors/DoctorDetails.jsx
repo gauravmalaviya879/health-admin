@@ -36,7 +36,10 @@ import {
   Paper as MuiPaper,
   ListItemIcon,
   ListItem,
-  ListItemText
+  ListItemText,
+  Alert,
+  Snackbar,
+  Tooltip
 } from '@mui/material';
 import {
   IconArrowLeft,
@@ -74,9 +77,11 @@ import {
   IconCreditCard,
   IconNote,
   IconDownload,
+  IconAlertTriangle,
 } from '@tabler/icons-react';
 import newDoctorsService from '../../services/newDoctorsService';
 import EditSurgeryModal from './EditSurgeryModal';
+import ReviewProfileUpdateModal from './ReviewProfileUpdateModal';
 
 // TabPanel component
 function TabPanel(props) {
@@ -120,6 +125,12 @@ const DoctorDetails = () => {
   const [surgeryStatusFilter, setSurgeryStatusFilter] = useState('pending');
   const [surgeryViewModalOpen, setSurgeryViewModalOpen] = useState(false);
   const [selectedSurgeryAppointment, setSelectedSurgeryAppointment] = useState(null);
+
+  // Profile update review & status dialog state
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [doctorStatusDialog, setDoctorStatusDialog] = useState({ open: false, action: '', reason: '' });
+  const [actionLoading, setActionLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const renderSurgeryViewModal = () => (
     <Dialog
       open={surgeryViewModalOpen}
@@ -568,26 +579,55 @@ const DoctorDetails = () => {
     setInitialLoad(false);
   };
 
-  useEffect(() => {
-    const fetchDoctorDetails = async () => {
-      try {
-        setLoading(true);
-        const response = await newDoctorsService.getDoctorById(id);
-        if (response.data && response.data.Data) {
-          setDoctor(response.data.Data);
-        } else {
-          setError('Doctor not found');
-        }
-      } catch (err) {
-        console.error('Error fetching doctor details:', err);
-        setError('Failed to load doctor details');
-      } finally {
-        setLoading(false);
+  const fetchDoctorDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await newDoctorsService.getDoctorById(id);
+      if (response.data && response.data.Data) {
+        setDoctor(response.data.Data);
+      } else {
+        setError('Doctor not found');
       }
-    };
+    } catch (err) {
+      console.error('Error fetching doctor details:', err);
+      setError('Failed to load doctor details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDoctorDetails();
   }, [id]);
+
+  const handleDoctorStatusAction = async () => {
+    try {
+      setActionLoading(true);
+      if (doctorStatusDialog.action === 'approve') {
+        const res = await newDoctorsService.approveDoctor(id, doctorStatusDialog.reason);
+        if (res.status === 200 || res.status === 201) {
+          setSnackbar({ open: true, message: 'Doctor approved successfully', severity: 'success' });
+          await fetchDoctorDetails();
+        }
+      } else if (doctorStatusDialog.action === 'reject') {
+        const res = await newDoctorsService.rejectDoctor(id, doctorStatusDialog.reason);
+        if (res.status === 200 || res.status === 201) {
+          setSnackbar({ open: true, message: 'Doctor rejected successfully', severity: 'success' });
+          await fetchDoctorDetails();
+        }
+      }
+    } catch (err) {
+      console.error('Error changing doctor status:', err);
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.message || 'Failed to update doctor status',
+        severity: 'error'
+      });
+    } finally {
+      setActionLoading(false);
+      setDoctorStatusDialog({ open: false, action: '', reason: '' });
+    }
+  };
 
   // Initialize first surgery as expanded on first load
   useEffect(() => {
@@ -604,6 +644,8 @@ const DoctorDetails = () => {
         return 'green';
       case 'pending':
         return '#ebc934';
+      case 'draft':
+        return '#9e9e9e';
       case 'rejected':
       case 'cancel':
       case 'cancelled':
@@ -1971,6 +2013,35 @@ const DoctorDetails = () => {
 
   return (
     <Box maxWidth="lg">
+      {/* Pending Profile Update Alert Banner */}
+      {doctor.is_profile_updated && (
+        <Alert
+          severity="warning"
+          variant="outlined"
+          icon={<IconAlertTriangle size={24} color="#f59e0b" />}
+          action={
+            <Button
+              color="warning"
+              size="small"
+              variant="contained"
+              onClick={() => setReviewModalOpen(true)}
+              startIcon={<IconEdit size={16} />}
+              sx={{ textTransform: 'none' }}
+            >
+              Review & Approve Changes
+            </Button>
+          }
+          sx={{ mb: 3, alignItems: 'center', borderColor: '#f59e0b', bgcolor: 'rgba(245, 158, 11, 0.06)' }}
+        >
+          <Typography variant="subtitle2" fontWeight={700} color="#b45309">
+            Doctor Profile Update Pending Approval
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            This doctor submitted profile updates. The changes are not yet applied to the active profile and require admin approval.
+          </Typography>
+        </Alert>
+      )}
+
       <Box
         sx={{
           display: 'flex',
@@ -1985,36 +2056,115 @@ const DoctorDetails = () => {
           Back to Doctors
         </Button>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<IconClipboardText size={16} />}
-          onClick={() => navigate(`/doctors/${id}/history`)}
-        >
-          View History
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
+          {doctor.approval_status?.toLowerCase() === 'pending' && (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                startIcon={<IconCheck size={18} />}
+                onClick={() => setDoctorStatusDialog({ open: true, action: 'approve', reason: '' })}
+                disabled={actionLoading}
+              >
+                Approve Doctor
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                size="small"
+                startIcon={<IconX size={18} />}
+                onClick={() => setDoctorStatusDialog({ open: true, action: 'reject', reason: '' })}
+                disabled={actionLoading}
+              >
+                Reject Doctor
+              </Button>
+            </>
+          )}
+
+          {doctor.approval_status?.toLowerCase() === 'approved' && (
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              startIcon={<IconX size={18} />}
+              onClick={() => setDoctorStatusDialog({ open: true, action: 'reject', reason: '' })}
+              disabled={actionLoading}
+            >
+              Reject Doctor
+            </Button>
+          )}
+
+          {doctor.is_profile_updated && (
+            <Button
+              variant="contained"
+              color="warning"
+              size="small"
+              startIcon={<IconEdit size={16} />}
+              onClick={() => setReviewModalOpen(true)}
+              sx={{ textTransform: 'none' }}
+            >
+              Review Updates
+            </Button>
+          )}
+
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<IconClipboardText size={16} />}
+            onClick={() => navigate(`/doctors/${id}/history`)}
+          >
+            View History
+          </Button>
+        </Box>
       </Box>
+
       {/* Contact Information Section */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar src={doctor.profile_pic} sx={{ width: 150, height: 150, mb: 2 }} />
+            <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <Avatar src={doctor.profile_pic} sx={{ width: 140, height: 140, mb: 2 }} />
+              {doctor.approval_status?.toLowerCase() === 'draft' ? (
+                <Chip
+                  icon={<IconClock size={14} />}
+                  label="Draft (OTP Unverified)"
+                  size="small"
+                  variant="outlined"
+                  color="default"
+                />
+              ) : doctor.approval_status?.toLowerCase() === 'pending' ? (
+                <Chip label="Pending Approval" size="small" color="warning" />
+              ) : doctor.approval_status?.toLowerCase() === 'approved' ? (
+                <Chip label="Approved" size="small" color="success" />
+              ) : (
+                <Chip label={doctor.approval_status || 'N/A'} size="small" color="error" />
+              )}
             </Grid>
-            <Grid item xs={12} md={8}>
-              <Box style={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h5" style={{ display: 'flex', alignItems: 'center' }} gutterBottom>
+            <Grid item xs={12} md={9}>
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center' }}>
                   {doctor.name || 'N/A'}{' '}
                   <IconRosetteDiscountCheckFilled
-                    style={{ marginRight: 8, margin: '0px 5px', color: getStatusIconColor(doctor.approval_status) }}
-                    size={20}
-                  ></IconRosetteDiscountCheckFilled>
+                    style={{ marginRight: 8, margin: '0px 6px', color: getStatusIconColor(doctor.approval_status) }}
+                    size={22}
+                  />
                 </Typography>
+                {doctor.is_profile_updated && (
+                  <Chip
+                    icon={<IconAlertTriangle size={14} />}
+                    label="Update Pending Approval"
+                    color="warning"
+                    size="small"
+                    onClick={() => setReviewModalOpen(true)}
+                    sx={{ cursor: 'pointer', fontWeight: 600 }}
+                  />
+                )}
               </Box>
               <Divider sx={{ my: 2 }} />
 
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <Typography variant="subtitle2" color="textSecondary">
                     Email
                   </Typography>
@@ -2037,7 +2187,21 @@ const DoctorDetails = () => {
                   </Typography>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Specialty
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.specialty || 'N/A'}
+                  </Typography>
+
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Sub-Specialty
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {doctor.sub_specialty || 'N/A'}
+                  </Typography>
+
                   <Typography variant="subtitle2" color="textSecondary">
                     Qualification
                   </Typography>
@@ -2051,25 +2215,63 @@ const DoctorDetails = () => {
                   <Typography variant="body1" paragraph>
                     {doctor.experience || 'N/A'}
                   </Typography>
-
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Specialty
-                  </Typography>
-                  <Typography variant="body1" paragraph>
-                    {doctor.specialty || 'N/A'}
-                  </Typography>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <Typography variant="subtitle2" color="textSecondary">
                     Address
                   </Typography>
-                  <Typography variant="body1" maxWidth={350} overflow="hidden">
+                  <Typography variant="body1" paragraph>
                     {[doctor.hospital_address, doctor.city, doctor.state, doctor.pincode, doctor.country].filter(Boolean).join(', ') ||
                       'N/A'}
                   </Typography>
+
+                  {doctor.aboutme && (
+                    <>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        About Doctor
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {doctor.aboutme}
+                      </Typography>
+                    </>
+                  )}
                 </Grid>
               </Grid>
+
+              {/* Professional Details Array display */}
+              {Array.isArray(doctor.professional_details) && doctor.professional_details.length > 0 && (
+                <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconStethoscope size={18} color="#1e88e5" /> Professional Details ({doctor.professional_details.length})
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {doctor.professional_details.map((item, idx) => (
+                      <Grid item xs={12} sm={6} md={6} key={idx}>
+                        <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1.5 }}>
+                          <Typography variant="subtitle2" color="primary.main" fontWeight={700}>
+                            {item.specialty || 'Specialty N/A'}
+                          </Typography>
+                          {item.sub_specialty && (
+                            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
+                              Sub-Specialty: <strong>{item.sub_specialty}</strong>
+                            </Typography>
+                          )}
+                          <Divider sx={{ my: 1 }} />
+                          <Box display="flex" justifyContent="space-between" flexWrap="wrap" gap={1}>
+                            <Typography variant="caption">
+                              Qualification: <strong>{item.qualification || 'N/A'}</strong>
+                            </Typography>
+                            <Typography variant="caption">
+                              Experience: <strong>{item.experience || 'N/A'}</strong>
+                            </Typography>
+                          </Box>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
             </Grid>
           </Grid>
         </CardContent>
@@ -2142,6 +2344,79 @@ const DoctorDetails = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Review Profile Update Modal */}
+      <ReviewProfileUpdateModal
+        open={reviewModalOpen}
+        doctor={doctor}
+        onClose={() => setReviewModalOpen(false)}
+        onSuccess={(msg) => {
+          setSnackbar({ open: true, message: msg, severity: 'success' });
+          fetchDoctorDetails();
+        }}
+      />
+
+      {/* Doctor Approve/Reject Confirmation Dialog */}
+      <Dialog
+        open={doctorStatusDialog.open}
+        onClose={() => setDoctorStatusDialog({ open: false, action: '', reason: '' })}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {doctorStatusDialog.action === 'approve' ? 'Approve Doctor' : 'Reject Doctor'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Are you sure you want to {doctorStatusDialog.action} Dr. {doctor.name}?
+            {doctorStatusDialog.action === 'approve'
+              ? ' This will grant them access to the platform.'
+              : ' This will reject or revoke their doctor status.'}
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label={doctorStatusDialog.action === 'reject' ? 'Rejection Reason (Required)' : 'Reason / Note (Optional)'}
+            type="text"
+            fullWidth
+            variant="outlined"
+            size="small"
+            multiline
+            rows={2}
+            value={doctorStatusDialog.reason}
+            onChange={(e) => setDoctorStatusDialog({ ...doctorStatusDialog, reason: e.target.value })}
+            placeholder={doctorStatusDialog.action === 'reject' ? 'Enter reason for rejection...' : 'Optional notes...'}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDoctorStatusDialog({ open: false, action: '', reason: '' })}
+            disabled={actionLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDoctorStatusAction}
+            color={doctorStatusDialog.action === 'approve' ? 'success' : 'error'}
+            variant="contained"
+            disabled={actionLoading || (doctorStatusDialog.action === 'reject' && !doctorStatusDialog.reason.trim())}
+          >
+            {actionLoading ? <CircularProgress size={20} color="inherit" /> : 'Confirm'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar notification */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
