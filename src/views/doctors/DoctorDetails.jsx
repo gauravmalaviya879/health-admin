@@ -29,6 +29,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   TablePagination,
   TextField,
